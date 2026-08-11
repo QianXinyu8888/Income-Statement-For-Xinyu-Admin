@@ -52,6 +52,11 @@ export interface TransactionPage {
   pageSize: number;
   warnings: string[];
 }
+export interface TransactionExport {
+  items: Transaction[];
+  total: number;
+  warnings: string[];
+}
 export interface TransactionQuery {
   page: number;
   pageSize: number;
@@ -79,6 +84,7 @@ export const apiClient = {
           .map(([key, value]) => [key, String(value)]),
       )}`,
     ),
+  exportTransactions: () => api<TransactionExport>('/transactions/export'),
   createTransaction: (input: TransactionInput) =>
     api<Transaction>('/transactions', { method: 'POST', body: JSON.stringify(input) }),
   updateTransaction: (id: string, input: TransactionInput) =>

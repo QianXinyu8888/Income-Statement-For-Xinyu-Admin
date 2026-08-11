@@ -12,7 +12,6 @@ describe('buildCsv', () => {
       shippingFee: 1,
       totalCost: 6,
       profit: 4,
-      profitRate: 0.8,
       roi: 4 / 6,
       status: '已售出',
       purchaseDate: '2026-07-01',
@@ -27,5 +26,28 @@ describe('buildCsv', () => {
     );
     expect(csv).toContain("'=HYPERLINK");
     expect(csv).toContain("'+cmd");
+  });
+
+  it('leaves missing Feishu values as empty cells', () => {
+    const row: Transaction = {
+      id: '2',
+      title: '待补记录',
+      salePrice: null,
+      costPrice: null,
+      shippingFee: null,
+      totalCost: null,
+      profit: null,
+      roi: null,
+      status: '在售中',
+      purchaseDate: null,
+      soldDate: null,
+      holdingDays: null,
+      sortOrder: null,
+      note: null,
+    };
+    const csv = buildCsv([row]);
+    expect(csv).not.toContain('undefined');
+    expect(csv).not.toContain('null');
+    expect(csv).toContain('待补记录,在售中,,,,,,,,,,,');
   });
 });

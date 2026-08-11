@@ -2,7 +2,7 @@ import { parseEnv } from '../../../_shared/env';
 import { requireUser } from '../../../_shared/auth';
 import { listRecords } from '../../../_shared/feishu';
 import { errorFromUnknown, errorResponse, jsonResponse } from '../../../_shared/http';
-import { fromFeishuRecord } from '../../../../src/domain/transaction';
+import { mapFeishuRecord } from '../../../../src/domain/transaction';
 import { summarizeTransactions } from '../../../../src/domain/analytics';
 
 export const onRequestGet: PagesFunction = async ({ request, env }) => {
@@ -14,17 +14,11 @@ export const onRequestGet: PagesFunction = async ({ request, env }) => {
     const from = url.searchParams.get('from');
     const to = url.searchParams.get('to');
     const records = (await listRecords(config))
-      .flatMap((record) => {
-        try {
-          return [fromFeishuRecord(record)];
-        } catch {
-          return [];
-        }
-      })
+      .map((record) => mapFeishuRecord(record).transaction)
       .filter(
         (record) =>
-          (!from || (record.soldDate ?? record.purchaseDate) >= from) &&
-          (!to || (record.soldDate ?? record.purchaseDate) <= to),
+          (!from || (record.soldDate !== null && record.soldDate >= from)) &&
+          (!to || (record.soldDate !== null && record.soldDate <= to)),
       );
     return jsonResponse(request, summarizeTransactions(records));
   } catch (error) {

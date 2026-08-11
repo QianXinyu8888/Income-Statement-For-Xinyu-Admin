@@ -4,7 +4,7 @@ import { requireUser } from '../../../_shared/auth';
 import { createRecord, deleteRecord, listRecords, updateRecord } from '../../../_shared/feishu';
 import { errorFromUnknown, errorResponse, jsonResponse } from '../../../_shared/http';
 import {
-  fromFeishuRecord,
+  mapFeishuRecord,
   toFeishuFields,
   transactionSchema,
   TRANSACTION_STATUSES,
@@ -58,24 +58,33 @@ export const onRequest: PagesFunction = async ({ request, env, params }) => {
       return errorResponse(request, 401, 'UNAUTHENTICATED', '请重新登录');
     const path = routePath(params.path);
 
+    const readAll = async () => {
+      const mapped = (await listRecords(config)).map(mapFeishuRecord);
+      return {
+        records: mapped.map(({ transaction }) => transaction),
+        warnings: mapped.flatMap(({ transaction, warnings }) =>
+          warnings.map((warning) => `${transaction.id}: ${warning}`),
+        ),
+      };
+    };
+
     if (!path && request.method === 'GET') {
       const query = querySchema.parse(Object.fromEntries(new URL(request.url).searchParams));
-      const warnings: string[] = [];
-      const records = (await listRecords(config)).flatMap((record) => {
-        try {
-          return [fromFeishuRecord(record)];
-        } catch (error) {
-          warnings.push(error instanceof Error ? error.message : '数据映射失败');
-          return [];
-        }
-      });
+      const { records, warnings } = await readAll();
       const q = query.q.toLocaleLowerCase('zh-CN');
       const filtered = records.filter(
-        (record) =>
-          (!q || `${record.title} ${record.note}`.toLocaleLowerCase('zh-CN').includes(q)) &&
-          (!query.status || record.status === query.status) &&
-          (!query.from || (record.soldDate ?? record.purchaseDate) >= query.from) &&
-          (!query.to || (record.soldDate ?? record.purchaseDate) <= query.to),
+        (record) => {
+          const date = record.soldDate ?? record.purchaseDate;
+          return (
+            (!q ||
+              `${record.title ?? ''} ${record.note ?? ''}`
+                .toLocaleLowerCase('zh-CN')
+                .includes(q)) &&
+            (!query.status || record.status === query.status) &&
+            (!query.from || (date !== null && date >= query.from)) &&
+            (!query.to || (date !== null && date <= query.to))
+          );
+        },
       );
       filtered.sort((a, b) => {
         const left = a[query.sort];
@@ -95,11 +104,15 @@ export const onRequest: PagesFunction = async ({ request, env, params }) => {
         warnings,
       });
     }
+    if (path === 'export' && request.method === 'GET') {
+      const { records, warnings } = await readAll();
+      return jsonResponse(request, { items: records, total: records.length, warnings });
+    }
     if (!path && request.method === 'POST') {
       const input = transactionSchema.parse(await request.json());
       return jsonResponse(
         request,
-        fromFeishuRecord(await createRecord(config, toFeishuFields(input))),
+        mapFeishuRecord(await createRecord(config, toFeishuFields(input))).transaction,
         201,
       );
     }
@@ -120,7 +133,7 @@ export const onRequest: PagesFunction = async ({ request, env, params }) => {
       const input = transactionSchema.parse(await request.json());
       return jsonResponse(
         request,
-        fromFeishuRecord(await updateRecord(config, path, toFeishuFields(input))),
+        mapFeishuRecord(await updateRecord(config, path, toFeishuFields(input))).transaction,
       );
     }
     if (path && request.method === 'DELETE') {
