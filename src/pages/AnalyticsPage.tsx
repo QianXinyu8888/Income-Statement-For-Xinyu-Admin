@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { ChevronDown } from 'lucide-react';
+import { ChevronDown, ChevronRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { Bar, BarChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
 import { apiClient } from '../api/client';
@@ -29,7 +29,7 @@ function DrilldownGroup({
 }) {
   const regionId = `analytics-products-${groupKey.replace(/[^a-zA-Z0-9_-]/g, '-')}`;
   return (
-    <div className="drilldown-group">
+    <div className={expanded ? 'drilldown-group drilldown-group--expanded' : 'drilldown-group'}>
       <button
         className="drilldown-toggle"
         type="button"
@@ -44,14 +44,31 @@ function DrilldownGroup({
       </button>
       {expanded && (
         <div className="drilldown-products" id={regionId}>
-          {items.map((item) => (
-            <Link key={item.id} to={`/transactions?focus=${encodeURIComponent(item.id)}`}>
-              {item.title ?? '未命名交易'}
+          {items.map((item, index) => (
+            <Link
+              className="drilldown-product"
+              key={item.id}
+              to={`/transactions?focus=${encodeURIComponent(item.id)}`}
+            >
+              <span className="drilldown-product__index" aria-hidden="true">
+                {index + 1}
+              </span>
+              <span className="drilldown-product__title">{item.title ?? '未命名交易'}</span>
+              <ChevronRight className="drilldown-product__arrow" size={15} aria-hidden="true" />
             </Link>
           ))}
         </div>
       )}
     </div>
+  );
+}
+
+function StatCardTitle({ children }: { children: string }) {
+  return (
+    <header className="analytics-stat-card__header">
+      <span className="analytics-stat-card__title-mark" aria-hidden="true" />
+      <h2>{children}</h2>
+    </header>
   );
 }
 
@@ -118,10 +135,8 @@ export default function AnalyticsPage() {
               <div className="empty-inline">暂无可用利润数据</div>
             )}
           </section>
-          <section className="panel">
-            <header>
-              <h2>利润区间</h2>
-            </header>
+          <section className="panel analytics-stat-card">
+            <StatCardTitle>利润区间</StatCardTitle>
             <div className="stat-list">
               {summary.data!.brackets.map((item) => (
                 <DrilldownGroup
@@ -139,10 +154,8 @@ export default function AnalyticsPage() {
               ))}
             </div>
           </section>
-          <section className="panel">
-            <header>
-              <h2>状态分布</h2>
-            </header>
+          <section className="panel analytics-stat-card">
+            <StatCardTitle>状态分布</StatCardTitle>
             <div className="stat-list">
               {summary.data!.statuses.map((item) => (
                 <DrilldownGroup
@@ -162,10 +175,8 @@ export default function AnalyticsPage() {
               ))}
             </div>
           </section>
-          <section className="panel">
-            <header>
-              <h2>退货摘要</h2>
-            </header>
+          <section className="panel analytics-stat-card">
+            <StatCardTitle>退货摘要</StatCardTitle>
             <div className="stat-list">
               <DrilldownGroup
                 groupKey="returns"

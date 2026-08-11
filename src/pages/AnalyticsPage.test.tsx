@@ -67,16 +67,22 @@ describe('AnalyticsPage drilldown', () => {
   it('expands product links, collapses them, and disables empty groups', async () => {
     vi.spyOn(apiClient, 'summary').mockResolvedValue(summary);
     const user = userEvent.setup();
-    renderPage();
+    const { container } = renderPage();
 
     const highYield = await screen.findByRole('button', { name: '高收益 1 笔' });
+    expect(container.querySelectorAll('.analytics-stat-card')).toHaveLength(3);
+    expect(container.querySelectorAll('.analytics-stat-card__title-mark')).toHaveLength(3);
     expect(screen.queryByRole('link', { name: '高收益产品' })).not.toBeInTheDocument();
 
     await user.click(highYield);
     expect(highYield).toHaveAttribute('aria-expanded', 'true');
-    expect(screen.getByRole('link', { name: '高收益产品' })).toHaveAttribute(
-      'href',
-      '/transactions?focus=record%2F1',
+    expect(highYield.closest('.drilldown-group')).toHaveClass('drilldown-group--expanded');
+    const productLink = screen.getByRole('link', { name: '高收益产品' });
+    expect(productLink).toHaveClass('drilldown-product');
+    expect(productLink).toHaveAttribute('href', '/transactions?focus=record%2F1');
+    expect(screen.getByText('1', { selector: '.drilldown-product__index' })).toHaveAttribute(
+      'aria-hidden',
+      'true',
     );
 
     await user.click(highYield);
