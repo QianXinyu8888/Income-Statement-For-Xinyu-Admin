@@ -66,9 +66,7 @@ it('shows all desktop fields in the requested order', () => {
     '利润',
     '备注',
   ]);
-  expect(container.querySelector('.desktop-list .row-title')).toHaveTextContent(
-    /^iPhone 15 Pro$/,
-  );
+  expect(container.querySelector('.desktop-list .row-title')).toHaveTextContent(/^iPhone 15 Pro$/);
 });
 ```
 
@@ -174,15 +172,44 @@ const displayMoney = (value: number | null) => (value === null ? '—' : money.f
     </span>
   </button>
   <dl className="mobile-row__details">
-    <div><dt>购入日期</dt><dd>{display(record.purchaseDate)}</dd></div>
-    <div><dt>售出日期</dt><dd>{display(record.soldDate)}</dd></div>
-    <div><dt>持有天数</dt><dd>{record.holdingDays === null ? '—' : `${record.holdingDays} 天`}</dd></div>
-    <div><dt>购入成本</dt><dd>{displayMoney(record.costPrice)}</dd></div>
-    <div><dt>运费</dt><dd>{displayMoney(record.shippingFee)}</dd></div>
-    <div><dt>总成本</dt><dd>{displayMoney(record.totalCost)}</dd></div>
-    <div><dt>成交价</dt><dd>{displayMoney(record.salePrice)}</dd></div>
-    <div><dt>利润</dt><dd><Profit value={record.profit} visible={showProfit(record)} /></dd></div>
-    <div className="mobile-row__note"><dt>备注</dt><dd>{record.note || '—'}</dd></div>
+    <div>
+      <dt>购入日期</dt>
+      <dd>{display(record.purchaseDate)}</dd>
+    </div>
+    <div>
+      <dt>售出日期</dt>
+      <dd>{display(record.soldDate)}</dd>
+    </div>
+    <div>
+      <dt>持有天数</dt>
+      <dd>{record.holdingDays === null ? '—' : `${record.holdingDays} 天`}</dd>
+    </div>
+    <div>
+      <dt>购入成本</dt>
+      <dd>{displayMoney(record.costPrice)}</dd>
+    </div>
+    <div>
+      <dt>运费</dt>
+      <dd>{displayMoney(record.shippingFee)}</dd>
+    </div>
+    <div>
+      <dt>总成本</dt>
+      <dd>{displayMoney(record.totalCost)}</dd>
+    </div>
+    <div>
+      <dt>成交价</dt>
+      <dd>{displayMoney(record.salePrice)}</dd>
+    </div>
+    <div>
+      <dt>利润</dt>
+      <dd>
+        <Profit value={record.profit} visible={showProfit(record)} />
+      </dd>
+    </div>
+    <div className="mobile-row__note">
+      <dt>备注</dt>
+      <dd>{record.note || '—'}</dd>
+    </div>
   </dl>
 </div>
 ```
@@ -300,14 +327,13 @@ git commit -m "feat: 完善交易明细字段展示"
 
 ```tsx
 await act(async () => vi.advanceTimersByTimeAsync(1499));
-expect(
-  container.querySelector('.desktop-list [data-transaction-id="target"]'),
-).toHaveAttribute('data-focused', 'true');
+expect(container.querySelector('.desktop-list [data-transaction-id="target"]')).toHaveAttribute(
+  'data-focused',
+  'true',
+);
 
 await act(async () => vi.advanceTimersByTimeAsync(1));
-const targetDuringRefresh = container.querySelector(
-  '.desktop-list [data-transaction-id="target"]',
-);
+const targetDuringRefresh = container.querySelector('.desktop-list [data-transaction-id="target"]');
 expect(targetDuringRefresh).toBeInTheDocument();
 expect(targetDuringRefresh).not.toHaveAttribute('data-focused');
 ```
