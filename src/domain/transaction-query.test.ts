@@ -22,19 +22,42 @@ function record(index: number): Transaction {
 }
 
 describe('queryTransactions', () => {
-  it('returns the page containing a focused transaction after sorting', () => {
+  it('returns the page containing a focused transaction after Feishu ordering', () => {
     const records = Array.from({ length: 25 }, (_, index) => record(index + 1));
     const result = queryTransactions(records, {
       page: 1,
       pageSize: 20,
-      sort: 'soldDate',
-      order: 'desc',
-      focusId: 'record-4',
+      sort: 'sortOrder',
+      order: 'asc',
+      focusId: 'record-22',
     });
 
     expect(result.page).toBe(2);
-    expect(result.items.some(({ id }) => id === 'record-4')).toBe(true);
+    expect(result.items.some(({ id }) => id === 'record-22')).toBe(true);
     expect(records[0].id).toBe('record-1');
+  });
+
+  it('sorts by the Feishu order field ascending with nulls last and stable ties', () => {
+    const records = [
+      { ...record(4), sortOrder: null },
+      { ...record(2), sortOrder: 1 },
+      { ...record(3), sortOrder: null },
+      { ...record(1), sortOrder: 1 },
+    ];
+
+    const result = queryTransactions(records, {
+      page: 1,
+      pageSize: 20,
+      sort: 'sortOrder',
+      order: 'asc',
+    });
+
+    expect(result.items.map(({ id }) => id)).toEqual([
+      'record-2',
+      'record-1',
+      'record-4',
+      'record-3',
+    ]);
   });
 
   it('keeps the requested page when the focused id does not exist', () => {

@@ -49,6 +49,11 @@ export function queryTransactions(
     .sort((a, b) => {
       const left = a[query.sort];
       const right = b[query.sort];
+      if (query.sort === 'sortOrder') {
+        if (left === null && right === null) return 0;
+        if (left === null) return 1;
+        if (right === null) return -1;
+      }
       const result =
         typeof left === 'number' && typeof right === 'number'
           ? left - right
