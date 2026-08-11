@@ -12,26 +12,28 @@ export default function SettingsPage() {
           <p>账号与服务状态</p>
         </div>
       </header>
-      <section className="settings-list">
+      <dl className="settings-list" role="group" aria-label="账号与服务状态">
         <div>
-          <span>当前账号</span>
-          <strong>{session.data?.user.username ?? '—'}</strong>
+          <dt>当前账号</dt>
+          <dd><strong>{session.data?.user.username ?? '—'}</strong></dd>
         </div>
         <div>
-          <span>账号权限</span>
-          <strong>{session.data?.user.role ?? '用户'}</strong>
+          <dt>账号权限</dt>
+          <dd><strong>{session.data?.user.role ?? '用户'}</strong></dd>
         </div>
         <div>
-          <span>飞书连接</span>
-          <strong className={health.data?.connected ? 'connected' : 'disconnected'}>
-            {health.isLoading ? '检查中' : health.data?.connected ? '正常' : '异常'}
-          </strong>
+          <dt>飞书连接</dt>
+          <dd>
+            <strong className={health.data?.connected ? 'connected' : 'disconnected'}>
+              {health.isLoading ? '检查中' : health.data?.connected ? '正常' : '异常'}
+            </strong>
+          </dd>
         </div>
         <div>
-          <span>版本</span>
-          <strong>2.0.0</strong>
+          <dt>版本</dt>
+          <dd><strong>2.0.0</strong></dd>
         </div>
-      </section>
+      </dl>
       <div className="security-note">
         <strong>安全提示</strong>
         <p>

@@ -966,8 +966,11 @@ tbody tr.is-selected {
   background: var(--surface);
   padding: 8px 18px;
 }
-.settings-list span {
+.settings-list dt {
   color: var(--muted);
+}
+.settings-list dd {
+  margin: 0;
 }
 .connected {
   color: var(--profit);
@@ -1361,7 +1364,6 @@ tbody tr:nth-child(n + 5), .mobile-row:nth-child(n + 5) { animation-delay: 112ms
   color: var(--text);
   box-shadow: var(--shadow-float);
   animation: bulk-enter 220ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
-  backdrop-filter: blur(12px);
 }
 @keyframes bulk-enter {
   from { opacity: 0; transform: translate(-50%, 12px); }
@@ -1470,7 +1472,7 @@ tbody tr:nth-child(n + 5), .mobile-row:nth-child(n + 5) { animation-delay: 112ms
 .drilldown-product { border-radius: 7px; }
 .settings-list { border-radius: 12px; padding: 0 20px; }
 .settings-list > div { min-height: 72px; }
-.settings-list span { font-size: 14px; }
+.settings-list dt { font-size: 14px; }
 .settings-list strong { font-size: 14px; }
 .connected::before, .disconnected::before {
   content: '';

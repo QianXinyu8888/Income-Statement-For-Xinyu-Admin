@@ -26,7 +26,12 @@ export default function LoginPage() {
   };
   return (
     <main className="login-page">
-      <form className="login-panel" onSubmit={submit}>
+      <form
+        className="login-panel"
+        aria-label="登录闲鱼损益"
+        aria-busy={loading}
+        onSubmit={submit}
+      >
         <div className="login-mark">X</div>
         <h1>闲鱼损益</h1>
         <p>登录后管理交易与利润</p>
