@@ -1,4 +1,4 @@
-import { BarChart3, List, LogOut, Moon, Settings, Sun, WalletCards } from 'lucide-react';
+import { BarChart3, List, LogOut, Moon, Settings, Sun, UserRound, WalletCards } from 'lucide-react';
 import { NavLink, Outlet, useNavigate } from 'react-router-dom';
 import { apiClient, type User } from '../api/client';
 import { useQueryClient } from '@tanstack/react-query';
@@ -32,7 +32,7 @@ export function AppShell({
         <div className="brand" aria-label="闲鱼损益">
           X
         </div>
-        <nav>
+        <nav className="sidebar-nav">
           {navigation.map(({ to, label, icon: Icon }) => (
             <NavLink key={to} to={to} title={label}>
               <Icon size={18} />
@@ -40,16 +40,20 @@ export function AppShell({
             </NavLink>
           ))}
         </nav>
-        <button
-          className="icon-button sidebar-theme"
-          onClick={onTheme}
-          aria-label={theme === 'dark' ? '切换到浅色模式' : '切换到深色模式'}
-        >
-          {theme === 'dark' ? <Sun size={18} /> : <Moon size={18} />}
-        </button>
+        <div className="sidebar-account" aria-label={`当前账号 ${user.username}`}>
+          <span className="sidebar-avatar"><UserRound size={15} /></span>
+          <span><strong>{user.username}</strong><small>{user.role}</small></span>
+        </div>
       </aside>
       <div className="workspace">
         <header className="topbar">
+          <button
+            className="icon-button topbar-theme"
+            onClick={onTheme}
+            aria-label={theme === 'dark' ? '切换到浅色模式' : '切换到深色模式'}
+          >
+            {theme === 'dark' ? <Sun size={17} /> : <Moon size={17} />}
+          </button>
           <span className="topbar-user">{user.username}</span>
           <button className="text-button" onClick={logout}>
             <LogOut size={15} />
