@@ -100,18 +100,14 @@ describe('TransactionsPage focused navigation', () => {
       ),
     );
     const desktopTarget = await waitFor(() => {
-      const element = container.querySelector(
-        '.desktop-list [data-transaction-id="target"]',
-      );
+      const element = container.querySelector('.desktop-list [data-transaction-id="target"]');
       expect(element).toHaveAttribute('data-focused', 'true');
       return element;
     });
     expect(desktopTarget).toBeInTheDocument();
     expect(scrollIntoView).toHaveBeenCalledWith({ behavior: 'smooth', block: 'center' });
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
-    await waitFor(() =>
-      expect(screen.getByLabelText('当前查询参数')).toBeEmptyDOMElement(),
-    );
+    await waitFor(() => expect(screen.getByLabelText('当前查询参数')).toBeEmptyDOMElement());
 
     await act(async () => vi.advanceTimersByTimeAsync(1000));
 

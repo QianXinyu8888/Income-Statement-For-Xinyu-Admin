@@ -38,13 +38,16 @@ describe('queryTransactions', () => {
   });
 
   it('keeps the requested page when the focused id does not exist', () => {
-    const result = queryTransactions(Array.from({ length: 25 }, (_, index) => record(index + 1)), {
-      page: 2,
-      pageSize: 20,
-      sort: 'soldDate',
-      order: 'desc',
-      focusId: 'missing',
-    });
+    const result = queryTransactions(
+      Array.from({ length: 25 }, (_, index) => record(index + 1)),
+      {
+        page: 2,
+        pageSize: 20,
+        sort: 'soldDate',
+        order: 'desc',
+        focusId: 'missing',
+      },
+    );
 
     expect(result.page).toBe(2);
     expect(result.items).toHaveLength(5);

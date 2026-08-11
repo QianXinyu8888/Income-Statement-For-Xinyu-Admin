@@ -110,8 +110,9 @@ export default function TransactionsPage() {
       const scope = window.matchMedia?.('(max-width: 680px)').matches
         ? '.mobile-list'
         : '.desktop-list';
-      const target = [...document.querySelectorAll<HTMLElement>(`${scope} [data-transaction-id]`)]
-        .find((element) => element.dataset.transactionId === focusedId);
+      const target = [
+        ...document.querySelectorAll<HTMLElement>(`${scope} [data-transaction-id]`),
+      ].find((element) => element.dataset.transactionId === focusedId);
       target?.scrollIntoView({ behavior: 'smooth', block: 'center' });
     });
     const timer = window.setTimeout(() => {

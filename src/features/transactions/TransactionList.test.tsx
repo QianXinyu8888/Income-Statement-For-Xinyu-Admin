@@ -82,11 +82,11 @@ describe('TransactionList', () => {
     );
 
     expect(container.querySelectorAll('[data-transaction-id="1"]')).toHaveLength(2);
-    expect(container.querySelectorAll('[data-transaction-id="1"][data-focused="true"]')).toHaveLength(
-      2,
-    );
-    expect(container.querySelectorAll('[data-transaction-id="2"][data-focused="true"]')).toHaveLength(
-      0,
-    );
+    expect(
+      container.querySelectorAll('[data-transaction-id="1"][data-focused="true"]'),
+    ).toHaveLength(2);
+    expect(
+      container.querySelectorAll('[data-transaction-id="2"][data-focused="true"]'),
+    ).toHaveLength(0);
   });
 });

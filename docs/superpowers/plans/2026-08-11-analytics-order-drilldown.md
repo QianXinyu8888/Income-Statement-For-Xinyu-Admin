@@ -30,6 +30,7 @@
 ### 任务 1：为分析分组添加精简产品索引
 
 **文件：**
+
 - 修改：`src/domain/analytics.ts`
 - 测试：`src/domain/analytics.test.ts`
 
@@ -95,6 +96,7 @@ git commit -m "feat: 为分析分组返回订单索引"
 ### 任务 2：在分析卡片中展开产品名称
 
 **文件：**
+
 - 创建：`src/pages/AnalyticsPage.test.tsx`
 - 修改：`src/pages/AnalyticsPage.tsx`
 - 修改：`src/styles.css`
@@ -134,9 +136,7 @@ const [expanded, setExpanded] = useState<string | null>(null);
 抽取页面内 `DrilldownGroup`，按钮设置 `aria-expanded`、`aria-controls` 和 `disabled={!items.length}`；展开区域把每项渲染为：
 
 ```tsx
-<Link to={`/transactions?focus=${encodeURIComponent(item.id)}`}>
-  {item.title ?? '未命名交易'}
-</Link>
+<Link to={`/transactions?focus=${encodeURIComponent(item.id)}`}>{item.title ?? '未命名交易'}</Link>
 ```
 
 为索引增加边框、紧凑行高、内部最大高度与滚动；保持现有桌面和移动端网格样式。
@@ -157,6 +157,7 @@ git commit -m "feat: 支持分析卡片展开产品索引"
 ### 任务 3：按唯一订单 ID 计算目标分页
 
 **文件：**
+
 - 创建：`src/domain/transaction-query.ts`
 - 创建：`src/domain/transaction-query.test.ts`
 - 修改：`functions/api/v1/transactions/[[path]].ts`
@@ -192,9 +193,7 @@ expect(result.items.some(({ id }) => id === 'record-on-page-2')).toBe(true);
 定义 `TransactionListQuery` 与 `queryTransactions(records, query)`。函数依次完成文本/状态/日期筛选、现有字段排序，然后使用：
 
 ```ts
-const focusIndex = query.focusId
-  ? filtered.findIndex((record) => record.id === query.focusId)
-  : -1;
+const focusIndex = query.focusId ? filtered.findIndex((record) => record.id === query.focusId) : -1;
 const page = focusIndex >= 0 ? Math.floor(focusIndex / query.pageSize) + 1 : query.page;
 const start = (page - 1) * query.pageSize;
 ```
@@ -229,6 +228,7 @@ git commit -m "feat: 支持按订单定位交易分页"
 ### 任务 4：交易页滚动并高亮目标订单 1 秒
 
 **文件：**
+
 - 修改：`src/features/transactions/TransactionList.tsx`
 - 修改：`src/features/transactions/TransactionList.test.tsx`
 - 创建：`src/pages/TransactionsPage.test.tsx`
@@ -298,6 +298,7 @@ git commit -m "feat: 跳转后定位并高亮交易订单"
 ### 任务 5：完整验证与交付检查
 
 **文件：**
+
 - 检查：本计划涉及的全部文件
 
 - [ ] **步骤 1：运行全部单元测试**
@@ -323,4 +324,3 @@ git commit -m "feat: 跳转后定位并高亮交易订单"
 运行：`git status --short && git diff --check && git log -5 --oneline`
 
 预期：没有意外文件或空白错误，提交仅覆盖本规格与实现计划。
-
