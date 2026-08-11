@@ -147,7 +147,7 @@ describe('TransactionsPage focused navigation', () => {
     expect(screen.getByLabelText('当前查询参数')).toBeEmptyDOMElement();
   });
 
-  it('uses the Feishu table order by default and restores it when filters reset', async () => {
+  it('uses descending order by default and restores it when filters reset', async () => {
     vi.spyOn(apiClient, 'transactions').mockResolvedValue({
       items: [{ ...target, sortOrder: 1 }],
       total: 1,
@@ -159,7 +159,7 @@ describe('TransactionsPage focused navigation', () => {
 
     await waitFor(() =>
       expect(apiClient.transactions).toHaveBeenCalledWith(
-        expect.objectContaining({ sort: 'sortOrder', order: 'asc' }),
+        expect.objectContaining({ sort: 'sortOrder', order: 'desc' }),
       ),
     );
 
@@ -177,7 +177,7 @@ describe('TransactionsPage focused navigation', () => {
         page: 1,
         pageSize: 20,
         sort: 'sortOrder',
-        order: 'asc',
+        order: 'desc',
       }),
     );
   });

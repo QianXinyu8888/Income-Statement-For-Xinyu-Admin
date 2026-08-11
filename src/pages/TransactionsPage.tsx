@@ -17,7 +17,7 @@ const DEFAULT_QUERY = {
   page: 1,
   pageSize: 20,
   sort: 'sortOrder',
-  order: 'asc',
+  order: 'desc',
 } as const;
 
 export default function TransactionsPage() {
