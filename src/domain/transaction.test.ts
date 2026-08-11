@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { fromFeishuRecord, toFeishuFields, transactionSchema } from './transaction';
+import { fromFeishuRecord, mapFeishuRecord, toFeishuFields, transactionSchema } from './transaction';
 
 describe('transaction domain', () => {
   it('maps every field from the real Feishu schema', () => {
@@ -39,17 +39,32 @@ describe('transaction domain', () => {
     });
   });
 
-  it('rejects a truly unknown status', () => {
-    expect(() =>
-      fromFeishuRecord({
-        record_id: 'rec-2',
-        fields: {
-          商品名称: '商品',
-          交易状态: ['交易中'],
-          购入日期: 1785600000000,
-        },
-      }),
-    ).toThrow('未知交易状态');
+  it('keeps missing Feishu values null without inventing defaults', () => {
+    const { transaction, warnings } = mapFeishuRecord({
+      record_id: 'rec-empty',
+      fields: { 商品名称: '待补记录', 交易状态: ['已售出'] },
+    });
+    expect(transaction).toMatchObject({
+      salePrice: null,
+      costPrice: null,
+      shippingFee: null,
+      totalCost: null,
+      profit: null,
+      roi: null,
+      purchaseDate: null,
+      soldDate: null,
+      holdingDays: null,
+    });
+    expect(warnings).toEqual([]);
+  });
+
+  it('returns an unknown status as null with a warning', () => {
+    const result = mapFeishuRecord({
+      record_id: 'rec-2',
+      fields: { 商品名称: '商品', 交易状态: ['交易中'] },
+    });
+    expect(result.transaction.status).toBeNull();
+    expect(result.warnings[0]).toContain('未知交易状态');
   });
 
   it('maps an on-sale record without a sold date', () => {
@@ -72,10 +87,10 @@ describe('transaction domain', () => {
       transactionSchema.parse({
         title: 'MacBook Air',
         salePrice: null,
-        costPrice: 5000,
-        shippingFee: 0,
+        costPrice: null,
+        shippingFee: null,
         status: '自用中',
-        purchaseDate: '2026-08-10',
+        purchaseDate: null,
         soldDate: null,
         note: '',
         sortOrder: null,
@@ -106,6 +121,28 @@ describe('transaction domain', () => {
       售出日期: expect.any(Number),
       排序: 2,
       备注: '顺丰',
+    });
+  });
+
+  it('allows optional writable fields to remain null', () => {
+    expect(
+      toFeishuFields({
+        title: '待补商品',
+        status: '在售中',
+        salePrice: null,
+        costPrice: null,
+        shippingFee: null,
+        purchaseDate: null,
+        soldDate: null,
+        note: null,
+        sortOrder: null,
+      }),
+    ).toMatchObject({
+      '成交价(¥)': null,
+      '购入成本(¥)': null,
+      '运费(¥)': null,
+      购入日期: null,
+      售出日期: null,
     });
   });
 });
