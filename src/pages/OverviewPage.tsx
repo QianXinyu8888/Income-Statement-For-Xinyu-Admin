@@ -18,11 +18,11 @@ export default function OverviewPage() {
     return <ErrorState message={summary.error.message} onRetry={() => summary.refetch()} />;
   const data = summary.data!;
   const metrics = [
-    ['销售额', formatMoney(data.revenue)],
-    ['总成本', formatMoney(data.totalCost)],
-    ['利润', formatMoney(data.profit)],
-    ['ROI', data.roi === null ? '—' : `${(data.roi * 100).toFixed(1)}%`],
-    ['成交笔数', `${data.count} 笔`],
+    { key: 'revenue', label: '销售额', value: formatMoney(data.revenue) },
+    { key: 'cost', label: '总成本', value: formatMoney(data.totalCost) },
+    { key: 'profit', label: '利润', value: formatMoney(data.profit) },
+    { key: 'roi', label: 'ROI', value: data.roi === null ? '—' : `${(data.roi * 100).toFixed(1)}%` },
+    { key: 'count', label: '成交笔数', value: `${data.count} 笔` },
   ];
   const monthly = data.monthly.filter(
     (item): item is typeof item & { profit: number } => item.profit !== null,
@@ -37,8 +37,8 @@ export default function OverviewPage() {
         </div>
       </header>
       <div className="metric-grid">
-        {metrics.map(([label, value]) => (
-          <article key={label} className="metric">
+        {metrics.map(({ key, label, value }) => (
+          <article key={key} className={`metric metric--${key}`}>
             <span>{label}</span>
             <strong>{value}</strong>
           </article>
