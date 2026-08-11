@@ -7,6 +7,13 @@ import {
   type TransactionInput,
 } from '../../domain/transaction';
 
+const money = new Intl.NumberFormat('zh-CN', {
+  style: 'currency',
+  currency: 'CNY',
+  minimumFractionDigits: 2,
+  maximumFractionDigits: 2,
+});
+
 type TransactionForm = Omit<TransactionInput, 'status'> & {
   status: TransactionInput['status'] | '';
 };
@@ -86,13 +93,16 @@ export function TransactionDrawer({
     }
   };
   const estimatedTotalCost =
-    form.costPrice === null || form.shippingFee === null
-      ? null
-      : form.costPrice + form.shippingFee;
+    form.costPrice === null || form.shippingFee === null ? null : form.costPrice + form.shippingFee;
   const estimatedProfit =
     form.salePrice === null || estimatedTotalCost === null
       ? null
       : form.salePrice - estimatedTotalCost;
+  const visibleEstimatedProfit =
+    form.status === '已售出' || form.status === '已退货' ? estimatedProfit : null;
+  const displayedTotalCost = record ? record.totalCost : estimatedTotalCost;
+  const actualProfit =
+    record && (record.status === '已售出' || record.status === '已退货') ? record.profit : null;
   return (
     <div className="drawer-layer" role="presentation">
       <button className="drawer-backdrop" onClick={onClose} aria-label="关闭编辑面板" />
@@ -101,9 +111,13 @@ export function TransactionDrawer({
           <div>
             <h2 id="drawer-title">{record ? '编辑交易' : '新增交易'}</h2>
             <p>
-              {estimatedProfit === null
-                ? '空字段将原样保存到飞书'
-                : `预计利润 ¥${estimatedProfit.toFixed(2)}`}
+              {record
+                ? actualProfit === null
+                  ? '空字段将原样保存到飞书'
+                  : `利润（飞书） ${money.format(actualProfit)}`
+                : visibleEstimatedProfit === null
+                  ? '空字段将原样保存到飞书'
+                  : `预计利润 ${money.format(visibleEstimatedProfit)}`}
             </p>
           </div>
           <button className="icon-button" onClick={onClose} aria-label="关闭">
@@ -207,11 +221,7 @@ export function TransactionDrawer({
           </div>
           <div className="calculated-field">
             <span>{record ? '总成本（飞书）' : '预计总成本'}</span>
-            <strong>
-              {(record?.totalCost ?? estimatedTotalCost) === null
-                ? '—'
-                : `¥${(record?.totalCost ?? estimatedTotalCost)!.toFixed(2)}`}
-            </strong>
+            <strong>{displayedTotalCost === null ? '—' : money.format(displayedTotalCost)}</strong>
             <small>{record ? '只读公式字段' : '保存后以飞书公式结果为准'}</small>
           </div>
           <label>

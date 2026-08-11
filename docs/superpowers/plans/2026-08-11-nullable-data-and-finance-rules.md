@@ -30,6 +30,7 @@
 ### 任务 1：建立严格保留空值的交易模型
 
 **文件：**
+
 - 修改：`src/domain/transaction.ts`
 - 测试：`src/domain/transaction.test.ts`
 
@@ -127,6 +128,7 @@ git commit -m "fix: 严格保留飞书交易空值"
 ### 任务 2：修正经营统计与退货口径
 
 **文件：**
+
 - 修改：`src/domain/analytics.ts`
 - 测试：`src/domain/analytics.test.ts`
 
@@ -187,6 +189,7 @@ git commit -m "fix: 分离已售出利润与退货损失"
 ### 任务 3：保留全部记录并提供全量导出 API
 
 **文件：**
+
 - 修改：`functions/api/v1/transactions/[[path]].ts`
 - 修改：`functions/api/v1/analytics/summary.ts`
 - 修改：`src/api/client.ts`
@@ -244,6 +247,7 @@ git commit -m "feat: 提供全部飞书交易导出"
 ### 任务 4：主列表和编辑抽屉展示总成本
 
 **文件：**
+
 - 修改：`src/features/transactions/TransactionList.tsx`
 - 修改：`src/features/transactions/TransactionList.test.tsx`
 - 修改：`src/features/transactions/TransactionDrawer.tsx`
@@ -286,6 +290,7 @@ git commit -m "fix: 交易界面使用总成本与真实利润"
 ### 任务 5：实现应用内删除确认框
 
 **文件：**
+
 - 创建：`src/components/ConfirmDialog.tsx`
 - 创建：`src/components/ConfirmDialog.test.tsx`
 - 修改：`src/pages/TransactionsPage.tsx`
@@ -342,6 +347,7 @@ git commit -m "feat: 使用应用内删除确认对话框"
 ### 任务 6：接入全量导出和经营页面
 
 **文件：**
+
 - 修改：`src/pages/TransactionsPage.tsx`
 - 修改：`src/pages/OverviewPage.tsx`
 - 修改：`src/pages/AnalyticsPage.tsx`
@@ -375,6 +381,7 @@ git commit -m "feat: 接入全量导出与真实经营口径"
 ### 任务 7：完整验证与浏览器验收
 
 **文件：**
+
 - 修改：仅修复验证中发现且属于本规格的问题
 
 - [ ] **步骤 1：运行静态与自动化验证**

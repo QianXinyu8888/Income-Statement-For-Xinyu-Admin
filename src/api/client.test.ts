@@ -19,7 +19,8 @@ describe('apiClient export', () => {
 
     await apiClient.exportTransactions();
 
-    expect(fetchMock).toHaveBeenCalledWith('/api/v1/transactions/export',
+    expect(fetchMock).toHaveBeenCalledWith(
+      '/api/v1/transactions/export',
       expect.objectContaining({ credentials: 'same-origin' }),
     );
   });

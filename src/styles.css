@@ -569,11 +569,71 @@ tbody tr.is-selected {
   display: flex;
   gap: 8px;
 }
+.calculated-field {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 5px 12px;
+  align-items: baseline;
+  border: 1px solid var(--border);
+  border-radius: 7px;
+  background: var(--surface-2);
+  padding: 11px 12px;
+}
+.calculated-field span,
+.calculated-field small {
+  color: var(--muted);
+}
+.calculated-field strong {
+  font-variant-numeric: tabular-nums;
+}
+.calculated-field small {
+  grid-column: 1 / -1;
+}
 .form-error {
   padding: 9px 11px;
   border-radius: 6px;
   color: var(--loss);
   background: var(--loss-soft);
+}
+.confirm-layer {
+  position: fixed;
+  inset: 0;
+  z-index: 80;
+  display: grid;
+  place-items: center;
+  padding: 20px;
+  background: rgba(0, 0, 0, 0.32);
+}
+.confirm-dialog {
+  width: min(380px, 100%);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface);
+  padding: 20px;
+}
+.confirm-dialog h2 {
+  margin: 0;
+  font-size: 17px;
+}
+.confirm-dialog p {
+  margin: 10px 0 20px;
+  color: var(--muted);
+  line-height: 1.6;
+}
+.confirm-dialog__actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+.mobile-export-actions {
+  display: none;
+}
+.data-note {
+  border-left: 3px solid var(--warning);
+  border-radius: 0 7px 7px 0;
+  background: var(--warning-soft);
+  padding: 11px 13px;
+  color: var(--muted);
 }
 .toast {
   position: fixed;
@@ -835,6 +895,11 @@ tbody tr.is-selected {
   .filter-panel {
     align-items: stretch;
     flex-direction: column;
+  }
+  .mobile-export-actions {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
   }
   .toolbar-spacer,
   .toolbar .icon-button {

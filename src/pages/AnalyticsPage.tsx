@@ -4,6 +4,13 @@ import { Bar, BarChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxi
 import { apiClient } from '../api/client';
 import { ErrorState, LoadingState } from '../components/LoadingState';
 
+const money = new Intl.NumberFormat('zh-CN', {
+  style: 'currency',
+  currency: 'CNY',
+  minimumFractionDigits: 2,
+  maximumFractionDigits: 2,
+});
+
 export default function AnalyticsPage() {
   const [from, setFrom] = useState('');
   const [to, setTo] = useState('');
@@ -40,21 +47,31 @@ export default function AnalyticsPage() {
         <ErrorState message={summary.error.message} onRetry={() => summary.refetch()} />
       ) : (
         <div className="analytics-grid">
+          {summary.data!.incompleteCount > 0 && (
+            <div className="data-note panel--wide" role="status">
+              有 {summary.data!.incompleteCount}{' '}
+              条已售出记录字段不完整，图表和金额只使用飞书中的真实值。
+            </div>
+          )}
           <section className="panel panel--wide">
             <header>
               <h2>月度趋势</h2>
             </header>
-            <div className="chart">
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={summary.data!.monthly}>
-                  <CartesianGrid stroke="var(--border)" vertical={false} />
-                  <XAxis dataKey="month" tickLine={false} axisLine={false} />
-                  <YAxis tickLine={false} axisLine={false} />
-                  <Tooltip />
-                  <Bar dataKey="profit" name="利润" fill="var(--accent)" radius={[4, 4, 0, 0]} />
-                </BarChart>
-              </ResponsiveContainer>
-            </div>
+            {summary.data!.monthly.some((item) => item.profit !== null) ? (
+              <div className="chart">
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart data={summary.data!.monthly.filter((item) => item.profit !== null)}>
+                    <CartesianGrid stroke="var(--border)" vertical={false} />
+                    <XAxis dataKey="month" tickLine={false} axisLine={false} />
+                    <YAxis tickLine={false} axisLine={false} />
+                    <Tooltip />
+                    <Bar dataKey="profit" name="利润" fill="var(--accent)" radius={[4, 4, 0, 0]} />
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
+            ) : (
+              <div className="empty-inline">暂无可用利润数据</div>
+            )}
           </section>
           <section className="panel">
             <header>
@@ -75,11 +92,28 @@ export default function AnalyticsPage() {
             </header>
             <div className="stat-list">
               {summary.data!.statuses.map((item) => (
-                <div key={item.status}>
-                  <span>{item.status}</span>
+                <div key={item.status ?? 'unknown'}>
+                  <span>{item.status ?? '—'}</span>
                   <strong>{item.count} 笔</strong>
                 </div>
               ))}
+            </div>
+          </section>
+          <section className="panel">
+            <header>
+              <h2>退货摘要</h2>
+            </header>
+            <div className="stat-list">
+              <div>
+                <span>退货笔数</span>
+                <strong>{summary.data!.returnCount} 笔</strong>
+              </div>
+              <div>
+                <span>退货损失</span>
+                <strong>
+                  {summary.data!.returnLoss === null ? '—' : money.format(summary.data!.returnLoss)}
+                </strong>
+              </div>
             </div>
           </section>
         </div>

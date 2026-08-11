@@ -5,8 +5,11 @@ import { ErrorState, LoadingState } from '../components/LoadingState';
 const money = new Intl.NumberFormat('zh-CN', {
   style: 'currency',
   currency: 'CNY',
-  maximumFractionDigits: 0,
+  minimumFractionDigits: 2,
+  maximumFractionDigits: 2,
 });
+
+const formatMoney = (value: number | null) => (value === null ? '—' : money.format(value));
 
 export default function OverviewPage() {
   const summary = useQuery({ queryKey: ['summary'], queryFn: () => apiClient.summary() });
@@ -15,13 +18,16 @@ export default function OverviewPage() {
     return <ErrorState message={summary.error.message} onRetry={() => summary.refetch()} />;
   const data = summary.data!;
   const metrics = [
-    ['销售额', money.format(data.revenue)],
-    ['成本', money.format(data.cost)],
-    ['利润', money.format(data.profit)],
-    ['利润率', data.profitRate === null ? '—' : `${(data.profitRate * 100).toFixed(1)}%`],
+    ['销售额', formatMoney(data.revenue)],
+    ['总成本', formatMoney(data.totalCost)],
+    ['利润', formatMoney(data.profit)],
+    ['ROI', data.roi === null ? '—' : `${(data.roi * 100).toFixed(1)}%`],
     ['成交笔数', `${data.count} 笔`],
   ];
-  const max = Math.max(...data.monthly.map((item) => Math.abs(item.profit)), 1);
+  const monthly = data.monthly.filter(
+    (item): item is typeof item & { profit: number } => item.profit !== null,
+  );
+  const max = Math.max(...monthly.map((item) => Math.abs(item.profit)), 1);
   return (
     <section className="page">
       <header className="page-header">
@@ -38,14 +44,19 @@ export default function OverviewPage() {
           </article>
         ))}
       </div>
+      {data.incompleteCount > 0 && (
+        <div className="data-note" role="status">
+          有 {data.incompleteCount} 条已售出记录字段不完整，未参与部分金额统计。
+        </div>
+      )}
       <section className="panel">
         <header>
           <h2>月度利润</h2>
-          <span>最近 {data.monthly.length} 个月</span>
+          <span>最近 {monthly.length} 个月</span>
         </header>
-        {data.monthly.length ? (
+        {monthly.length ? (
           <div className="simple-chart">
-            {data.monthly.map((item) => (
+            {monthly.map((item) => (
               <div key={item.month} className="simple-chart__item">
                 <span>{item.month.slice(5)}</span>
                 <div>

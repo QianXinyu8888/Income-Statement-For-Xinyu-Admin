@@ -1,5 +1,10 @@
 import { describe, expect, it } from 'vitest';
-import { fromFeishuRecord, mapFeishuRecord, toFeishuFields, transactionSchema } from './transaction';
+import {
+  fromFeishuRecord,
+  mapFeishuRecord,
+  toFeishuFields,
+  transactionSchema,
+} from './transaction';
 
 describe('transaction domain', () => {
   it('maps every field from the real Feishu schema', () => {

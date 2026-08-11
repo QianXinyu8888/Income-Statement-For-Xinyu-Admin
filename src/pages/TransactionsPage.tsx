@@ -8,9 +8,15 @@ import { downloadCsv, downloadExcel } from '../domain/export';
 import { ErrorState, LoadingState } from '../components/LoadingState';
 import { TransactionList } from '../features/transactions/TransactionList';
 import { TransactionDrawer } from '../features/transactions/TransactionDrawer';
+import { ConfirmDialog } from '../components/ConfirmDialog';
+
+type DeleteIntent = { kind: 'single'; record: Transaction } | { kind: 'batch'; count: number };
 
 export default function TransactionsPage() {
   const client = useQueryClient();
+  const now = new Date();
+  const month = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+  const monthEnd = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
   const [query, setQuery] = useState<TransactionQuery>({
     page: 1,
     pageSize: 20,
@@ -23,11 +29,22 @@ export default function TransactionsPage() {
   const [drawer, setDrawer] = useState(false);
   const [moreFilters, setMoreFilters] = useState(false);
   const [notice, setNotice] = useState('');
+  const [deleteIntent, setDeleteIntent] = useState<DeleteIntent | null>(null);
+  const [exporting, setExporting] = useState(false);
   const result = useQuery({
     queryKey: ['transactions', query],
     queryFn: () => apiClient.transactions(query),
   });
-  const invalidate = () => client.invalidateQueries({ queryKey: ['transactions'] });
+  const monthSummary = useQuery({
+    queryKey: ['summary', month],
+    queryFn: () => apiClient.summary(`${month}-01`, `${month}-${monthEnd}`),
+  });
+  const invalidate = async () => {
+    await Promise.all([
+      client.invalidateQueries({ queryKey: ['transactions'] }),
+      client.invalidateQueries({ queryKey: ['summary'] }),
+    ]);
+  };
   const save = useMutation({
     mutationFn: ({ record, input }: { record: Transaction | null; input: TransactionInput }) =>
       record ? apiClient.updateTransaction(record.id, input) : apiClient.createTransaction(input),
@@ -63,18 +80,10 @@ export default function TransactionsPage() {
       setNotice(failed ? `${failed} 条记录删除失败，已保留选择` : '记录已删除');
     },
   });
+  const exportAll = useMutation({
+    mutationFn: apiClient.exportTransactions,
+  });
   const records = useMemo(() => result.data?.items ?? [], [result.data?.items]);
-  const monthProfit = useMemo(
-    () =>
-      records
-        .filter(
-          (record) =>
-            record.soldDate?.startsWith(new Date().toISOString().slice(0, 7)) &&
-            record.status === '已售出',
-        )
-        .reduce((sum, record) => sum + record.profit, 0),
-    [records],
-  );
   const open = (record: Transaction | null) => {
     setEditing(record);
     setDrawer(true);
@@ -87,6 +96,34 @@ export default function TransactionsPage() {
       order: current.sort === field && current.order === 'desc' ? 'asc' : 'desc',
     }));
   const submitSearch = () => setQuery((current) => ({ ...current, page: 1, q: search }));
+  const runExport = async (format: 'csv' | 'excel') => {
+    if (exporting) return;
+    setExporting(true);
+    try {
+      const exported = await exportAll.mutateAsync();
+      if (format === 'csv') downloadCsv(exported.items, '交易明细.csv');
+      else await downloadExcel(exported.items, '交易明细.xlsx');
+      setNotice(
+        exported.warnings.length
+          ? `已导出全部 ${exported.total} 条记录；${exported.warnings.length} 个字段无法识别，已留空`
+          : `已导出全部 ${exported.total} 条记录`,
+      );
+    } catch (error) {
+      setNotice(error instanceof Error ? error.message : '导出失败');
+    } finally {
+      setExporting(false);
+    }
+  };
+  const confirmDelete = async () => {
+    if (!deleteIntent) return;
+    try {
+      if (deleteIntent.kind === 'single') await remove.mutateAsync(deleteIntent.record.id);
+      else await batchDelete.mutateAsync();
+      setDeleteIntent(null);
+    } catch (error) {
+      setNotice(error instanceof Error ? error.message : '删除失败');
+    }
+  };
   return (
     <section className="page">
       <header className="page-header">
@@ -94,7 +131,13 @@ export default function TransactionsPage() {
           <div className="page-title-row">
             <h1>交易明细</h1>
             <span className="monthly-profit">
-              本月利润 ¥{monthProfit.toLocaleString('zh-CN', { minimumFractionDigits: 2 })}
+              本月利润{' '}
+              {monthSummary.data?.profit === null || monthSummary.data?.profit === undefined
+                ? '—'
+                : `¥${monthSummary.data.profit.toLocaleString('zh-CN', {
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2,
+                  })}`}
             </span>
           </div>
           <p>{result.data ? `共 ${result.data.total} 条记录` : '查找、记录和管理每一笔交易'}</p>
@@ -155,7 +198,8 @@ export default function TransactionsPage() {
         <button
           className="icon-button"
           title="导出 CSV"
-          onClick={() => downloadCsv(records, '交易明细.csv')}
+          onClick={() => runExport('csv')}
+          disabled={exporting}
         >
           <Download size={17} />
           <span className="sr-only">导出 CSV</span>
@@ -163,7 +207,8 @@ export default function TransactionsPage() {
         <button
           className="icon-button"
           title="导出 Excel"
-          onClick={() => downloadExcel(records, '交易明细.xlsx')}
+          onClick={() => runExport('excel')}
+          disabled={exporting}
         >
           <SlidersHorizontal size={17} />
           <span className="sr-only">导出 Excel</span>
@@ -194,6 +239,27 @@ export default function TransactionsPage() {
           >
             重置筛选
           </button>
+          <div className="mobile-export-actions">
+            <button
+              className="button button--secondary"
+              onClick={() => runExport('csv')}
+              disabled={exporting}
+            >
+              导出全部 CSV
+            </button>
+            <button
+              className="button button--secondary"
+              onClick={() => runExport('excel')}
+              disabled={exporting}
+            >
+              导出全部 Excel
+            </button>
+          </div>
+        </div>
+      )}
+      {result.data && result.data.warnings.length > 0 && (
+        <div className="data-note" role="status">
+          有 {result.data.warnings.length} 个飞书字段无法识别，相关位置已显示为 —。
         </div>
       )}
       {result.isLoading ? (
@@ -262,9 +328,7 @@ export default function TransactionsPage() {
             ))}
             <button
               className="danger-text"
-              onClick={() => {
-                if (window.confirm(`确定删除 ${selected.size} 条记录？`)) batchDelete.mutate();
-              }}
+              onClick={() => setDeleteIntent({ kind: 'batch', count: selected.size })}
               disabled={batchDelete.isPending}
             >
               删除
@@ -281,10 +345,23 @@ export default function TransactionsPage() {
         onDelete={
           editing
             ? async () => {
-                if (window.confirm('确定删除这条交易？')) await remove.mutateAsync(editing.id);
+                setDeleteIntent({ kind: 'single', record: editing });
               }
             : undefined
         }
+      />
+      <ConfirmDialog
+        open={deleteIntent !== null}
+        title={deleteIntent?.kind === 'batch' ? '删除所选交易？' : '删除这条交易？'}
+        description={
+          deleteIntent?.kind === 'batch'
+            ? `将删除 ${deleteIntent.count} 条交易，删除后无法恢复。`
+            : `“${deleteIntent?.record.title ?? '未命名交易'}”删除后无法恢复。`
+        }
+        confirmLabel="删除"
+        pending={remove.isPending || batchDelete.isPending}
+        onCancel={() => setDeleteIntent(null)}
+        onConfirm={confirmDelete}
       />
       {notice && (
         <button className="toast" onClick={() => setNotice('')} role="status">

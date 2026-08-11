@@ -73,20 +73,16 @@ export const onRequest: PagesFunction = async ({ request, env, params }) => {
       const query = querySchema.parse(Object.fromEntries(new URL(request.url).searchParams));
       const { records, warnings } = await readAll();
       const q = query.q.toLocaleLowerCase('zh-CN');
-      const filtered = records.filter(
-        (record) => {
-          const date = record.soldDate ?? record.purchaseDate;
-          return (
-            (!q ||
-              `${record.title ?? ''} ${record.note ?? ''}`
-                .toLocaleLowerCase('zh-CN')
-                .includes(q)) &&
-            (!query.status || record.status === query.status) &&
-            (!query.from || (date !== null && date >= query.from)) &&
-            (!query.to || (date !== null && date <= query.to))
-          );
-        },
-      );
+      const filtered = records.filter((record) => {
+        const date = record.soldDate ?? record.purchaseDate;
+        return (
+          (!q ||
+            `${record.title ?? ''} ${record.note ?? ''}`.toLocaleLowerCase('zh-CN').includes(q)) &&
+          (!query.status || record.status === query.status) &&
+          (!query.from || (date !== null && date >= query.from)) &&
+          (!query.to || (date !== null && date <= query.to))
+        );
+      });
       filtered.sort((a, b) => {
         const left = a[query.sort];
         const right = b[query.sort];
