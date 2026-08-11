@@ -71,15 +71,13 @@ export default function AnalyticsPage() {
           </section>
           <section className="panel">
             <header>
-              <h2>分类贡献</h2>
+              <h2>状态分布</h2>
             </header>
             <div className="stat-list">
-              {summary.data!.categories.slice(0, 8).map((item) => (
-                <div key={item.category}>
-                  <span>{item.category}</span>
-                  <strong className={item.profit >= 0 ? 'profit' : 'loss'}>
-                    ¥{item.profit.toLocaleString()}
-                  </strong>
+              {summary.data!.statuses.map((item) => (
+                <div key={item.status}>
+                  <span>{item.status}</span>
+                  <strong>{item.count} 笔</strong>
                 </div>
               ))}
             </div>

@@ -14,7 +14,7 @@ export default function TransactionsPage() {
   const [query, setQuery] = useState<TransactionQuery>({
     page: 1,
     pageSize: 20,
-    sort: 'transactionDate',
+    sort: 'soldDate',
     order: 'desc',
   });
   const [search, setSearch] = useState('');
@@ -69,7 +69,7 @@ export default function TransactionsPage() {
       records
         .filter(
           (record) =>
-            record.transactionDate.startsWith(new Date().toISOString().slice(0, 7)) &&
+            record.soldDate?.startsWith(new Date().toISOString().slice(0, 7)) &&
             record.status === '已售出',
         )
         .reduce((sum, record) => sum + record.profit, 0),
@@ -137,7 +137,7 @@ export default function TransactionsPage() {
           ))}
         </select>
         <input
-          aria-label="日期"
+          aria-label="开始日期"
           type="date"
           value={query.from ?? ''}
           onChange={(event) =>
@@ -172,24 +172,6 @@ export default function TransactionsPage() {
       {moreFilters && (
         <div className="filter-panel">
           <label>
-            分类
-            <select
-              value={query.category ?? ''}
-              onChange={(event) =>
-                setQuery((current) => ({
-                  ...current,
-                  page: 1,
-                  category: event.target.value || undefined,
-                }))
-              }
-            >
-              <option value="">全部分类</option>
-              {result.data?.categories.map((category) => (
-                <option key={category}>{category}</option>
-              ))}
-            </select>
-          </label>
-          <label>
             结束日期
             <input
               type="date"
@@ -207,7 +189,7 @@ export default function TransactionsPage() {
             className="text-button"
             onClick={() => {
               setSearch('');
-              setQuery({ page: 1, pageSize: 20, sort: 'transactionDate', order: 'desc' });
+              setQuery({ page: 1, pageSize: 20, sort: 'soldDate', order: 'desc' });
             }}
           >
             重置筛选
@@ -240,7 +222,7 @@ export default function TransactionsPage() {
           }
           onOpen={open}
           onSort={sort}
-          sort={query.sort ?? 'transactionDate'}
+          sort={query.sort ?? 'soldDate'}
           order={query.order ?? 'desc'}
         />
       )}

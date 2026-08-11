@@ -15,12 +15,20 @@ const querySchema = z.object({
   pageSize: z.coerce.number().int().min(1).max(100).default(20),
   q: z.string().trim().default(''),
   status: z.enum(TRANSACTION_STATUSES).optional(),
-  category: z.string().trim().optional(),
   from: z.string().date().optional(),
   to: z.string().date().optional(),
   sort: z
-    .enum(['transactionDate', 'title', 'salePrice', 'costPrice', 'profit', 'status'])
-    .default('transactionDate'),
+    .enum([
+      'soldDate',
+      'purchaseDate',
+      'title',
+      'salePrice',
+      'costPrice',
+      'profit',
+      'status',
+      'sortOrder',
+    ])
+    .default('soldDate'),
   order: z.enum(['asc', 'desc']).default('desc'),
 });
 
@@ -66,9 +74,8 @@ export const onRequest: PagesFunction = async ({ request, env, params }) => {
         (record) =>
           (!q || `${record.title} ${record.note}`.toLocaleLowerCase('zh-CN').includes(q)) &&
           (!query.status || record.status === query.status) &&
-          (!query.category || record.category === query.category) &&
-          (!query.from || record.transactionDate >= query.from) &&
-          (!query.to || record.transactionDate <= query.to),
+          (!query.from || (record.soldDate ?? record.purchaseDate) >= query.from) &&
+          (!query.to || (record.soldDate ?? record.purchaseDate) <= query.to),
       );
       filtered.sort((a, b) => {
         const left = a[query.sort];
@@ -85,7 +92,6 @@ export const onRequest: PagesFunction = async ({ request, env, params }) => {
         total: filtered.length,
         page: query.page,
         pageSize: query.pageSize,
-        categories: [...new Set(records.map((record) => record.category))].sort(),
         warnings,
       });
     }

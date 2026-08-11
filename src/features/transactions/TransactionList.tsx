@@ -7,7 +7,15 @@ const money = new Intl.NumberFormat('zh-CN', {
   currency: 'CNY',
   minimumFractionDigits: 2,
 });
-type SortKey = 'transactionDate' | 'title' | 'salePrice' | 'costPrice' | 'profit' | 'status';
+type SortKey =
+  | 'soldDate'
+  | 'purchaseDate'
+  | 'title'
+  | 'salePrice'
+  | 'costPrice'
+  | 'profit'
+  | 'status'
+  | 'sortOrder';
 
 interface Props {
   records: Transaction[];
@@ -84,7 +92,7 @@ export function TransactionList({
                 <SortLabel field="profit" label="利润" {...{ sort, order, onSort }} />
               </th>
               <th>
-                <SortLabel field="transactionDate" label="日期" {...{ sort, order, onSort }} />
+                <SortLabel field="soldDate" label="售出日期" {...{ sort, order, onSort }} />
               </th>
             </tr>
           </thead>
@@ -102,7 +110,7 @@ export function TransactionList({
                 <td>
                   <button className="row-title" onClick={() => onOpen(record)}>
                     {record.title}
-                    <small>{record.category}</small>
+                    <small>购入 {record.purchaseDate}</small>
                   </button>
                 </td>
                 <td>
@@ -115,7 +123,7 @@ export function TransactionList({
                 <td className="number">
                   <Profit value={record.profit} />
                 </td>
-                <td className="muted">{record.transactionDate}</td>
+                <td className="muted">{record.soldDate ?? '—'}</td>
               </tr>
             ))}
           </tbody>
@@ -141,7 +149,7 @@ export function TransactionList({
               <span className="mobile-row__bottom">
                 <span>{record.salePrice === null ? '—' : money.format(record.salePrice)}</span>
                 <Profit value={record.profit} />
-                <time>{record.transactionDate.slice(5)}</time>
+                <time>{(record.soldDate ?? record.purchaseDate).slice(5)}</time>
               </span>
             </button>
           </article>

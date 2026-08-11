@@ -10,12 +10,13 @@ import {
 const today = () => new Date().toISOString().slice(0, 10);
 const empty: TransactionInput = {
   title: '',
-  category: '3C数码',
-  salePrice: 0,
+  salePrice: null,
   costPrice: 0,
   shippingFee: 0,
-  status: '已售出',
-  transactionDate: today(),
+  status: '在售中',
+  purchaseDate: today(),
+  soldDate: null,
+  sortOrder: null,
   note: '',
 };
 
@@ -43,12 +44,13 @@ export function TransactionDrawer({
         record
           ? {
               title: record.title,
-              category: record.category,
               salePrice: record.salePrice,
               costPrice: record.costPrice,
               shippingFee: record.shippingFee,
               status: record.status,
-              transactionDate: record.transactionDate,
+              purchaseDate: record.purchaseDate,
+              soldDate: record.soldDate,
+              sortOrder: record.sortOrder,
               note: record.note,
             }
           : empty,
@@ -107,14 +109,6 @@ export function TransactionDrawer({
           </label>
           <div className="form-grid">
             <label>
-              分类
-              <input
-                value={form.category}
-                onChange={(event) => set('category', event.target.value)}
-                required
-              />
-            </label>
-            <label>
               状态
               <select
                 value={form.status}
@@ -126,6 +120,17 @@ export function TransactionDrawer({
                   <option key={status}>{status}</option>
                 ))}
               </select>
+            </label>
+            <label>
+              排序
+              <input
+                type="number"
+                step="1"
+                value={form.sortOrder ?? ''}
+                onChange={(event) =>
+                  set('sortOrder', event.target.value === '' ? null : Number(event.target.value))
+                }
+              />
             </label>
           </div>
           <div className="form-grid">
@@ -166,12 +171,20 @@ export function TransactionDrawer({
               />
             </label>
             <label>
-              交易日期
+              购入日期
               <input
                 type="date"
-                value={form.transactionDate}
-                onChange={(event) => set('transactionDate', event.target.value)}
+                value={form.purchaseDate}
+                onChange={(event) => set('purchaseDate', event.target.value)}
                 required
+              />
+            </label>
+            <label>
+              售出日期
+              <input
+                type="date"
+                value={form.soldDate ?? ''}
+                onChange={(event) => set('soldDate', event.target.value || null)}
               />
             </label>
           </div>

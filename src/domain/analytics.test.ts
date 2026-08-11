@@ -5,14 +5,18 @@ import type { Transaction } from './transaction';
 const base: Transaction = {
   id: '1',
   title: '商品',
-  category: '数码',
   salePrice: 1000,
   costPrice: 700,
   shippingFee: 10,
+  totalCost: 710,
   profit: 290,
   profitRate: 290 / 700,
+  roi: 290 / 710,
   status: '已售出',
-  transactionDate: '2026-08-01',
+  purchaseDate: '2026-07-01',
+  soldDate: '2026-08-01',
+  holdingDays: 31,
+  sortOrder: null,
   note: '',
 };
 
@@ -25,9 +29,12 @@ describe('summarizeTransactions', () => {
         id: '2',
         salePrice: null,
         costPrice: 500,
+        totalCost: 500,
         profit: -500,
         profitRate: null,
+        roi: null,
         status: '自用中',
+        soldDate: null,
       },
     ]);
     expect(summary.revenue).toBe(1000);
@@ -35,10 +42,10 @@ describe('summarizeTransactions', () => {
     expect(summary.count).toBe(1);
   });
 
-  it('groups monthly trend chronologically', () => {
+  it('groups monthly trend by sold date', () => {
     const summary = summarizeTransactions([
       base,
-      { ...base, id: '2', transactionDate: '2026-07-01', salePrice: 500, profit: -50 },
+      { ...base, id: '2', soldDate: '2026-07-01', salePrice: 500, profit: -50 },
     ]);
     expect(summary.monthly).toEqual([
       { month: '2026-07', revenue: 500, profit: -50, count: 1 },

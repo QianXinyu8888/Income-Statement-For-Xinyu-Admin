@@ -50,7 +50,6 @@ export interface TransactionPage {
   total: number;
   page: number;
   pageSize: number;
-  categories: string[];
   warnings: string[];
 }
 export interface TransactionQuery {
@@ -58,7 +57,6 @@ export interface TransactionQuery {
   pageSize: number;
   q?: string;
   status?: TransactionStatus;
-  category?: string;
   from?: string;
   to?: string;
   sort?: string;

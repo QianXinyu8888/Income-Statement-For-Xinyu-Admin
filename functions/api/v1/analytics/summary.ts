@@ -23,7 +23,8 @@ export const onRequestGet: PagesFunction = async ({ request, env }) => {
       })
       .filter(
         (record) =>
-          (!from || record.transactionDate >= from) && (!to || record.transactionDate <= to),
+          (!from || (record.soldDate ?? record.purchaseDate) >= from) &&
+          (!to || (record.soldDate ?? record.purchaseDate) <= to),
       );
     return jsonResponse(request, summarizeTransactions(records));
   } catch (error) {

@@ -2,14 +2,17 @@ import type { Transaction } from './transaction';
 
 const HEADERS = [
   '商品名称',
-  '分类',
-  '售价',
-  '成本',
+  '交易状态',
+  '购入日期',
+  '售出日期',
+  '成交价',
+  '购入成本',
   '运费',
+  '总成本',
   '利润',
-  '利润率',
-  '状态',
-  '日期',
+  'ROI',
+  '持有天数',
+  '排序',
   '备注',
 ];
 
@@ -20,67 +23,64 @@ function safeCell(value: unknown): string {
   return text;
 }
 
-export function buildCsv(records: Transaction[]): string {
-  const rows = records.map((record) => [
+function row(record: Transaction): unknown[] {
+  return [
     record.title,
-    record.category,
+    record.status,
+    record.purchaseDate,
+    record.soldDate,
     record.salePrice,
     record.costPrice,
     record.shippingFee,
+    record.totalCost,
     record.profit,
-    record.profitRate === null ? '' : `${(record.profitRate * 100).toFixed(2)}%`,
-    record.status,
-    record.transactionDate,
+    record.roi,
+    record.holdingDays,
+    record.sortOrder,
     record.note,
-  ]);
-  return `\uFEFF${[HEADERS, ...rows].map((row) => row.map(safeCell).join(',')).join('\r\n')}`;
+  ];
 }
 
-export function downloadCsv(records: Transaction[], filename: string) {
-  const blob = new Blob([buildCsv(records)], { type: 'text/csv;charset=utf-8' });
+export function buildCsv(records: Transaction[]): string {
+  return `\uFEFF${[HEADERS, ...records.map(row)].map((values) => values.map(safeCell).join(',')).join('\r\n')}`;
+}
+
+function download(blob: Blob, filename: string) {
   const link = document.createElement('a');
   link.href = URL.createObjectURL(blob);
   link.download = filename;
   link.click();
   URL.revokeObjectURL(link.href);
+}
+
+export function downloadCsv(records: Transaction[], filename: string) {
+  download(new Blob([buildCsv(records)], { type: 'text/csv;charset=utf-8' }), filename);
 }
 
 export async function downloadExcel(records: Transaction[], filename: string) {
   const ExcelJS = await import('exceljs');
   const workbook = new ExcelJS.Workbook();
-  const sheet = workbook.addWorksheet('交易明细');
+  const sheet = workbook.addWorksheet('闲鱼交易明细');
   sheet.columns = HEADERS.map((header, index) => ({
     header,
     key: String(index),
-    width: index === 0 ? 28 : index === 9 ? 30 : 14,
+    width: index === 0 ? 42 : index === 12 ? 30 : 14,
   }));
-  records.forEach((record) => {
-    sheet.addRow([
-      safeCell(record.title),
-      safeCell(record.category),
-      record.salePrice,
-      record.costPrice,
-      record.shippingFee,
-      record.profit,
-      record.profitRate,
-      record.status,
-      record.transactionDate,
-      safeCell(record.note),
-    ]);
-  });
+  records.forEach((record) =>
+    sheet.addRow(
+      row(record).map((value, index) => (index === 0 || index === 12 ? safeCell(value) : value)),
+    ),
+  );
   sheet.getRow(1).font = { bold: true };
-  sheet.getColumn(3).numFmt = '¥#,##0.00';
-  sheet.getColumn(4).numFmt = '¥#,##0.00';
-  sheet.getColumn(5).numFmt = '¥#,##0.00';
-  sheet.getColumn(6).numFmt = '¥#,##0.00';
-  sheet.getColumn(7).numFmt = '0.00%';
-  const buffer = await workbook.xlsx.writeBuffer();
-  const blob = new Blob([buffer], {
-    type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+  [5, 6, 7, 8, 9].forEach((column) => {
+    sheet.getColumn(column).numFmt = '¥#,##0.00';
   });
-  const link = document.createElement('a');
-  link.href = URL.createObjectURL(blob);
-  link.download = filename;
-  link.click();
-  URL.revokeObjectURL(link.href);
+  sheet.getColumn(10).numFmt = '0.00%';
+  const buffer = await workbook.xlsx.writeBuffer();
+  download(
+    new Blob([buffer], {
+      type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+    }),
+    filename,
+  );
 }

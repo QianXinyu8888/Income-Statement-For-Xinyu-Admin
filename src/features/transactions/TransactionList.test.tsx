@@ -6,19 +6,23 @@ import type { Transaction } from '../../domain/transaction';
 const record: Transaction = {
   id: '1',
   title: 'iPhone 15 Pro',
-  category: '手机',
   salePrice: 5200,
   costPrice: 4100,
   shippingFee: 18,
+  totalCost: 4118,
   profit: 1082,
   profitRate: 1082 / 4100,
+  roi: 1082 / 4118,
   status: '已售出',
-  transactionDate: '2026-08-10',
+  purchaseDate: '2026-04-01',
+  soldDate: '2026-08-10',
+  holdingDays: 131,
+  sortOrder: 1,
   note: '',
 };
 
 describe('TransactionList', () => {
-  it('shows the same essential information in the responsive list', () => {
+  it('shows essential mapped information in both responsive views', () => {
     render(
       <TransactionList
         records={[record]}
@@ -26,7 +30,7 @@ describe('TransactionList', () => {
         onToggle={vi.fn()}
         onOpen={vi.fn()}
         onSort={vi.fn()}
-        sort="transactionDate"
+        sort="soldDate"
         order="desc"
       />,
     );

@@ -408,6 +408,10 @@ tbody tr.is-selected {
   color: var(--profit);
   background: var(--profit-soft);
 }
+.status--在售中 {
+  color: var(--accent);
+  background: var(--accent-soft);
+}
 .status--自用中 {
   color: var(--warning);
   background: var(--warning-soft);
