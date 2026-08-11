@@ -59,8 +59,11 @@ function dateValue(value: unknown): string {
   return text;
 }
 
-export function calculateProfit(input: Pick<TransactionInput, 'salePrice' | 'costPrice' | 'shippingFee'>) {
-  if (input.salePrice === null) return { profit: -input.costPrice - input.shippingFee, profitRate: null };
+export function calculateProfit(
+  input: Pick<TransactionInput, 'salePrice' | 'costPrice' | 'shippingFee'>,
+) {
+  if (input.salePrice === null)
+    return { profit: -input.costPrice - input.shippingFee, profitRate: null };
   const profit = Math.round((input.salePrice - input.costPrice - input.shippingFee) * 100) / 100;
   return { profit, profitRate: input.costPrice > 0 ? profit / input.costPrice : null };
 }
@@ -88,9 +91,10 @@ export function fromFeishuRecord(record: FeishuRecord): Transaction {
   });
   const calculated = calculateProfit(input);
   const formulaProfit = fields['利润(¥)'];
-  const profit = formulaProfit === null || formulaProfit === undefined
-    ? calculated.profit
-    : numberValue(formulaProfit);
+  const profit =
+    formulaProfit === null || formulaProfit === undefined
+      ? calculated.profit
+      : numberValue(formulaProfit);
   return {
     id: record.record_id ?? record.id ?? '',
     ...input,

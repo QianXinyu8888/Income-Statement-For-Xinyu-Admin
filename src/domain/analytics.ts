@@ -38,7 +38,10 @@ export function summarizeTransactions(records: Transaction[]): AnalyticsSummary 
   });
   const bracketNames = ['高收益', '稳健盈利', '平价回血', '亏损'] as const;
   const bracketCounts: Record<(typeof bracketNames)[number], number> = {
-    高收益: 0, 稳健盈利: 0, 平价回血: 0, 亏损: 0,
+    高收益: 0,
+    稳健盈利: 0,
+    平价回血: 0,
+    亏损: 0,
   };
   sold.forEach(({ profit: value }) => {
     if (value > 500) bracketCounts.高收益 += 1;
@@ -47,11 +50,18 @@ export function summarizeTransactions(records: Transaction[]): AnalyticsSummary 
     else bracketCounts.亏损 += 1;
   });
   return {
-    revenue, cost, shipping, profit,
+    revenue,
+    cost,
+    shipping,
+    profit,
     profitRate: cost > 0 ? profit / cost : null,
     count: sold.length,
-    monthly: [...monthlyMap.entries()].sort(([a], [b]) => a.localeCompare(b)).map(([month, value]) => ({ month, ...value })),
-    categories: [...categoryMap.entries()].map(([category, value]) => ({ category, ...value })).sort((a, b) => b.profit - a.profit),
+    monthly: [...monthlyMap.entries()]
+      .sort(([a], [b]) => a.localeCompare(b))
+      .map(([month, value]) => ({ month, ...value })),
+    categories: [...categoryMap.entries()]
+      .map(([category, value]) => ({ category, ...value }))
+      .sort((a, b) => b.profit - a.profit),
     brackets: bracketNames.map((name) => ({ name, count: bracketCounts[name] })),
   };
 }

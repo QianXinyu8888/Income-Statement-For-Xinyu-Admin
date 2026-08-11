@@ -1,6 +1,17 @@
 import type { Transaction } from './transaction';
 
-const HEADERS = ['商品名称', '分类', '售价', '成本', '运费', '利润', '利润率', '状态', '日期', '备注'];
+const HEADERS = [
+  '商品名称',
+  '分类',
+  '售价',
+  '成本',
+  '运费',
+  '利润',
+  '利润率',
+  '状态',
+  '日期',
+  '备注',
+];
 
 function safeCell(value: unknown): string {
   let text = value === null || value === undefined ? '' : String(value);
@@ -11,9 +22,16 @@ function safeCell(value: unknown): string {
 
 export function buildCsv(records: Transaction[]): string {
   const rows = records.map((record) => [
-    record.title, record.category, record.salePrice, record.costPrice, record.shippingFee,
-    record.profit, record.profitRate === null ? '' : `${(record.profitRate * 100).toFixed(2)}%`,
-    record.status, record.transactionDate, record.note,
+    record.title,
+    record.category,
+    record.salePrice,
+    record.costPrice,
+    record.shippingFee,
+    record.profit,
+    record.profitRate === null ? '' : `${(record.profitRate * 100).toFixed(2)}%`,
+    record.status,
+    record.transactionDate,
+    record.note,
   ]);
   return `\uFEFF${[HEADERS, ...rows].map((row) => row.map(safeCell).join(',')).join('\r\n')}`;
 }
@@ -38,9 +56,16 @@ export async function downloadExcel(records: Transaction[], filename: string) {
   }));
   records.forEach((record) => {
     sheet.addRow([
-      safeCell(record.title), safeCell(record.category), record.salePrice, record.costPrice,
-      record.shippingFee, record.profit, record.profitRate, record.status,
-      record.transactionDate, safeCell(record.note),
+      safeCell(record.title),
+      safeCell(record.category),
+      record.salePrice,
+      record.costPrice,
+      record.shippingFee,
+      record.profit,
+      record.profitRate,
+      record.status,
+      record.transactionDate,
+      safeCell(record.note),
     ]);
   });
   sheet.getRow(1).font = { bold: true };
@@ -50,7 +75,9 @@ export async function downloadExcel(records: Transaction[], filename: string) {
   sheet.getColumn(6).numFmt = '¥#,##0.00';
   sheet.getColumn(7).numFmt = '0.00%';
   const buffer = await workbook.xlsx.writeBuffer();
-  const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+  const blob = new Blob([buffer], {
+    type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+  });
   const link = document.createElement('a');
   link.href = URL.createObjectURL(blob);
   link.download = filename;

@@ -3,16 +3,32 @@ import { summarizeTransactions } from './analytics';
 import type { Transaction } from './transaction';
 
 const base: Transaction = {
-  id: '1', title: '商品', category: '数码', salePrice: 1000, costPrice: 700,
-  shippingFee: 10, profit: 290, profitRate: 290 / 700, status: '已售出',
-  transactionDate: '2026-08-01', note: '',
+  id: '1',
+  title: '商品',
+  category: '数码',
+  salePrice: 1000,
+  costPrice: 700,
+  shippingFee: 10,
+  profit: 290,
+  profitRate: 290 / 700,
+  status: '已售出',
+  transactionDate: '2026-08-01',
+  note: '',
 };
 
 describe('summarizeTransactions', () => {
   it('excludes self-use records from revenue and sold profit', () => {
     const summary = summarizeTransactions([
       base,
-      { ...base, id: '2', salePrice: null, costPrice: 500, profit: -500, profitRate: null, status: '自用中' },
+      {
+        ...base,
+        id: '2',
+        salePrice: null,
+        costPrice: 500,
+        profit: -500,
+        profitRate: null,
+        status: '自用中',
+      },
     ]);
     expect(summary.revenue).toBe(1000);
     expect(summary.profit).toBe(290);
