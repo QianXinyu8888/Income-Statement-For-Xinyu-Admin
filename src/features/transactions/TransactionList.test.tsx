@@ -66,4 +66,27 @@ describe('TransactionList', () => {
     expect(screen.queryByText('-¥105.00')).not.toBeInTheDocument();
     expect(screen.getAllByText('—').length).toBeGreaterThan(0);
   });
+
+  it('marks the focused transaction in desktop and mobile views', () => {
+    const { container } = render(
+      <TransactionList
+        records={[record, { ...record, id: '2', title: '另一件产品' }]}
+        selected={new Set()}
+        focusedId="1"
+        onToggle={vi.fn()}
+        onOpen={vi.fn()}
+        onSort={vi.fn()}
+        sort="soldDate"
+        order="desc"
+      />,
+    );
+
+    expect(container.querySelectorAll('[data-transaction-id="1"]')).toHaveLength(2);
+    expect(container.querySelectorAll('[data-transaction-id="1"][data-focused="true"]')).toHaveLength(
+      2,
+    );
+    expect(container.querySelectorAll('[data-transaction-id="2"][data-focused="true"]')).toHaveLength(
+      0,
+    );
+  });
 });

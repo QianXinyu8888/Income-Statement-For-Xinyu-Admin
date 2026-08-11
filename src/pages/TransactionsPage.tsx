@@ -1,6 +1,7 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Download, Filter, Plus, Search, SlidersHorizontal } from 'lucide-react';
+import { useSearchParams } from 'react-router-dom';
 import { apiClient, type TransactionQuery } from '../api/client';
 import type { Transaction, TransactionInput, TransactionStatus } from '../domain/transaction';
 import { TRANSACTION_STATUSES } from '../domain/transaction';
@@ -14,15 +15,17 @@ type DeleteIntent = { kind: 'single'; record: Transaction } | { kind: 'batch'; c
 
 export default function TransactionsPage() {
   const client = useQueryClient();
+  const [searchParams, setSearchParams] = useSearchParams();
   const now = new Date();
   const month = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
   const monthEnd = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
-  const [query, setQuery] = useState<TransactionQuery>({
+  const [query, setQuery] = useState<TransactionQuery>(() => ({
     page: 1,
     pageSize: 20,
     sort: 'soldDate',
     order: 'desc',
-  });
+    focusId: searchParams.get('focus') || undefined,
+  }));
   const [search, setSearch] = useState('');
   const [selected, setSelected] = useState(new Set<string>());
   const [editing, setEditing] = useState<Transaction | null>(null);
@@ -31,6 +34,7 @@ export default function TransactionsPage() {
   const [notice, setNotice] = useState('');
   const [deleteIntent, setDeleteIntent] = useState<DeleteIntent | null>(null);
   const [exporting, setExporting] = useState(false);
+  const [focusedId, setFocusedId] = useState<string | null>(null);
   const result = useQuery({
     queryKey: ['transactions', query],
     queryFn: () => apiClient.transactions(query),
@@ -84,6 +88,45 @@ export default function TransactionsPage() {
     mutationFn: apiClient.exportTransactions,
   });
   const records = useMemo(() => result.data?.items ?? [], [result.data?.items]);
+  useEffect(() => {
+    const focusId = query.focusId;
+    if (!focusId || !result.data || focusedId) return;
+    const nextParams = new URLSearchParams(searchParams);
+    nextParams.delete('focus');
+    setSearchParams(nextParams, { replace: true });
+    if (!records.some((record) => record.id === focusId)) {
+      setQuery((current) => ({
+        ...current,
+        page: result.data.page,
+        focusId: undefined,
+      }));
+      return;
+    }
+    setFocusedId(focusId);
+  }, [focusedId, query.focusId, records, result.data, searchParams, setSearchParams]);
+  useEffect(() => {
+    if (!focusedId) return;
+    const frame = requestAnimationFrame(() => {
+      const scope = window.matchMedia?.('(max-width: 680px)').matches
+        ? '.mobile-list'
+        : '.desktop-list';
+      const target = [...document.querySelectorAll<HTMLElement>(`${scope} [data-transaction-id]`)]
+        .find((element) => element.dataset.transactionId === focusedId);
+      target?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    });
+    const timer = window.setTimeout(() => {
+      setFocusedId(null);
+      setQuery((current) => ({
+        ...current,
+        page: result.data?.page ?? current.page,
+        focusId: undefined,
+      }));
+    }, 1000);
+    return () => {
+      cancelAnimationFrame(frame);
+      window.clearTimeout(timer);
+    };
+  }, [focusedId, result.data?.page]);
   const open = (record: Transaction | null) => {
     setEditing(record);
     setDrawer(true);
@@ -278,6 +321,7 @@ export default function TransactionsPage() {
         <TransactionList
           records={records}
           selected={selected}
+          focusedId={focusedId}
           onToggle={(id) =>
             setSelected((current) => {
               const next = new Set(current);
@@ -296,18 +340,18 @@ export default function TransactionsPage() {
         <div className="pagination">
           <button
             className="button button--secondary"
-            disabled={query.page === 1}
-            onClick={() => setQuery((current) => ({ ...current, page: current.page - 1 }))}
+            disabled={result.data.page === 1}
+            onClick={() => setQuery((current) => ({ ...current, page: result.data.page - 1 }))}
           >
             上一页
           </button>
           <span>
-            第 {query.page} / {Math.ceil(result.data.total / result.data.pageSize)} 页
+            第 {result.data.page} / {Math.ceil(result.data.total / result.data.pageSize)} 页
           </span>
           <button
             className="button button--secondary"
-            disabled={query.page >= Math.ceil(result.data.total / result.data.pageSize)}
-            onClick={() => setQuery((current) => ({ ...current, page: current.page + 1 }))}
+            disabled={result.data.page >= Math.ceil(result.data.total / result.data.pageSize)}
+            onClick={() => setQuery((current) => ({ ...current, page: result.data.page + 1 }))}
           >
             下一页
           </button>

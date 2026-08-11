@@ -352,6 +352,23 @@ tbody tr:hover,
 tbody tr.is-selected {
   background: var(--accent-soft);
 }
+[data-focused='true'] {
+  background: var(--warning-soft) !important;
+  box-shadow: inset 3px 0 0 var(--warning);
+  animation: focused-transaction 1s ease-out;
+}
+@keyframes focused-transaction {
+  0% {
+    background: color-mix(in srgb, var(--warning), transparent 72%);
+    box-shadow:
+      inset 4px 0 0 var(--warning),
+      inset 0 0 0 1px color-mix(in srgb, var(--warning), transparent 45%);
+  }
+  100% {
+    background: var(--warning-soft);
+    box-shadow: inset 3px 0 0 var(--warning);
+  }
+}
 .check-cell {
   width: 42px;
   padding-right: 0;

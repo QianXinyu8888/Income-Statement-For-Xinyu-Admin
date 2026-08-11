@@ -21,6 +21,7 @@ type SortKey =
 interface Props {
   records: Transaction[];
   selected: Set<string>;
+  focusedId?: string | null;
   onToggle: (id: string) => void;
   onOpen: (record: Transaction) => void;
   onSort: (key: SortKey) => void;
@@ -63,6 +64,7 @@ function Profit({ value, visible }: { value: number | null; visible: boolean }) 
 export function TransactionList({
   records,
   selected,
+  focusedId,
   onToggle,
   onOpen,
   onSort,
@@ -103,7 +105,12 @@ export function TransactionList({
           </thead>
           <tbody>
             {records.map((record) => (
-              <tr key={record.id} className={selected.has(record.id) ? 'is-selected' : ''}>
+              <tr
+                key={record.id}
+                className={selected.has(record.id) ? 'is-selected' : ''}
+                data-transaction-id={record.id}
+                data-focused={focusedId === record.id || undefined}
+              >
                 <td className="check-cell">
                   <input
                     type="checkbox"
@@ -141,6 +148,8 @@ export function TransactionList({
           <article
             key={record.id}
             className={selected.has(record.id) ? 'mobile-row is-selected' : 'mobile-row'}
+            data-transaction-id={record.id}
+            data-focused={focusedId === record.id || undefined}
           >
             <input
               type="checkbox"
