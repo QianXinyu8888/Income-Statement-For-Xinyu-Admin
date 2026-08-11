@@ -110,7 +110,9 @@ describe('TransactionsPage focused navigation', () => {
       return element;
     });
     expect(desktopTarget).toBeInTheDocument();
-    expect(scrollIntoView).toHaveBeenCalledWith({ behavior: 'smooth', block: 'center' });
+    await waitFor(() =>
+      expect(scrollIntoView).toHaveBeenCalledWith({ behavior: 'smooth', block: 'center' }),
+    );
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
     await waitFor(() => expect(screen.getByLabelText('当前查询参数')).toBeEmptyDOMElement());
 
