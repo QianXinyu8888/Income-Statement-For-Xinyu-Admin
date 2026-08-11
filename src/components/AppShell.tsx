@@ -41,8 +41,13 @@ export function AppShell({
           ))}
         </nav>
         <div className="sidebar-account" aria-label={`当前账号 ${user.username}`}>
-          <span className="sidebar-avatar"><UserRound size={15} /></span>
-          <span><strong>{user.username}</strong><small>{user.role}</small></span>
+          <span className="sidebar-avatar">
+            <UserRound size={15} />
+          </span>
+          <span>
+            <strong>{user.username}</strong>
+            <small>{user.role}</small>
+          </span>
         </div>
       </aside>
       <div className="workspace">

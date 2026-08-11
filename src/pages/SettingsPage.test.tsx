@@ -17,7 +17,9 @@ describe('SettingsPage', () => {
   afterEach(() => vi.restoreAllMocks());
 
   it('presents account and service metadata as a named description list', async () => {
-    vi.spyOn(apiClient, 'session').mockResolvedValue({ user: { username: 'xinyu', role: '管理员' } });
+    vi.spyOn(apiClient, 'session').mockResolvedValue({
+      user: { username: 'xinyu', role: '管理员' },
+    });
     vi.spyOn(apiClient, 'health').mockResolvedValue({ connected: true, checkedAt: '2026-08-12' });
     renderPage();
 

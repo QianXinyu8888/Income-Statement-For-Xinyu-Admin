@@ -15,11 +15,15 @@ export default function SettingsPage() {
       <dl className="settings-list" role="group" aria-label="账号与服务状态">
         <div>
           <dt>当前账号</dt>
-          <dd><strong>{session.data?.user.username ?? '—'}</strong></dd>
+          <dd>
+            <strong>{session.data?.user.username ?? '—'}</strong>
+          </dd>
         </div>
         <div>
           <dt>账号权限</dt>
-          <dd><strong>{session.data?.user.role ?? '用户'}</strong></dd>
+          <dd>
+            <strong>{session.data?.user.role ?? '用户'}</strong>
+          </dd>
         </div>
         <div>
           <dt>飞书连接</dt>
@@ -31,7 +35,9 @@ export default function SettingsPage() {
         </div>
         <div>
           <dt>版本</dt>
-          <dd><strong>2.0.0</strong></dd>
+          <dd>
+            <strong>2.0.0</strong>
+          </dd>
         </div>
       </dl>
       <div className="security-note">

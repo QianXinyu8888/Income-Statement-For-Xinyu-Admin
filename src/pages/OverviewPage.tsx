@@ -21,7 +21,11 @@ export default function OverviewPage() {
     { key: 'revenue', label: '销售额', value: formatMoney(data.revenue) },
     { key: 'cost', label: '总成本', value: formatMoney(data.totalCost) },
     { key: 'profit', label: '利润', value: formatMoney(data.profit) },
-    { key: 'roi', label: 'ROI', value: data.roi === null ? '—' : `${(data.roi * 100).toFixed(1)}%` },
+    {
+      key: 'roi',
+      label: 'ROI',
+      value: data.roi === null ? '—' : `${(data.roi * 100).toFixed(1)}%`,
+    },
     { key: 'count', label: '成交笔数', value: `${data.count} 笔` },
   ];
   const monthly = data.monthly.filter(

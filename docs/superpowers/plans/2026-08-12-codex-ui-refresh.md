@@ -32,6 +32,7 @@
 ## 任务 1：建立应用壳与全局设计令牌
 
 **文件：**
+
 - 创建：`src/components/AppShell.test.tsx`
 - 修改：`src/components/AppShell.tsx`
 - 修改：`src/styles.css`
@@ -86,6 +87,7 @@ git commit -m "feat: 重构 Codex 风格应用壳"
 ## 任务 2：统一基础控件、状态与动效
 
 **文件：**
+
 - 修改：`src/components/LoadingState.tsx`
 - 修改：`src/components/StatusBadge.tsx`
 - 修改：`src/components/ConfirmDialog.tsx`
@@ -96,7 +98,16 @@ git commit -m "feat: 重构 Codex 风格应用壳"
 
 ```tsx
 it('exposes the destructive action without adding an unsupported close control', () => {
-  render(<ConfirmDialog open title="删除交易？" description="删除后无法恢复" confirmLabel="删除" onCancel={vi.fn()} onConfirm={vi.fn()} />);
+  render(
+    <ConfirmDialog
+      open
+      title="删除交易？"
+      description="删除后无法恢复"
+      confirmLabel="删除"
+      onCancel={vi.fn()}
+      onConfirm={vi.fn()}
+    />,
+  );
   expect(screen.getByRole('alertdialog')).toHaveTextContent('删除后无法恢复');
   expect(screen.getByRole('button', { name: '删除' })).toBeInTheDocument();
   expect(screen.queryByRole('button', { name: '关闭' })).not.toBeInTheDocument();
@@ -115,7 +126,9 @@ it('exposes the destructive action without adding an unsupported close control',
 
 ```css
 @media (prefers-reduced-motion: reduce) {
-  *, *::before, *::after {
+  *,
+  *::before,
+  *::after {
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
     scroll-behavior: auto !important;
@@ -140,6 +153,7 @@ git commit -m "feat: 统一基础控件与界面动效"
 ## 任务 3：重构交易工作区
 
 **文件：**
+
 - 修改：`src/pages/TransactionsPage.tsx`
 - 修改：`src/pages/TransactionsPage.test.tsx`
 - 修改：`src/features/transactions/TransactionList.tsx`
@@ -190,6 +204,7 @@ git commit -m "feat: 优化交易工作区与移动账本"
 ## 任务 4：重构交易抽屉与移动表单
 
 **文件：**
+
 - 修改：`src/features/transactions/TransactionDrawer.tsx`
 - 修改：`src/features/transactions/TransactionDrawer.test.tsx`
 - 修改：`src/styles.css`
@@ -199,7 +214,16 @@ git commit -m "feat: 优化交易工作区与移动账本"
 ```tsx
 it('shows only supported fields and read-only calculated cost', () => {
   renderDrawer();
-  for (const label of ['商品名称', '状态', '售价', '购入成本', '运费', '购入日期', '售出日期', '备注']) {
+  for (const label of [
+    '商品名称',
+    '状态',
+    '售价',
+    '购入成本',
+    '运费',
+    '购入日期',
+    '售出日期',
+    '备注',
+  ]) {
     expect(screen.getByLabelText(label)).toBeInTheDocument();
   }
   expect(screen.getByText('总成本（飞书）')).toBeInTheDocument();
@@ -233,6 +257,7 @@ git commit -m "feat: 优化交易抽屉与移动表单"
 ## 任务 5：实现经营概览
 
 **文件：**
+
 - 创建：`src/pages/OverviewPage.test.tsx`
 - 修改：`src/pages/OverviewPage.tsx`
 - 修改：`src/styles.css`
@@ -276,6 +301,7 @@ git commit -m "feat: 重构经营概览数据层级"
 ## 任务 6：实现利润分析
 
 **文件：**
+
 - 修改：`src/pages/AnalyticsPage.tsx`
 - 修改：`src/pages/AnalyticsPage.test.tsx`
 - 修改：`src/styles.css`
@@ -318,6 +344,7 @@ git commit -m "feat: 优化利润分析与移动下钻"
 ## 任务 7：实现登录与设置
 
 **文件：**
+
 - 创建：`src/pages/LoginPage.test.tsx`
 - 创建：`src/pages/SettingsPage.test.tsx`
 - 修改：`src/pages/LoginPage.tsx`
@@ -372,6 +399,7 @@ git commit -m "feat: 优化登录与设置界面"
 ## 任务 8：整体验证、视觉对照与修正
 
 **文件：**
+
 - 修改：上述任一出现差异的源码或测试文件
 - 临时：浏览器截图与差异记录，交付前删除
 
@@ -426,4 +454,3 @@ git diff --check
 git add src
 git commit -m "fix: 对齐最终视觉与响应式细节"
 ```
-

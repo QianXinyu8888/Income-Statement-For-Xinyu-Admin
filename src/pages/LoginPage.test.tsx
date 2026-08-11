@@ -27,10 +27,7 @@ describe('LoginPage', () => {
     fireEvent.change(screen.getByLabelText('密码'), { target: { value: 'secret' } });
     fireEvent.submit(screen.getByRole('button', { name: '登录' }).closest('form')!);
 
-    expect(screen.getByRole('form', { name: '登录闲鱼损益' })).toHaveAttribute(
-      'aria-busy',
-      'true',
-    );
+    expect(screen.getByRole('form', { name: '登录闲鱼损益' })).toHaveAttribute('aria-busy', 'true');
     expect(screen.getByRole('button', { name: '正在登录…' })).toBeDisabled();
   });
 });
