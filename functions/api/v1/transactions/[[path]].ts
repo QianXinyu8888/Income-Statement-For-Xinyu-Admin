@@ -9,6 +9,7 @@ import {
   transactionSchema,
   TRANSACTION_STATUSES,
 } from '../../../../src/domain/transaction';
+import { queryTransactions } from '../../../../src/domain/transaction-query';
 
 const querySchema = z.object({
   page: z.coerce.number().int().min(1).default(1),
@@ -31,6 +32,7 @@ const querySchema = z.object({
     ])
     .default('soldDate'),
   order: z.enum(['asc', 'desc']).default('desc'),
+  focusId: z.string().trim().min(1).optional(),
 });
 
 const batchStatusSchema = z.object({
@@ -72,34 +74,7 @@ export const onRequest: PagesFunction = async ({ request, env, params }) => {
     if (!path && request.method === 'GET') {
       const query = querySchema.parse(Object.fromEntries(new URL(request.url).searchParams));
       const { records, warnings } = await readAll();
-      const q = query.q.toLocaleLowerCase('zh-CN');
-      const filtered = records.filter((record) => {
-        const date = record.soldDate ?? record.purchaseDate;
-        return (
-          (!q ||
-            `${record.title ?? ''} ${record.note ?? ''}`.toLocaleLowerCase('zh-CN').includes(q)) &&
-          (!query.status || record.status === query.status) &&
-          (!query.from || (date !== null && date >= query.from)) &&
-          (!query.to || (date !== null && date <= query.to))
-        );
-      });
-      filtered.sort((a, b) => {
-        const left = a[query.sort];
-        const right = b[query.sort];
-        const result =
-          typeof left === 'number' && typeof right === 'number'
-            ? left - right
-            : String(left ?? '').localeCompare(String(right ?? ''), 'zh-CN');
-        return query.order === 'asc' ? result : -result;
-      });
-      const start = (query.page - 1) * query.pageSize;
-      return jsonResponse(request, {
-        items: filtered.slice(start, start + query.pageSize),
-        total: filtered.length,
-        page: query.page,
-        pageSize: query.pageSize,
-        warnings,
-      });
+      return jsonResponse(request, { ...queryTransactions(records, query), warnings });
     }
     if (path === 'export' && request.method === 'GET') {
       const { records, warnings } = await readAll();

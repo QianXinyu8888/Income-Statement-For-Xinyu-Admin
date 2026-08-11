@@ -66,6 +66,7 @@ export interface TransactionQuery {
   to?: string;
   sort?: string;
   order?: 'asc' | 'desc';
+  focusId?: string;
 }
 
 export const apiClient = {
