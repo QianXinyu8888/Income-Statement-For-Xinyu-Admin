@@ -85,4 +85,43 @@ describe('summarizeTransactions', () => {
       { month: '2026-08', revenue: 1000, profit: 290, count: 1 },
     ]);
   });
+
+  it('attaches matching product indexes to profit, status, and return groups', () => {
+    const summary = summarizeTransactions([
+      { ...base, id: 'high', title: '高收益产品', profit: 501 },
+      { ...base, id: 'steady', title: '稳健盈利产品', profit: 100 },
+      { ...base, id: 'flat', title: '平价回血产品', profit: 0 },
+      { ...base, id: 'loss', title: '亏损产品', profit: -1 },
+      {
+        ...base,
+        id: 'selling',
+        title: null,
+        status: '在售中',
+        salePrice: null,
+        profit: null,
+        soldDate: null,
+      },
+      { ...base, id: 'returned', title: '退货产品', status: '已退货', profit: -45 },
+    ]);
+
+    expect(summary.brackets.find(({ name }) => name === '高收益')?.items).toEqual([
+      { id: 'high', title: '高收益产品' },
+    ]);
+    expect(summary.brackets.find(({ name }) => name === '稳健盈利')?.items).toEqual([
+      { id: 'steady', title: '稳健盈利产品' },
+    ]);
+    expect(summary.brackets.find(({ name }) => name === '平价回血')?.items).toEqual([
+      { id: 'flat', title: '平价回血产品' },
+    ]);
+    expect(summary.brackets.find(({ name }) => name === '亏损')?.items).toEqual([
+      { id: 'loss', title: '亏损产品' },
+    ]);
+    expect(summary.statuses.find(({ status }) => status === '在售中')?.items).toEqual([
+      { id: 'selling', title: null },
+    ]);
+    expect(summary.returnItems).toEqual([{ id: 'returned', title: '退货产品' }]);
+    expect(summary.brackets.every((group) => group.count === group.items.length)).toBe(true);
+    expect(summary.statuses.every((group) => group.count === group.items.length)).toBe(true);
+    expect(summary.returnCount).toBe(summary.returnItems.length);
+  });
 });

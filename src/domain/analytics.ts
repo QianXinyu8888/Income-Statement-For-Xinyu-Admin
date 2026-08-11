@@ -1,5 +1,10 @@
 import type { Transaction, TransactionStatus } from './transaction';
 
+export interface AnalyticsOrderIndexItem {
+  id: string;
+  title: string | null;
+}
+
 export interface AnalyticsSummary {
   revenue: number | null;
   totalCost: number | null;
@@ -16,8 +21,13 @@ export interface AnalyticsSummary {
     profit: number | null;
     count: number;
   }>;
-  statuses: Array<{ status: TransactionStatus | null; count: number }>;
-  brackets: Array<{ name: string; count: number }>;
+  statuses: Array<{
+    status: TransactionStatus | null;
+    count: number;
+    items: AnalyticsOrderIndexItem[];
+  }>;
+  brackets: Array<{ name: string; count: number; items: AnalyticsOrderIndexItem[] }>;
+  returnItems: AnalyticsOrderIndexItem[];
 }
 
 const round = (value: number) => Math.round(value * 100) / 100;
@@ -40,18 +50,26 @@ export function summarizeTransactions(records: Transaction[]): AnalyticsSummary 
     const month = record.soldDate.slice(0, 7);
     monthlyMap.set(month, [...(monthlyMap.get(month) ?? []), record]);
   });
-  const statusMap = new Map<TransactionStatus | null, number>();
-  records.forEach((record) =>
-    statusMap.set(record.status, (statusMap.get(record.status) ?? 0) + 1),
-  );
+  const indexItem = ({ id, title }: Transaction): AnalyticsOrderIndexItem => ({ id, title });
+  const statusMap = new Map<TransactionStatus | null, AnalyticsOrderIndexItem[]>();
+  records.forEach((record) => {
+    const items = statusMap.get(record.status) ?? [];
+    statusMap.set(record.status, [...items, indexItem(record)]);
+  });
   const bracketNames = ['高收益', '稳健盈利', '平价回血', '亏损'] as const;
-  const bracketCounts = { 高收益: 0, 稳健盈利: 0, 平价回血: 0, 亏损: 0 };
-  sold.forEach(({ profit: value }) => {
+  const bracketItems: Record<(typeof bracketNames)[number], AnalyticsOrderIndexItem[]> = {
+    高收益: [],
+    稳健盈利: [],
+    平价回血: [],
+    亏损: [],
+  };
+  sold.forEach((record) => {
+    const value = record.profit;
     if (value === null) return;
-    if (value > 500) bracketCounts.高收益 += 1;
-    else if (value >= 100) bracketCounts.稳健盈利 += 1;
-    else if (value >= 0) bracketCounts.平价回血 += 1;
-    else bracketCounts.亏损 += 1;
+    if (value > 500) bracketItems.高收益.push(indexItem(record));
+    else if (value >= 100) bracketItems.稳健盈利.push(indexItem(record));
+    else if (value >= 0) bracketItems.平价回血.push(indexItem(record));
+    else bracketItems.亏损.push(indexItem(record));
   });
   const returnLoss = sumKnown(
     returned.map((record) =>
@@ -82,7 +100,16 @@ export function summarizeTransactions(records: Transaction[]): AnalyticsSummary 
         profit: sumKnown(values.map((record) => record.profit)),
         count: values.length,
       })),
-    statuses: [...statusMap.entries()].map(([status, count]) => ({ status, count })),
-    brackets: bracketNames.map((name) => ({ name, count: bracketCounts[name] })),
+    statuses: [...statusMap.entries()].map(([status, items]) => ({
+      status,
+      count: items.length,
+      items,
+    })),
+    brackets: bracketNames.map((name) => ({
+      name,
+      count: bracketItems[name].length,
+      items: bracketItems[name],
+    })),
+    returnItems: returned.map(indexItem),
   };
 }
