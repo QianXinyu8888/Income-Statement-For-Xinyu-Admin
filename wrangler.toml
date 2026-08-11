@@ -3,7 +3,5 @@ compatibility_date = "2024-09-23"
 pages_build_output_dir = "./dist"
 
 [vars]
-FEISHU_APP_ID = "cli_aafbdc1dc5b85bdd"
-FEISHU_BITABLE_APP_TOKEN = "I8uhbjG29aOl9Rs9wcjcWVmYnvd"
-
+ALLOWED_ORIGIN = "https://your-domain.example"
 
