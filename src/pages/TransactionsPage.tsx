@@ -201,7 +201,7 @@ export default function TransactionsPage() {
           <Search size={16} />
           <input
             aria-label="搜索交易"
-            placeholder="搜索交易"
+            placeholder="搜索商品名称"
             value={search}
             onChange={(event) => setSearch(event.target.value)}
             onKeyDown={(event) => {
@@ -241,7 +241,7 @@ export default function TransactionsPage() {
           onClick={() => setMoreFilters(!moreFilters)}
         >
           <Filter size={15} />
-          筛选
+          更多筛选
         </button>
         <div className="toolbar-spacer" />
         <button
@@ -365,19 +365,21 @@ export default function TransactionsPage() {
       )}
       {selected.size > 0 && (
         <div className="bulk-bar" role="region" aria-label="批量操作">
-          <strong>已选 {selected.size} 条</strong>
+          <strong>已选择 {selected.size} 项</strong>
           <div>
             {TRANSACTION_STATUSES.map((status) => (
               <button
                 key={status}
+                aria-label={`标记${status}`}
                 onClick={() => batchStatus.mutate(status)}
                 disabled={batchStatus.isPending}
               >
-                {status}
+                标记{status}
               </button>
             ))}
             <button
               className="danger-text"
+              aria-label="删除所选交易"
               onClick={() => setDeleteIntent({ kind: 'batch', count: selected.size })}
               disabled={batchDelete.isPending}
             >

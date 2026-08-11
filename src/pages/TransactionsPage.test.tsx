@@ -182,4 +182,23 @@ describe('TransactionsPage focused navigation', () => {
       }),
     );
   });
+
+  it('gives batch status actions explicit accessible names', async () => {
+    vi.spyOn(apiClient, 'transactions').mockResolvedValue({
+      items: [target],
+      total: 1,
+      page: 1,
+      pageSize: 20,
+      warnings: [],
+    });
+    renderPage('/transactions');
+
+    const checkboxes = await screen.findAllByRole('checkbox', { name: '选择 目标产品' });
+    fireEvent.click(checkboxes[0]);
+
+    expect(screen.getByText('已选择 1 项')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: '标记在售中' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: '标记已售出' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: '删除所选交易' })).toBeInTheDocument();
+  });
 });
