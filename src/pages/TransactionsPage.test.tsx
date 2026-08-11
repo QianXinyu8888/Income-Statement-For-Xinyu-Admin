@@ -109,7 +109,9 @@ describe('TransactionsPage focused navigation', () => {
     expect(desktopTarget).toBeInTheDocument();
     expect(scrollIntoView).toHaveBeenCalledWith({ behavior: 'smooth', block: 'center' });
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
-    expect(screen.getByLabelText('当前查询参数')).toHaveTextContent('');
+    await waitFor(() =>
+      expect(screen.getByLabelText('当前查询参数')).toBeEmptyDOMElement(),
+    );
 
     await act(async () => vi.advanceTimersByTimeAsync(1000));
 
@@ -139,6 +141,6 @@ describe('TransactionsPage focused navigation', () => {
       ),
     );
     expect(scrollIntoView).not.toHaveBeenCalled();
-    expect(screen.getByLabelText('当前查询参数')).toHaveTextContent('');
+    expect(screen.getByLabelText('当前查询参数')).toBeEmptyDOMElement();
   });
 });
