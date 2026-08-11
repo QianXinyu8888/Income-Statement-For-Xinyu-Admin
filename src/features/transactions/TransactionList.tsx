@@ -7,6 +7,9 @@ const money = new Intl.NumberFormat('zh-CN', {
   currency: 'CNY',
   minimumFractionDigits: 2,
 });
+const display = (value: string | number | null) => value ?? '—';
+const displayMoney = (value: number | null) => (value === null ? '—' : money.format(value));
+
 type SortKey =
   | 'soldDate'
   | 'purchaseDate'
@@ -84,23 +87,32 @@ export function TransactionList({
                 <span className="sr-only">选择</span>
               </th>
               <th>
-                <SortLabel field="title" label="商品" {...{ sort, order, onSort }} />
+                <SortLabel field="title" label="商品名称" {...{ sort, order, onSort }} />
               </th>
               <th>
-                <SortLabel field="status" label="状态" {...{ sort, order, onSort }} />
+                <SortLabel field="status" label="交易状态" {...{ sort, order, onSort }} />
               </th>
-              <th className="number">
-                <SortLabel field="salePrice" label="售价" {...{ sort, order, onSort }} />
-              </th>
-              <th className="number">
-                <SortLabel field="totalCost" label="总成本" {...{ sort, order, onSort }} />
-              </th>
-              <th className="number">
-                <SortLabel field="profit" label="利润" {...{ sort, order, onSort }} />
+              <th>
+                <SortLabel field="purchaseDate" label="购入日期" {...{ sort, order, onSort }} />
               </th>
               <th>
                 <SortLabel field="soldDate" label="售出日期" {...{ sort, order, onSort }} />
               </th>
+              <th className="number">持有天数</th>
+              <th className="number">
+                <SortLabel field="costPrice" label="购入成本" {...{ sort, order, onSort }} />
+              </th>
+              <th className="number">运费</th>
+              <th className="number">
+                <SortLabel field="totalCost" label="总成本" {...{ sort, order, onSort }} />
+              </th>
+              <th className="number">
+                <SortLabel field="salePrice" label="成交价" {...{ sort, order, onSort }} />
+              </th>
+              <th className="number">
+                <SortLabel field="profit" label="利润" {...{ sort, order, onSort }} />
+              </th>
+              <th>备注</th>
             </tr>
           </thead>
           <tbody>
@@ -119,25 +131,27 @@ export function TransactionList({
                     aria-label={`选择 ${label(record)}`}
                   />
                 </td>
-                <td>
+                <td className="product-cell">
                   <button className="row-title" onClick={() => onOpen(record)}>
                     {record.title ?? '—'}
-                    <small>购入 {record.purchaseDate ?? '—'}</small>
                   </button>
                 </td>
                 <td>
                   <StatusBadge status={record.status} />
                 </td>
-                <td className="number">
-                  {record.salePrice === null ? '—' : money.format(record.salePrice)}
-                </td>
+                <td className="muted">{display(record.purchaseDate)}</td>
+                <td className="muted">{display(record.soldDate)}</td>
                 <td className="number muted">
-                  {record.totalCost === null ? '—' : money.format(record.totalCost)}
+                  {record.holdingDays === null ? '—' : `${record.holdingDays} 天`}
                 </td>
+                <td className="number muted">{displayMoney(record.costPrice)}</td>
+                <td className="number muted">{displayMoney(record.shippingFee)}</td>
+                <td className="number muted">{displayMoney(record.totalCost)}</td>
+                <td className="number">{displayMoney(record.salePrice)}</td>
                 <td className="number">
                   <Profit value={record.profit} visible={showProfit(record)} />
                 </td>
-                <td className="muted">{record.soldDate ?? '—'}</td>
+                <td className="note-cell">{record.note || '—'}</td>
               </tr>
             ))}
           </tbody>
@@ -157,21 +171,55 @@ export function TransactionList({
               onChange={() => onToggle(record.id)}
               aria-label={`选择 ${label(record)}`}
             />
-            <button onClick={() => onOpen(record)}>
-              <span className="mobile-row__top">
+            <div className="mobile-row__content">
+              <button className="mobile-row__heading" onClick={() => onOpen(record)}>
                 <strong>{record.title ?? '—'}</strong>
-                <StatusBadge status={record.status} />
-              </span>
-              <span className="mobile-row__bottom">
-                <span>{record.salePrice === null ? '—' : money.format(record.salePrice)}</span>
-                <Profit value={record.profit} visible={showProfit(record)} />
-                <time>
-                  {record.soldDate || record.purchaseDate
-                    ? (record.soldDate ?? record.purchaseDate)!.slice(5)
-                    : '—'}
-                </time>
-              </span>
-            </button>
+                <span className="mobile-row__status">
+                  <span className="sr-only">交易状态</span>
+                  <StatusBadge status={record.status} />
+                </span>
+              </button>
+              <dl className="mobile-row__details">
+                <div>
+                  <dt>购入日期</dt>
+                  <dd>{display(record.purchaseDate)}</dd>
+                </div>
+                <div>
+                  <dt>售出日期</dt>
+                  <dd>{display(record.soldDate)}</dd>
+                </div>
+                <div>
+                  <dt>持有天数</dt>
+                  <dd>{record.holdingDays === null ? '—' : `${record.holdingDays} 天`}</dd>
+                </div>
+                <div>
+                  <dt>购入成本</dt>
+                  <dd>{displayMoney(record.costPrice)}</dd>
+                </div>
+                <div>
+                  <dt>运费</dt>
+                  <dd>{displayMoney(record.shippingFee)}</dd>
+                </div>
+                <div>
+                  <dt>总成本</dt>
+                  <dd>{displayMoney(record.totalCost)}</dd>
+                </div>
+                <div>
+                  <dt>成交价</dt>
+                  <dd>{displayMoney(record.salePrice)}</dd>
+                </div>
+                <div>
+                  <dt>利润</dt>
+                  <dd>
+                    <Profit value={record.profit} visible={showProfit(record)} />
+                  </dd>
+                </div>
+                <div className="mobile-row__note">
+                  <dt>备注</dt>
+                  <dd>{record.note || '—'}</dd>
+                </div>
+              </dl>
+            </div>
           </article>
         ))}
       </div>

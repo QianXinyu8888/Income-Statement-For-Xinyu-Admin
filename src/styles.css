@@ -324,7 +324,10 @@ button:disabled {
   border: 1px solid var(--border);
   border-radius: 8px;
   background: var(--surface);
-  overflow: hidden;
+  overflow-x: auto;
+}
+.desktop-list table {
+  min-width: 1480px;
 }
 table {
   width: 100%;
@@ -397,11 +400,15 @@ tbody tr.is-selected {
   display: grid;
   text-align: left;
 }
-.row-title small {
-  color: var(--muted);
-  font-size: 11px;
-  font-weight: 400;
-  margin-top: 2px;
+.product-cell {
+  min-width: 260px;
+  max-width: 360px;
+}
+.note-cell {
+  min-width: 180px;
+  max-width: 280px;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 .muted {
   color: var(--muted);
@@ -1034,11 +1041,10 @@ tbody tr.is-selected {
     overflow: hidden;
   }
   .mobile-row {
-    min-height: 76px;
     border-bottom: 1px solid var(--border);
     display: flex;
-    align-items: center;
-    padding: 0 12px;
+    align-items: flex-start;
+    padding: 14px 12px;
     gap: 10px;
   }
   .mobile-row:last-child {
@@ -1047,34 +1053,53 @@ tbody tr.is-selected {
   .mobile-row.is-selected {
     background: var(--accent-soft);
   }
-  .mobile-row > button {
+  .mobile-row > input {
+    margin-top: 4px;
+  }
+  .mobile-row__content {
     flex: 1;
-    border: 0;
-    background: transparent;
-    padding: 13px 0;
-    display: grid;
-    gap: 10px;
     min-width: 0;
   }
-  .mobile-row__top,
-  .mobile-row__bottom {
+  .mobile-row__heading {
+    width: 100%;
+    border: 0;
+    background: transparent;
+    padding: 0 0 12px;
     display: flex;
     justify-content: space-between;
-    align-items: center;
+    align-items: flex-start;
     gap: 10px;
+    text-align: left;
   }
-  .mobile-row__top strong {
+  .mobile-row__heading strong {
+    min-width: 0;
     overflow: hidden;
     white-space: nowrap;
     text-overflow: ellipsis;
   }
-  .mobile-row__bottom {
-    color: var(--muted);
-    font-size: 12px;
-    font-variant-numeric: tabular-nums;
+  .mobile-row__details {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px 16px;
+    margin: 0;
+    padding-top: 12px;
+    border-top: 1px solid var(--border);
   }
-  .mobile-row__bottom time {
-    margin-left: auto;
+  .mobile-row__details > div {
+    min-width: 0;
+  }
+  .mobile-row__details dt {
+    color: var(--muted);
+    font-size: 11px;
+  }
+  .mobile-row__details dd {
+    margin: 4px 0 0;
+    font-size: 13px;
+    font-variant-numeric: tabular-nums;
+    overflow-wrap: anywhere;
+  }
+  .mobile-row__note {
+    grid-column: 1 / -1;
   }
   .bulk-bar {
     left: 12px;
