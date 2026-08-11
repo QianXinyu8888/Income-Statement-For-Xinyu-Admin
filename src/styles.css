@@ -1346,6 +1346,7 @@ tbody tr:nth-child(n + 5), .mobile-row:nth-child(n + 5) { animation-delay: 112ms
   padding: 3px 7px;
   font-size: 12px;
   font-weight: 550;
+  white-space: nowrap;
 }
 .state, .empty-state {
   min-height: 220px;
@@ -1502,6 +1503,7 @@ tbody tr:nth-child(n + 5), .mobile-row:nth-child(n + 5) { animation-delay: 112ms
 
 @media (max-width: 680px) {
   body { font-size: 14px; }
+  .workspace { margin-left: 0; width: 100%; }
   .content { padding: 22px 16px calc(104px + env(safe-area-inset-bottom)); }
   .bottom-nav { height: calc(68px + env(safe-area-inset-bottom)); }
   .bottom-nav a { gap: 4px; font-size: 12px; font-weight: 500; }
@@ -1515,13 +1517,30 @@ tbody tr:nth-child(n + 5), .mobile-row:nth-child(n + 5) { animation-delay: 112ms
   .page-header .button { width: 44px; height: 44px; min-height: 44px; border-radius: 9px; }
   .toolbar { padding: 0; border: 0; background: transparent; min-height: 44px; }
   .search-box { height: 44px; background: var(--surface); }
-  .filter-button { width: 44px; height: 44px; min-height: 44px; }
+  .filter-button {
+    width: 44px;
+    height: 44px;
+    min-height: 44px;
+    flex: 0 0 44px;
+    padding: 0;
+    font-size: 0;
+  }
+  .filter-button svg { width: 18px; height: 18px; }
   .filter-panel { padding: 14px; }
-  .mobile-list { border: 0; border-radius: 0; background: transparent; overflow: visible; }
-  .mobile-row { min-height: 122px; padding: 16px 4px; gap: 12px; }
+  .mobile-list {
+    width: 100%;
+    min-width: 0;
+    max-width: 100%;
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+    overflow: hidden;
+  }
+  .mobile-row { width: 100%; min-width: 0; min-height: 122px; padding: 16px 4px; gap: 12px; }
   .mobile-row > input { width: 18px; height: 18px; margin-top: 3px; }
   .mobile-row__heading { padding-bottom: 9px; }
-  .mobile-row__heading strong { font-size: 15px; }
+  .mobile-row__heading strong { flex: 1; font-size: 15px; }
+  .mobile-row__status { flex: 0 0 auto; }
   .mobile-row__details { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px 14px; padding-top: 9px; }
   .mobile-row__details dt { font-size: 12px; }
   .mobile-row__details dd { margin-top: 2px; font-size: 14px; }

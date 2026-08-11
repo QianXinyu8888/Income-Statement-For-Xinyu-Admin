@@ -22,6 +22,16 @@ const record: Transaction = {
 };
 
 describe('TransactionDrawer', () => {
+  it('mounts the fixed overlay at the document root', () => {
+    render(
+      <div style={{ transform: 'translateY(0)' }}>
+        <TransactionDrawer record={null} open saving={false} onClose={vi.fn()} onSave={vi.fn()} />
+      </div>,
+    );
+
+    expect(screen.getByRole('dialog').closest('.drawer-layer')?.parentElement).toBe(document.body);
+  });
+
   it('shows only Feishu formula values for an existing record', () => {
     render(
       <TransactionDrawer record={record} open saving={false} onClose={vi.fn()} onSave={vi.fn()} />,

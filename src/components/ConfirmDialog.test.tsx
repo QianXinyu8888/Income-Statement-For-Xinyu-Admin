@@ -24,6 +24,25 @@ function Harness({ onConfirm = vi.fn() }: { onConfirm?: () => void }) {
 }
 
 describe('ConfirmDialog', () => {
+  it('mounts the fixed overlay at the document root', () => {
+    render(
+      <div style={{ transform: 'translateY(0)' }}>
+        <ConfirmDialog
+          open
+          title="删除交易？"
+          description="删除后无法恢复"
+          confirmLabel="删除"
+          onCancel={vi.fn()}
+          onConfirm={vi.fn()}
+        />
+      </div>,
+    );
+
+    expect(screen.getByRole('alertdialog').closest('.confirm-layer')?.parentElement).toBe(
+      document.body,
+    );
+  });
+
   it('focuses cancel, closes with Escape and restores trigger focus', async () => {
     const user = userEvent.setup();
     render(<Harness />);

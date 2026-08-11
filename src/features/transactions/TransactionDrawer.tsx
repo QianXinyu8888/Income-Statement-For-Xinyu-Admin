@@ -1,4 +1,5 @@
 import { FormEvent, useEffect, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { X } from 'lucide-react';
 import {
   TRANSACTION_STATUSES,
@@ -101,7 +102,7 @@ export function TransactionDrawer({
   const displayedTotalCost = record ? record.totalCost : estimatedTotalCost;
   const actualProfit =
     record && (record.status === '已售出' || record.status === '已退货') ? record.profit : null;
-  return (
+  return createPortal(
     <div className="drawer-layer" role="presentation">
       <button className="drawer-backdrop" onClick={onClose} aria-label="关闭编辑面板" />
       <section className="drawer" role="dialog" aria-modal="true" aria-labelledby="drawer-title">
@@ -244,6 +245,7 @@ export function TransactionDrawer({
           </footer>
         </form>
       </section>
-    </div>
+    </div>,
+    document.body,
   );
 }

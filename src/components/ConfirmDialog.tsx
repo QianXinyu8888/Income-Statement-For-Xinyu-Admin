@@ -1,4 +1,5 @@
 import { useEffect, useId, useRef } from 'react';
+import { createPortal } from 'react-dom';
 
 export function ConfirmDialog({
   open,
@@ -72,7 +73,7 @@ export function ConfirmDialog({
   };
 
   if (!open) return null;
-  return (
+  return createPortal(
     <div
       className="confirm-layer"
       role="presentation"
@@ -108,6 +109,7 @@ export function ConfirmDialog({
           </button>
         </div>
       </section>
-    </div>
+    </div>,
+    document.body,
   );
 }
