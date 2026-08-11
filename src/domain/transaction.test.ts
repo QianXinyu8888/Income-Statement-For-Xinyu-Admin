@@ -22,7 +22,6 @@ describe('transaction domain', () => {
         购入日期: 1775232000000,
         售出日期: 1785600000000,
         持有天数: 120,
-        排序: 1,
         备注: '自提',
       },
     });
@@ -39,9 +38,9 @@ describe('transaction domain', () => {
       purchaseDate: '2026-04-04',
       soldDate: '2026-08-02',
       holdingDays: 120,
-      sortOrder: 1,
       note: '自提',
     });
+    expect(result).not.toHaveProperty('sortOrder');
   });
 
   it('keeps missing Feishu values null without inventing defaults', () => {
@@ -98,7 +97,6 @@ describe('transaction domain', () => {
         purchaseDate: null,
         soldDate: null,
         note: '',
-        sortOrder: null,
       }).salePrice,
     ).toBeNull();
   });
@@ -114,7 +112,6 @@ describe('transaction domain', () => {
         purchaseDate: '2026-07-01',
         soldDate: '2026-08-09',
         note: '顺丰',
-        sortOrder: 2,
       }),
     ).toEqual({
       商品名称: 'AirPods Pro',
@@ -124,7 +121,6 @@ describe('transaction domain', () => {
       交易状态: '已售出',
       购入日期: expect.any(Number),
       售出日期: expect.any(Number),
-      排序: 2,
       备注: '顺丰',
     });
   });
@@ -140,7 +136,6 @@ describe('transaction domain', () => {
         purchaseDate: null,
         soldDate: null,
         note: null,
-        sortOrder: null,
       }),
     ).toMatchObject({
       '成交价(¥)': null,

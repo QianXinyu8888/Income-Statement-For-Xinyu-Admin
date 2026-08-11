@@ -16,7 +16,6 @@ const record: Transaction = {
   purchaseDate: '2026-04-01',
   soldDate: '2026-08-10',
   holdingDays: 131,
-  sortOrder: 1,
   note: '顺丰到付',
 };
 

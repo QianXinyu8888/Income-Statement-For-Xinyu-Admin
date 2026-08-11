@@ -26,7 +26,6 @@ const empty: TransactionForm = {
   status: '',
   purchaseDate: null,
   soldDate: null,
-  sortOrder: null,
   note: null,
 };
 
@@ -60,7 +59,6 @@ export function TransactionDrawer({
               status: record.status ?? '',
               purchaseDate: record.purchaseDate,
               soldDate: record.soldDate,
-              sortOrder: record.sortOrder,
               note: record.note,
             }
           : empty,
@@ -134,35 +132,20 @@ export function TransactionDrawer({
               required
             />
           </label>
-          <div className="form-grid">
-            <label>
-              状态
-              <select
-                value={form.status}
-                onChange={(event) =>
-                  set('status', event.target.value as TransactionInput['status'])
-                }
-              >
-                <option value="" disabled>
-                  请选择
-                </option>
-                {TRANSACTION_STATUSES.map((status) => (
-                  <option key={status}>{status}</option>
-                ))}
-              </select>
-            </label>
-            <label>
-              排序
-              <input
-                type="number"
-                step="1"
-                value={form.sortOrder ?? ''}
-                onChange={(event) =>
-                  set('sortOrder', event.target.value === '' ? null : Number(event.target.value))
-                }
-              />
-            </label>
-          </div>
+          <label>
+            状态
+            <select
+              value={form.status}
+              onChange={(event) => set('status', event.target.value as TransactionInput['status'])}
+            >
+              <option value="" disabled>
+                请选择
+              </option>
+              {TRANSACTION_STATUSES.map((status) => (
+                <option key={status}>{status}</option>
+              ))}
+            </select>
+          </label>
           <div className="form-grid">
             <label>
               售价

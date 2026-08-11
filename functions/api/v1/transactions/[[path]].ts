@@ -28,9 +28,9 @@ const querySchema = z.object({
       'totalCost',
       'profit',
       'status',
-      'sortOrder',
+      'sourceOrder',
     ])
-    .default('soldDate'),
+    .default('sourceOrder'),
   order: z.enum(['asc', 'desc']).default('desc'),
   focusId: z.string().trim().min(1).optional(),
 });

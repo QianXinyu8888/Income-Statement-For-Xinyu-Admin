@@ -13,7 +13,6 @@ export const transactionSchema = z.object({
   status: z.enum(TRANSACTION_STATUSES),
   purchaseDate: z.string().date().nullable(),
   soldDate: z.string().date().nullable(),
-  sortOrder: z.number().finite().nullable().default(null),
   note: z.string().trim().max(2000).nullable(),
 });
 
@@ -32,7 +31,6 @@ export interface Transaction {
   purchaseDate: string | null;
   soldDate: string | null;
   holdingDays: number | null;
-  sortOrder: number | null;
   note: string | null;
   updatedAt?: string;
 }
@@ -115,7 +113,6 @@ export function mapFeishuRecord(record: FeishuRecord): {
       purchaseDate: dateValue(fields['购入日期'], '购入日期', warnings),
       soldDate: dateValue(fields['售出日期'], '售出日期', warnings),
       holdingDays: optionalNumber(fields['持有天数'], '持有天数', warnings),
-      sortOrder: optionalNumber(fields['排序'], '排序', warnings),
       note: optionalText(fields['备注']),
       updatedAt:
         record.last_modified_time && Number.isFinite(modified)
@@ -144,7 +141,6 @@ export function toFeishuFields(value: TransactionInput): Record<string, unknown>
     交易状态: input.status,
     购入日期: dateTimestamp(input.purchaseDate),
     售出日期: dateTimestamp(input.soldDate),
-    排序: input.sortOrder,
     备注: input.note,
   };
 }

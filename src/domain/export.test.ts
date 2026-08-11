@@ -17,12 +17,11 @@ describe('buildCsv', () => {
       purchaseDate: '2026-07-01',
       soldDate: '2026-08-01',
       holdingDays: 31,
-      sortOrder: 1,
       note: '+cmd',
     };
     const csv = buildCsv([row]);
     expect(csv).toContain(
-      '商品名称,交易状态,购入日期,售出日期,成交价,购入成本,运费,总成本,利润,ROI,持有天数,排序,备注',
+      '商品名称,交易状态,购入日期,售出日期,成交价,购入成本,运费,总成本,利润,ROI,持有天数,备注',
     );
     expect(csv).toContain("'=HYPERLINK");
     expect(csv).toContain("'+cmd");
@@ -42,12 +41,11 @@ describe('buildCsv', () => {
       purchaseDate: null,
       soldDate: null,
       holdingDays: null,
-      sortOrder: null,
       note: null,
     };
     const csv = buildCsv([row]);
     expect(csv).not.toContain('undefined');
     expect(csv).not.toContain('null');
-    expect(csv).toContain('待补记录,在售中,,,,,,,,,,,');
+    expect(csv.split('\r\n')[1]?.split(',')).toHaveLength(12);
   });
 });

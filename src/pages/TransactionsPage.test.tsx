@@ -20,7 +20,6 @@ const target: Transaction = {
   purchaseDate: '2026-01-01',
   soldDate: '2026-08-01',
   holdingDays: 212,
-  sortOrder: null,
   note: null,
 };
 
@@ -151,7 +150,7 @@ describe('TransactionsPage focused navigation', () => {
 
   it('uses descending order by default and restores it when filters reset', async () => {
     vi.spyOn(apiClient, 'transactions').mockResolvedValue({
-      items: [{ ...target, sortOrder: 1 }],
+      items: [target],
       total: 1,
       page: 1,
       pageSize: 20,
@@ -161,7 +160,7 @@ describe('TransactionsPage focused navigation', () => {
 
     await waitFor(() =>
       expect(apiClient.transactions).toHaveBeenCalledWith(
-        expect.objectContaining({ sort: 'sortOrder', order: 'desc' }),
+        expect.objectContaining({ sort: 'sourceOrder', order: 'desc' }),
       ),
     );
 
@@ -178,7 +177,7 @@ describe('TransactionsPage focused navigation', () => {
       expect(apiClient.transactions).toHaveBeenLastCalledWith({
         page: 1,
         pageSize: 20,
-        sort: 'sortOrder',
+        sort: 'sourceOrder',
         order: 'desc',
       }),
     );

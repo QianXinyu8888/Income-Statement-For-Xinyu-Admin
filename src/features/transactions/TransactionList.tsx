@@ -18,8 +18,7 @@ type SortKey =
   | 'costPrice'
   | 'totalCost'
   | 'profit'
-  | 'status'
-  | 'sortOrder';
+  | 'status';
 
 interface Props {
   records: Transaction[];

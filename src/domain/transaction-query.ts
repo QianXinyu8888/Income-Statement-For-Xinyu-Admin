@@ -44,14 +44,15 @@ export function queryTransactions(
       (!query.to || (date !== null && date <= query.to))
     );
   });
+  const sort = query.sort;
   const ordered =
-    query.sort === 'sourceOrder'
+    sort === 'sourceOrder'
       ? query.order === 'desc'
         ? [...filtered].reverse()
         : filtered
       : [...filtered].sort((a, b) => {
-          const left = a[query.sort];
-          const right = b[query.sort];
+          const left = a[sort];
+          const right = b[sort];
           const result =
             typeof left === 'number' && typeof right === 'number'
               ? left - right

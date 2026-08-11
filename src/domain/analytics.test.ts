@@ -15,7 +15,6 @@ const base: Transaction = {
   purchaseDate: '2026-07-01',
   soldDate: '2026-08-01',
   holdingDays: 31,
-  sortOrder: null,
   note: null,
 };
 

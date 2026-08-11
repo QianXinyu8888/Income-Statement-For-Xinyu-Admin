@@ -18,7 +18,6 @@ const record: Transaction = {
   purchaseDate: '2026-08-01',
   soldDate: '2026-08-02',
   holdingDays: 1,
-  sortOrder: null,
   note: null,
 };
 
@@ -31,5 +30,6 @@ describe('TransactionDrawer', () => {
     expect(screen.getByText('利润（飞书） ¥40.00')).toBeInTheDocument();
     expect(screen.getByText('总成本（飞书）').parentElement).toHaveTextContent('—');
     expect(screen.queryByText('¥120.00')).not.toBeInTheDocument();
+    expect(screen.queryByLabelText('排序')).not.toBeInTheDocument();
   });
 });

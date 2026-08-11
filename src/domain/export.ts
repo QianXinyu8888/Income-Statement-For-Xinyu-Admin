@@ -12,7 +12,6 @@ const HEADERS = [
   '利润',
   'ROI',
   '持有天数',
-  '排序',
   '备注',
 ];
 
@@ -36,7 +35,6 @@ function row(record: Transaction): unknown[] {
     record.profit,
     record.roi,
     record.holdingDays,
-    record.sortOrder,
     record.note,
   ];
 }
@@ -64,11 +62,11 @@ export async function downloadExcel(records: Transaction[], filename: string) {
   sheet.columns = HEADERS.map((header, index) => ({
     header,
     key: String(index),
-    width: index === 0 ? 42 : index === 12 ? 30 : 14,
+    width: index === 0 ? 42 : index === 11 ? 30 : 14,
   }));
   records.forEach((record) =>
     sheet.addRow(
-      row(record).map((value, index) => (index === 0 || index === 12 ? safeCell(value) : value)),
+      row(record).map((value, index) => (index === 0 || index === 11 ? safeCell(value) : value)),
     ),
   );
   sheet.getRow(1).font = { bold: true };
