@@ -9,7 +9,7 @@ export type TransactionSortKey =
   | 'totalCost'
   | 'profit'
   | 'status'
-  | 'sortOrder';
+  | 'sourceOrder';
 
 export interface TransactionListQuery {
   page: number;
@@ -35,39 +35,37 @@ export function queryTransactions(
   query: TransactionListQuery,
 ): TransactionListResult {
   const q = (query.q ?? '').toLocaleLowerCase('zh-CN');
-  const filtered = records
-    .filter((record) => {
-      const date = record.soldDate ?? record.purchaseDate;
-      return (
-        (!q ||
-          `${record.title ?? ''} ${record.note ?? ''}`.toLocaleLowerCase('zh-CN').includes(q)) &&
-        (!query.status || record.status === query.status) &&
-        (!query.from || (date !== null && date >= query.from)) &&
-        (!query.to || (date !== null && date <= query.to))
-      );
-    })
-    .sort((a, b) => {
-      const left = a[query.sort];
-      const right = b[query.sort];
-      if (query.sort === 'sortOrder') {
-        if (left === null && right === null) return 0;
-        if (left === null) return 1;
-        if (right === null) return -1;
-      }
-      const result =
-        typeof left === 'number' && typeof right === 'number'
-          ? left - right
-          : String(left ?? '').localeCompare(String(right ?? ''), 'zh-CN');
-      return query.order === 'asc' ? result : -result;
-    });
+  const filtered = records.filter((record) => {
+    const date = record.soldDate ?? record.purchaseDate;
+    return (
+      (!q || `${record.title ?? ''} ${record.note ?? ''}`.toLocaleLowerCase('zh-CN').includes(q)) &&
+      (!query.status || record.status === query.status) &&
+      (!query.from || (date !== null && date >= query.from)) &&
+      (!query.to || (date !== null && date <= query.to))
+    );
+  });
+  const ordered =
+    query.sort === 'sourceOrder'
+      ? query.order === 'desc'
+        ? [...filtered].reverse()
+        : filtered
+      : [...filtered].sort((a, b) => {
+          const left = a[query.sort];
+          const right = b[query.sort];
+          const result =
+            typeof left === 'number' && typeof right === 'number'
+              ? left - right
+              : String(left ?? '').localeCompare(String(right ?? ''), 'zh-CN');
+          return query.order === 'asc' ? result : -result;
+        });
   const focusIndex = query.focusId
-    ? filtered.findIndex((record) => record.id === query.focusId)
+    ? ordered.findIndex((record) => record.id === query.focusId)
     : -1;
   const page = focusIndex >= 0 ? Math.floor(focusIndex / query.pageSize) + 1 : query.page;
   const start = (page - 1) * query.pageSize;
   return {
-    items: filtered.slice(start, start + query.pageSize),
-    total: filtered.length,
+    items: ordered.slice(start, start + query.pageSize),
+    total: ordered.length,
     page,
     pageSize: query.pageSize,
   };

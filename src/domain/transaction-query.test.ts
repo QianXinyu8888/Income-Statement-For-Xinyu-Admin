@@ -16,48 +16,45 @@ function record(index: number): Transaction {
     purchaseDate: '2026-01-01',
     soldDate: `2026-08-${String(index).padStart(2, '0')}`,
     holdingDays: index,
-    sortOrder: index,
     note: null,
   };
 }
 
 describe('queryTransactions', () => {
-  it('returns the page containing a focused transaction after Feishu ordering', () => {
-    const records = Array.from({ length: 25 }, (_, index) => record(index + 1));
+  it('returns the page containing a focused transaction after reversed source ordering', () => {
+    const records = Array.from({ length: 25 }, (_, index) => record(25 - index));
     const result = queryTransactions(records, {
       page: 1,
       pageSize: 20,
-      sort: 'sortOrder',
-      order: 'asc',
+      sort: 'sourceOrder',
+      order: 'desc',
       focusId: 'record-22',
     });
 
     expect(result.page).toBe(2);
     expect(result.items.some(({ id }) => id === 'record-22')).toBe(true);
-    expect(records[0].id).toBe('record-1');
+    expect(records[0].id).toBe('record-25');
   });
 
-  it('sorts by the Feishu order field ascending with nulls last and stable ties', () => {
-    const records = [
-      { ...record(4), sortOrder: null },
-      { ...record(2), sortOrder: 1 },
-      { ...record(3), sortOrder: null },
-      { ...record(1), sortOrder: 1 },
-    ];
+  it('preserves or reverses the Feishu source order without mutating the input', () => {
+    const records = [record(3), record(1), record(2)];
 
-    const result = queryTransactions(records, {
+    const ascending = queryTransactions(records, {
       page: 1,
       pageSize: 20,
-      sort: 'sortOrder',
+      sort: 'sourceOrder',
       order: 'asc',
     });
+    const descending = queryTransactions(records, {
+      page: 1,
+      pageSize: 20,
+      sort: 'sourceOrder',
+      order: 'desc',
+    });
 
-    expect(result.items.map(({ id }) => id)).toEqual([
-      'record-2',
-      'record-1',
-      'record-4',
-      'record-3',
-    ]);
+    expect(ascending.items.map(({ id }) => id)).toEqual(['record-3', 'record-1', 'record-2']);
+    expect(descending.items.map(({ id }) => id)).toEqual(['record-2', 'record-1', 'record-3']);
+    expect(records.map(({ id }) => id)).toEqual(['record-3', 'record-1', 'record-2']);
   });
 
   it('keeps the requested page when the focused id does not exist', () => {
