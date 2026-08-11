@@ -82,16 +82,20 @@ describe('TransactionsPage focused navigation', () => {
   });
 
   it('loads the target page, scrolls to the order, and clears highlighting after one second', async () => {
-    vi.spyOn(apiClient, 'transactions').mockImplementation(async (query) => {
-      const page: TransactionPage = {
-        items: [target],
-        total: 25,
-        page: query.focusId ? 2 : query.page,
-        pageSize: 20,
-        warnings: [],
-      };
-      return page;
+    const focusedPage: TransactionPage = {
+      items: [target],
+      total: 25,
+      page: 2,
+      pageSize: 20,
+      warnings: [],
+    };
+    let resolveRefresh!: (page: TransactionPage) => void;
+    const pendingRefresh = new Promise<TransactionPage>((resolve) => {
+      resolveRefresh = resolve;
     });
+    vi.spyOn(apiClient, 'transactions').mockImplementation((query) =>
+      query.focusId ? Promise.resolve(focusedPage) : pendingRefresh,
+    );
     const { container } = renderPage();
 
     await waitFor(() =>
@@ -111,14 +115,15 @@ describe('TransactionsPage focused navigation', () => {
 
     await act(async () => vi.advanceTimersByTimeAsync(1000));
 
-    await waitFor(() =>
-      expect(
-        container.querySelector('.desktop-list [data-transaction-id="target"]'),
-      ).not.toHaveAttribute('data-focused'),
+    const targetDuringRefresh = container.querySelector(
+      '.desktop-list [data-transaction-id="target"]',
     );
+    expect(targetDuringRefresh).toBeInTheDocument();
+    expect(targetDuringRefresh).not.toHaveAttribute('data-focused');
     expect(apiClient.transactions).toHaveBeenLastCalledWith(
       expect.objectContaining({ page: 2, focusId: undefined }),
     );
+    await act(async () => resolveRefresh(focusedPage));
   });
 
   it('silently clears an invalid focused id without scrolling', async () => {

@@ -38,6 +38,7 @@ export default function TransactionsPage() {
   const result = useQuery({
     queryKey: ['transactions', query],
     queryFn: () => apiClient.transactions(query),
+    placeholderData: (previousData) => previousData,
   });
   const monthSummary = useQuery({
     queryKey: ['summary', month],
