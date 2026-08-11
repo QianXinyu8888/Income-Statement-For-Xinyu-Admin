@@ -61,6 +61,7 @@ describe('TransactionsPage focused navigation', () => {
 
   beforeEach(() => {
     vi.useFakeTimers({ shouldAdvanceTime: true });
+    vi.spyOn(window, 'setTimeout');
     vi.stubGlobal('requestAnimationFrame', (callback: FrameRequestCallback) => {
       callback(0);
       return 1;
@@ -81,7 +82,7 @@ describe('TransactionsPage focused navigation', () => {
     scrollIntoView.mockReset();
   });
 
-  it('loads the target page, scrolls to the order, and clears highlighting after one second', async () => {
+  it('loads the target page, scrolls to the order, and clears highlighting after 1.5 seconds', async () => {
     const focusedPage: TransactionPage = {
       items: [target],
       total: 25,
@@ -113,7 +114,8 @@ describe('TransactionsPage focused navigation', () => {
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
     await waitFor(() => expect(screen.getByLabelText('当前查询参数')).toBeEmptyDOMElement());
 
-    await act(async () => vi.advanceTimersByTimeAsync(1000));
+    expect(window.setTimeout).toHaveBeenCalledWith(expect.any(Function), 1500);
+    await act(async () => vi.advanceTimersByTimeAsync(1500));
 
     const targetDuringRefresh = container.querySelector(
       '.desktop-list [data-transaction-id="target"]',

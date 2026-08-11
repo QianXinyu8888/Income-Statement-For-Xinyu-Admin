@@ -123,7 +123,7 @@ export default function TransactionsPage() {
         page: result.data?.page ?? current.page,
         focusId: undefined,
       }));
-    }, 1000);
+    }, 1500);
     return () => {
       cancelAnimationFrame(frame);
       window.clearTimeout(timer);

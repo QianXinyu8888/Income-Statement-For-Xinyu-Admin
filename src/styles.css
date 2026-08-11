@@ -358,7 +358,7 @@ tbody tr.is-selected {
 [data-focused='true'] {
   background: var(--warning-soft) !important;
   box-shadow: inset 3px 0 0 var(--warning);
-  animation: focused-transaction 1s ease-out;
+  animation: focused-transaction 1.5s ease-out;
 }
 @keyframes focused-transaction {
   0% {
