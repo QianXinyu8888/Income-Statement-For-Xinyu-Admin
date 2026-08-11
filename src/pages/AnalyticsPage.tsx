@@ -120,7 +120,7 @@ export default function AnalyticsPage() {
               <h2>月度趋势</h2>
             </header>
             {summary.data!.monthly.some((item) => item.profit !== null) ? (
-              <div className="chart">
+              <div className="chart" role="img" aria-label="月度利润趋势图">
                 <ResponsiveContainer width="100%" height="100%">
                   <BarChart data={summary.data!.monthly.filter((item) => item.profit !== null)}>
                     <CartesianGrid stroke="var(--border)" vertical={false} />

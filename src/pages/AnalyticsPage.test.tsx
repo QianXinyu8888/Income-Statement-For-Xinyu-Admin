@@ -1,5 +1,5 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { render, screen } from '@testing-library/react';
+import { cleanup, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { MemoryRouter } from 'react-router-dom';
 import { afterAll, afterEach, beforeAll, describe, expect, it, vi } from 'vitest';
@@ -62,7 +62,10 @@ describe('AnalyticsPage drilldown', () => {
     );
   });
   afterAll(() => vi.unstubAllGlobals());
-  afterEach(() => vi.restoreAllMocks());
+  afterEach(() => {
+    cleanup();
+    vi.restoreAllMocks();
+  });
 
   it('expands product links, collapses them, and disables empty groups', async () => {
     vi.spyOn(apiClient, 'summary').mockResolvedValue(summary);
@@ -101,5 +104,14 @@ describe('AnalyticsPage drilldown', () => {
       'href',
       '/transactions?focus=selling',
     );
+  });
+
+  it('labels the profit-only chart and does not expose invented aggregate columns', async () => {
+    vi.spyOn(apiClient, 'summary').mockResolvedValue(summary);
+    renderPage();
+
+    expect(await screen.findByRole('img', { name: '月度利润趋势图' })).toBeInTheDocument();
+    expect(screen.queryByText('占比')).not.toBeInTheDocument();
+    expect(screen.queryByText('成交金额')).not.toBeInTheDocument();
   });
 });
