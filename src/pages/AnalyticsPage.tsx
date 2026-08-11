@@ -1,8 +1,11 @@
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
+import { ChevronDown } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import { Bar, BarChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
 import { apiClient } from '../api/client';
 import { ErrorState, LoadingState } from '../components/LoadingState';
+import type { AnalyticsOrderIndexItem } from '../domain/analytics';
 
 const money = new Intl.NumberFormat('zh-CN', {
   style: 'currency',
@@ -11,9 +14,51 @@ const money = new Intl.NumberFormat('zh-CN', {
   maximumFractionDigits: 2,
 });
 
+function DrilldownGroup({
+  groupKey,
+  label,
+  items,
+  expanded,
+  onToggle,
+}: {
+  groupKey: string;
+  label: string;
+  items: AnalyticsOrderIndexItem[];
+  expanded: boolean;
+  onToggle: () => void;
+}) {
+  const regionId = `analytics-products-${groupKey.replace(/[^a-zA-Z0-9_-]/g, '-')}`;
+  return (
+    <div className="drilldown-group">
+      <button
+        className="drilldown-toggle"
+        type="button"
+        aria-expanded={expanded}
+        aria-controls={regionId}
+        disabled={!items.length}
+        onClick={onToggle}
+      >
+        <span>{label}</span>
+        <strong>{items.length} 笔</strong>
+        <ChevronDown size={15} aria-hidden="true" />
+      </button>
+      {expanded && (
+        <div className="drilldown-products" id={regionId}>
+          {items.map((item) => (
+            <Link key={item.id} to={`/transactions?focus=${encodeURIComponent(item.id)}`}>
+              {item.title ?? '未命名交易'}
+            </Link>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
 export default function AnalyticsPage() {
   const [from, setFrom] = useState('');
   const [to, setTo] = useState('');
+  const [expanded, setExpanded] = useState<string | null>(null);
   const summary = useQuery({
     queryKey: ['summary', from, to],
     queryFn: () => apiClient.summary(from || undefined, to || undefined),
@@ -79,10 +124,18 @@ export default function AnalyticsPage() {
             </header>
             <div className="stat-list">
               {summary.data!.brackets.map((item) => (
-                <div key={item.name}>
-                  <span>{item.name}</span>
-                  <strong>{item.count} 笔</strong>
-                </div>
+                <DrilldownGroup
+                  key={item.name}
+                  groupKey={`bracket-${item.name}`}
+                  label={item.name}
+                  items={item.items}
+                  expanded={expanded === `bracket-${item.name}`}
+                  onToggle={() =>
+                    setExpanded((current) =>
+                      current === `bracket-${item.name}` ? null : `bracket-${item.name}`,
+                    )
+                  }
+                />
               ))}
             </div>
           </section>
@@ -92,10 +145,20 @@ export default function AnalyticsPage() {
             </header>
             <div className="stat-list">
               {summary.data!.statuses.map((item) => (
-                <div key={item.status ?? 'unknown'}>
-                  <span>{item.status ?? '—'}</span>
-                  <strong>{item.count} 笔</strong>
-                </div>
+                <DrilldownGroup
+                  key={item.status ?? 'unknown'}
+                  groupKey={`status-${item.status ?? 'unknown'}`}
+                  label={item.status ?? '—'}
+                  items={item.items}
+                  expanded={expanded === `status-${item.status ?? 'unknown'}`}
+                  onToggle={() =>
+                    setExpanded((current) =>
+                      current === `status-${item.status ?? 'unknown'}`
+                        ? null
+                        : `status-${item.status ?? 'unknown'}`,
+                    )
+                  }
+                />
               ))}
             </div>
           </section>
@@ -104,10 +167,15 @@ export default function AnalyticsPage() {
               <h2>退货摘要</h2>
             </header>
             <div className="stat-list">
-              <div>
-                <span>退货笔数</span>
-                <strong>{summary.data!.returnCount} 笔</strong>
-              </div>
+              <DrilldownGroup
+                groupKey="returns"
+                label="退货笔数"
+                items={summary.data!.returnItems}
+                expanded={expanded === 'returns'}
+                onToggle={() =>
+                  setExpanded((current) => (current === 'returns' ? null : 'returns'))
+                }
+              />
               <div>
                 <span>退货损失</span>
                 <strong>
