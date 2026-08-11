@@ -13,9 +13,14 @@ describe('parseEnv', () => {
         FEISHU_APP_SECRET: 'secret',
         FEISHU_BITABLE_APP_TOKEN: 'app',
         FEISHU_TRANSACTIONS_TABLE_ID: 'transactions',
+        FEISHU_TRANSACTIONS_VIEW_ID: 'view',
         FEISHU_USERS_TABLE_ID: 'users',
         SESSION_SECRET: 'a-session-secret-at-least-32-characters',
       }),
-    ).toMatchObject({ transactionsTableId: 'transactions', usersTableId: 'users' });
+    ).toMatchObject({
+      transactionsTableId: 'transactions',
+      transactionsViewId: 'view',
+      usersTableId: 'users',
+    });
   });
 });

@@ -4,7 +4,7 @@
 
 **目标：** 删除独立“排序”字段，并让交易明细默认按飞书当前记录顺序倒序展示。
 
-**架构：** 使用非持久化的 `sourceOrder` 查询模式表达飞书记录数组顺序。领域模型、表单与导出彻底移除 `sortOrder`，API 在筛选后按需要保留或反转来源顺序；代码部署兼容后再删除飞书字段。
+**架构：** 飞书记录请求通过 `FEISHU_TRANSACTIONS_VIEW_ID` 显式绑定网格视图，再使用非持久化的 `sourceOrder` 查询模式表达该视图的记录数组顺序。领域模型、表单与导出彻底移除 `sortOrder`，API 在筛选后按需要保留或反转来源顺序；代码部署兼容后再删除飞书字段。
 
 **技术栈：** TypeScript、React、Zod、Vitest、Cloudflare Pages Functions、飞书 Base CLI
 
@@ -19,6 +19,8 @@
 - 修改 `src/features/transactions/TransactionList.tsx`：移除旧排序键类型。
 - 修改 `src/features/transactions/TransactionDrawer.tsx`：移除排序输入。
 - 修改 `src/domain/export.ts`：从 CSV/Excel 中移除排序列。
+- 修改 `functions/_shared/env.ts` 与 `functions/_shared/feishu.ts`：要求交易视图 ID，并在记录请求中传递 `view_id`。
+- 修改 `README.md`：记录交易视图环境变量和无“排序”字段的新结构。
 - 修改对应 `*.test.ts(x)`：覆盖新排序与字段删除行为。
 
 ### 任务 1：用测试定义来源顺序
@@ -80,7 +82,7 @@ npm test -- src/domain/transaction.test.ts src/domain/export.test.ts src/feature
 
 - [ ] **步骤 3：实现最少代码**
 
-从 `transactionSchema`、`Transaction`、`mapFeishuRecord`、`toFeishuFields`、编辑抽屉、导出列与列表排序键中移除 `sortOrder`；API 查询枚举将其替换为 `sourceOrder`；`DEFAULT_QUERY.sort` 改为 `sourceOrder`。
+从 `transactionSchema`、`Transaction`、`mapFeishuRecord`、`toFeishuFields`、编辑抽屉、导出列与列表排序键中移除 `sortOrder`；API 查询枚举将其替换为 `sourceOrder`；`DEFAULT_QUERY.sort` 改为 `sourceOrder`。环境模型新增必填 `transactionsViewId`，`listRecords` 请求参数加入 `view_id`。
 
 - [ ] **步骤 4：运行相关测试和类型检查**
 
@@ -118,7 +120,7 @@ git commit -m "refactor: 移除交易排序字段（任务 2/3）"
 npm test
 npm run typecheck
 npm run lint
-npm run format:check
+npm run format
 npm run build
 ```
 
@@ -134,4 +136,3 @@ npm run build
 git add docs/superpowers/specs/2026-08-11-source-row-order-design.md docs/superpowers/plans/2026-08-11-source-row-order.md
 git commit -m "docs: 记录直接序号排序方案（任务 3/3）"
 ```
-

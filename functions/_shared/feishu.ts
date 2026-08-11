@@ -51,7 +51,10 @@ export async function listRecords(env: AppEnv): Promise<FeishuRecord[]> {
   const records: FeishuRecord[] = [];
   let pageToken = '';
   do {
-    const params = new URLSearchParams({ page_size: '500' });
+    const params = new URLSearchParams({
+      page_size: '500',
+      view_id: env.transactionsViewId,
+    });
     if (pageToken) params.set('page_token', pageToken);
     const payload = await request<{
       data?: { items?: FeishuRecord[]; has_more?: boolean; page_token?: string };

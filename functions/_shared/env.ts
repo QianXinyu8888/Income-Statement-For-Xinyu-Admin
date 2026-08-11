@@ -3,6 +3,7 @@ export interface AppEnv {
   appSecret: string;
   bitableAppToken: string;
   transactionsTableId: string;
+  transactionsViewId: string;
   usersTableId: string;
   sessionSecret: string;
   allowedOrigin?: string;
@@ -16,6 +17,7 @@ export function parseEnv(env: RawEnv): AppEnv {
     'FEISHU_APP_SECRET',
     'FEISHU_BITABLE_APP_TOKEN',
     'FEISHU_TRANSACTIONS_TABLE_ID',
+    'FEISHU_TRANSACTIONS_VIEW_ID',
     'FEISHU_USERS_TABLE_ID',
     'SESSION_SECRET',
   ] as const;
@@ -28,6 +30,7 @@ export function parseEnv(env: RawEnv): AppEnv {
     appSecret: String(env.FEISHU_APP_SECRET),
     bitableAppToken: String(env.FEISHU_BITABLE_APP_TOKEN),
     transactionsTableId: String(env.FEISHU_TRANSACTIONS_TABLE_ID),
+    transactionsViewId: String(env.FEISHU_TRANSACTIONS_VIEW_ID),
     usersTableId: String(env.FEISHU_USERS_TABLE_ID),
     sessionSecret,
     allowedOrigin: env.ALLOWED_ORIGIN ? String(env.ALLOWED_ORIGIN) : undefined,
