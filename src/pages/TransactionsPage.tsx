@@ -13,6 +13,13 @@ import { ConfirmDialog } from '../components/ConfirmDialog';
 
 type DeleteIntent = { kind: 'single'; record: Transaction } | { kind: 'batch'; count: number };
 
+const DEFAULT_QUERY = {
+  page: 1,
+  pageSize: 20,
+  sort: 'sortOrder',
+  order: 'asc',
+} as const;
+
 export default function TransactionsPage() {
   const client = useQueryClient();
   const [searchParams, setSearchParams] = useSearchParams();
@@ -20,10 +27,7 @@ export default function TransactionsPage() {
   const month = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
   const monthEnd = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
   const [query, setQuery] = useState<TransactionQuery>(() => ({
-    page: 1,
-    pageSize: 20,
-    sort: 'soldDate',
-    order: 'desc',
+    ...DEFAULT_QUERY,
     focusId: searchParams.get('focus') || undefined,
   }));
   const [search, setSearch] = useState('');
@@ -279,7 +283,7 @@ export default function TransactionsPage() {
             className="text-button"
             onClick={() => {
               setSearch('');
-              setQuery({ page: 1, pageSize: 20, sort: 'soldDate', order: 'desc' });
+              setQuery({ ...DEFAULT_QUERY });
             }}
           >
             重置筛选

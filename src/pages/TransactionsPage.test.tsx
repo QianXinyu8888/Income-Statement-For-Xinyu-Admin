@@ -1,5 +1,5 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { act, cleanup, render, screen, waitFor } from '@testing-library/react';
+import { act, cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { MemoryRouter, useLocation } from 'react-router-dom';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { apiClient, type TransactionPage } from '../api/client';
@@ -145,5 +145,40 @@ describe('TransactionsPage focused navigation', () => {
     );
     expect(scrollIntoView).not.toHaveBeenCalled();
     expect(screen.getByLabelText('当前查询参数')).toBeEmptyDOMElement();
+  });
+
+  it('uses the Feishu table order by default and restores it when filters reset', async () => {
+    vi.spyOn(apiClient, 'transactions').mockResolvedValue({
+      items: [{ ...target, sortOrder: 1 }],
+      total: 1,
+      page: 1,
+      pageSize: 20,
+      warnings: [],
+    });
+    renderPage('/transactions');
+
+    await waitFor(() =>
+      expect(apiClient.transactions).toHaveBeenCalledWith(
+        expect.objectContaining({ sort: 'sortOrder', order: 'asc' }),
+      ),
+    );
+
+    fireEvent.click(await screen.findByRole('button', { name: /成交价/ }));
+    await waitFor(() =>
+      expect(apiClient.transactions).toHaveBeenLastCalledWith(
+        expect.objectContaining({ sort: 'salePrice', order: 'desc' }),
+      ),
+    );
+
+    fireEvent.click(screen.getByRole('button', { name: /筛选/ }));
+    fireEvent.click(screen.getByRole('button', { name: '重置筛选' }));
+    await waitFor(() =>
+      expect(apiClient.transactions).toHaveBeenLastCalledWith({
+        page: 1,
+        pageSize: 20,
+        sort: 'sortOrder',
+        order: 'asc',
+      }),
+    );
   });
 });
