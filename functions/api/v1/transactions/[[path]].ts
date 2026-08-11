@@ -24,6 +24,7 @@ const querySchema = z.object({
       'title',
       'salePrice',
       'costPrice',
+      'totalCost',
       'profit',
       'status',
       'sortOrder',

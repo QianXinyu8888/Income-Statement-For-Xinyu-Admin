@@ -7,17 +7,20 @@ import {
   type TransactionInput,
 } from '../../domain/transaction';
 
-const today = () => new Date().toISOString().slice(0, 10);
-const empty: TransactionInput = {
+type TransactionForm = Omit<TransactionInput, 'status'> & {
+  status: TransactionInput['status'] | '';
+};
+
+const empty: TransactionForm = {
   title: '',
   salePrice: null,
-  costPrice: 0,
-  shippingFee: 0,
-  status: '在售中',
-  purchaseDate: today(),
+  costPrice: null,
+  shippingFee: null,
+  status: '',
+  purchaseDate: null,
   soldDate: null,
   sortOrder: null,
-  note: '',
+  note: null,
 };
 
 export function TransactionDrawer({
@@ -35,7 +38,7 @@ export function TransactionDrawer({
   onSave: (value: TransactionInput) => Promise<void>;
   onDelete?: () => Promise<void>;
 }) {
-  const [form, setForm] = useState<TransactionInput>(empty);
+  const [form, setForm] = useState<TransactionForm>(empty);
   const [error, setError] = useState('');
   const titleRef = useRef<HTMLInputElement>(null);
   useEffect(() => {
@@ -43,11 +46,11 @@ export function TransactionDrawer({
       setForm(
         record
           ? {
-              title: record.title,
+              title: record.title ?? '',
               salePrice: record.salePrice,
               costPrice: record.costPrice,
               shippingFee: record.shippingFee,
-              status: record.status,
+              status: record.status ?? '',
               purchaseDate: record.purchaseDate,
               soldDate: record.soldDate,
               sortOrder: record.sortOrder,
@@ -67,7 +70,7 @@ export function TransactionDrawer({
     return () => window.removeEventListener('keydown', close);
   }, [open, onClose]);
   if (!open) return null;
-  const set = <K extends keyof TransactionInput>(key: K, value: TransactionInput[K]) =>
+  const set = <K extends keyof TransactionForm>(key: K, value: TransactionForm[K]) =>
     setForm((current) => ({ ...current, [key]: value }));
   const submit = async (event: FormEvent) => {
     event.preventDefault();
@@ -82,8 +85,14 @@ export function TransactionDrawer({
       setError(reason instanceof Error ? reason.message : '保存失败');
     }
   };
-  const profit =
-    form.salePrice === null ? null : form.salePrice - form.costPrice - form.shippingFee;
+  const estimatedTotalCost =
+    form.costPrice === null || form.shippingFee === null
+      ? null
+      : form.costPrice + form.shippingFee;
+  const estimatedProfit =
+    form.salePrice === null || estimatedTotalCost === null
+      ? null
+      : form.salePrice - estimatedTotalCost;
   return (
     <div className="drawer-layer" role="presentation">
       <button className="drawer-backdrop" onClick={onClose} aria-label="关闭编辑面板" />
@@ -91,7 +100,11 @@ export function TransactionDrawer({
         <header>
           <div>
             <h2 id="drawer-title">{record ? '编辑交易' : '新增交易'}</h2>
-            <p>{profit === null ? '自用记录不计入销售额' : `预计利润 ¥${profit.toFixed(2)}`}</p>
+            <p>
+              {estimatedProfit === null
+                ? '空字段将原样保存到飞书'
+                : `预计利润 ¥${estimatedProfit.toFixed(2)}`}
+            </p>
           </div>
           <button className="icon-button" onClick={onClose} aria-label="关闭">
             <X size={18} />
@@ -116,6 +129,9 @@ export function TransactionDrawer({
                   set('status', event.target.value as TransactionInput['status'])
                 }
               >
+                <option value="" disabled>
+                  请选择
+                </option>
                 {TRANSACTION_STATUSES.map((status) => (
                   <option key={status}>{status}</option>
                 ))}
@@ -147,14 +163,15 @@ export function TransactionDrawer({
               />
             </label>
             <label>
-              成本
+              购入成本
               <input
                 type="number"
                 min="0"
                 step="0.01"
-                value={form.costPrice}
-                onChange={(event) => set('costPrice', Number(event.target.value))}
-                required
+                value={form.costPrice ?? ''}
+                onChange={(event) =>
+                  set('costPrice', event.target.value === '' ? null : Number(event.target.value))
+                }
               />
             </label>
           </div>
@@ -165,18 +182,18 @@ export function TransactionDrawer({
                 type="number"
                 min="0"
                 step="0.01"
-                value={form.shippingFee}
-                onChange={(event) => set('shippingFee', Number(event.target.value))}
-                required
+                value={form.shippingFee ?? ''}
+                onChange={(event) =>
+                  set('shippingFee', event.target.value === '' ? null : Number(event.target.value))
+                }
               />
             </label>
             <label>
               购入日期
               <input
                 type="date"
-                value={form.purchaseDate}
-                onChange={(event) => set('purchaseDate', event.target.value)}
-                required
+                value={form.purchaseDate ?? ''}
+                onChange={(event) => set('purchaseDate', event.target.value || null)}
               />
             </label>
             <label>
@@ -188,12 +205,21 @@ export function TransactionDrawer({
               />
             </label>
           </div>
+          <div className="calculated-field">
+            <span>{record ? '总成本（飞书）' : '预计总成本'}</span>
+            <strong>
+              {(record?.totalCost ?? estimatedTotalCost) === null
+                ? '—'
+                : `¥${(record?.totalCost ?? estimatedTotalCost)!.toFixed(2)}`}
+            </strong>
+            <small>{record ? '只读公式字段' : '保存后以飞书公式结果为准'}</small>
+          </div>
           <label>
             备注
             <textarea
               rows={4}
-              value={form.note}
-              onChange={(event) => set('note', event.target.value)}
+              value={form.note ?? ''}
+              onChange={(event) => set('note', event.target.value || null)}
             />
           </label>
           {error && (

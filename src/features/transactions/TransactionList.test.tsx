@@ -11,7 +11,6 @@ const record: Transaction = {
   shippingFee: 18,
   totalCost: 4118,
   profit: 1082,
-  profitRate: 1082 / 4100,
   roi: 1082 / 4118,
   status: '已售出',
   purchaseDate: '2026-04-01',
@@ -38,5 +37,33 @@ describe('TransactionList', () => {
     expect(screen.getAllByText('已售出').length).toBeGreaterThan(0);
     expect(screen.getAllByText('+¥1,082.00').length).toBeGreaterThan(0);
     expect(screen.getByRole('table', { name: '交易明细' })).toBeInTheDocument();
+  });
+
+  it('shows total cost and never renders an unsold record as a loss', () => {
+    render(
+      <TransactionList
+        records={[
+          {
+            ...record,
+            id: '2',
+            status: '在售中',
+            salePrice: null,
+            totalCost: 105,
+            profit: -105,
+            roi: null,
+            soldDate: null,
+          },
+        ]}
+        selected={new Set()}
+        onToggle={vi.fn()}
+        onOpen={vi.fn()}
+        onSort={vi.fn()}
+        sort="soldDate"
+        order="desc"
+      />,
+    );
+    expect(screen.getAllByRole('button', { name: /总成本/ }).length).toBeGreaterThan(0);
+    expect(screen.queryByText('-¥105.00')).not.toBeInTheDocument();
+    expect(screen.getAllByText('—').length).toBeGreaterThan(0);
   });
 });

@@ -13,6 +13,7 @@ type SortKey =
   | 'title'
   | 'salePrice'
   | 'costPrice'
+  | 'totalCost'
   | 'profit'
   | 'status'
   | 'sortOrder';
@@ -49,7 +50,8 @@ function SortLabel({
   );
 }
 
-function Profit({ value }: { value: number }) {
+function Profit({ value, visible }: { value: number | null; visible: boolean }) {
+  if (!visible || value === null) return <>—</>;
   return (
     <span className={value >= 0 ? 'profit' : 'loss'}>
       {value >= 0 ? '+' : ''}
@@ -67,6 +69,9 @@ export function TransactionList({
   sort,
   order,
 }: Props) {
+  const label = (record: Transaction) => record.title ?? '未命名交易';
+  const showProfit = (record: Transaction) =>
+    record.status === '已售出' || record.status === '已退货';
   return (
     <>
       <div className="table-wrap desktop-list">
@@ -86,7 +91,7 @@ export function TransactionList({
                 <SortLabel field="salePrice" label="售价" {...{ sort, order, onSort }} />
               </th>
               <th className="number">
-                <SortLabel field="costPrice" label="成本" {...{ sort, order, onSort }} />
+                <SortLabel field="totalCost" label="总成本" {...{ sort, order, onSort }} />
               </th>
               <th className="number">
                 <SortLabel field="profit" label="利润" {...{ sort, order, onSort }} />
@@ -104,13 +109,13 @@ export function TransactionList({
                     type="checkbox"
                     checked={selected.has(record.id)}
                     onChange={() => onToggle(record.id)}
-                    aria-label={`选择 ${record.title}`}
+                    aria-label={`选择 ${label(record)}`}
                   />
                 </td>
                 <td>
                   <button className="row-title" onClick={() => onOpen(record)}>
-                    {record.title}
-                    <small>购入 {record.purchaseDate}</small>
+                    {record.title ?? '—'}
+                    <small>购入 {record.purchaseDate ?? '—'}</small>
                   </button>
                 </td>
                 <td>
@@ -119,9 +124,11 @@ export function TransactionList({
                 <td className="number">
                   {record.salePrice === null ? '—' : money.format(record.salePrice)}
                 </td>
-                <td className="number muted">{money.format(record.costPrice)}</td>
+                <td className="number muted">
+                  {record.totalCost === null ? '—' : money.format(record.totalCost)}
+                </td>
                 <td className="number">
-                  <Profit value={record.profit} />
+                  <Profit value={record.profit} visible={showProfit(record)} />
                 </td>
                 <td className="muted">{record.soldDate ?? '—'}</td>
               </tr>
@@ -139,17 +146,21 @@ export function TransactionList({
               type="checkbox"
               checked={selected.has(record.id)}
               onChange={() => onToggle(record.id)}
-              aria-label={`选择 ${record.title}`}
+              aria-label={`选择 ${label(record)}`}
             />
             <button onClick={() => onOpen(record)}>
               <span className="mobile-row__top">
-                <strong>{record.title}</strong>
+                <strong>{record.title ?? '—'}</strong>
                 <StatusBadge status={record.status} />
               </span>
               <span className="mobile-row__bottom">
                 <span>{record.salePrice === null ? '—' : money.format(record.salePrice)}</span>
-                <Profit value={record.profit} />
-                <time>{(record.soldDate ?? record.purchaseDate).slice(5)}</time>
+                <Profit value={record.profit} visible={showProfit(record)} />
+                <time>
+                  {record.soldDate || record.purchaseDate
+                    ? (record.soldDate ?? record.purchaseDate)!.slice(5)
+                    : '—'}
+                </time>
               </span>
             </button>
           </article>
