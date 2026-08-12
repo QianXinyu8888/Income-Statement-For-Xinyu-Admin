@@ -1,4 +1,4 @@
-name = "income-statement-dashboard"
+name = "income-statement-for-xinyu-admin"
 compatibility_date = "2024-09-23"
 pages_build_output_dir = "./dist"
 

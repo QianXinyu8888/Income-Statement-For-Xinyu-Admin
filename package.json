@@ -1,5 +1,5 @@
 {
-  "name": "xianyu-bitable-manager",
+  "name": "income-statement-for-xinyu-admin",
   "private": true,
   "version": "1.0.0",
   "type": "module",
@@ -13,7 +13,8 @@
     "format": "prettier --check .",
     "test": "vitest run",
     "test:watch": "vitest",
-    "test:coverage": "vitest run --coverage"
+    "test:coverage": "vitest run --coverage",
+    "deploy:production": "npm run verify && wrangler pages deploy dist --project-name income-statement-for-xinyu-admin --branch main"
   },
   "dependencies": {
     "@tanstack/react-query": "^5.66.0",

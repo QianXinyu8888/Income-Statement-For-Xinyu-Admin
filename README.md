@@ -1,4 +1,4 @@
-# 闲鱼损益管理系统
+# Income-Statement-For-Xinyu-Admin
 
 面向个人高频卖家的交易与利润管理后台。前端使用 React、TypeScript 与 Vite，Cloudflare Pages Functions 作为同域 BFF，飞书多维表格是唯一数据源。
 
