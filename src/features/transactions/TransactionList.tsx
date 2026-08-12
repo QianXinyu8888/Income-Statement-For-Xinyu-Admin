@@ -34,6 +34,7 @@ function EditableField({
   value,
   onClick,
   className = '',
+  title,
   children,
 }: {
   field: EditableTransactionField;
@@ -41,6 +42,7 @@ function EditableField({
   value: string;
   onClick: () => void;
   className?: string;
+  title?: string;
   children: ReactNode;
 }) {
   const accessibleValue = value.length > 40 ? `${value.slice(0, 40)}…` : value;
@@ -50,6 +52,7 @@ function EditableField({
       className={`editable-field ${className}`.trim()}
       data-edit-field={field}
       aria-label={`编辑${label}：${accessibleValue}`}
+      title={title}
       onClick={onClick}
     >
       {children}
@@ -111,6 +114,7 @@ export function TransactionList({
                     label="商品名称"
                     value={record.title ?? '空'}
                     className="row-title"
+                    title={record.title ?? undefined}
                     onClick={() => onOpen(record, 'title')}
                   >
                     {record.title ?? '—'}

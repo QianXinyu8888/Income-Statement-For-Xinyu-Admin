@@ -394,7 +394,9 @@ button:disabled {
   overflow-x: auto;
 }
 .desktop-list table {
-  min-width: 1480px;
+  width: 100%;
+  min-width: 960px;
+  table-layout: fixed;
 }
 table {
   width: 100%;
@@ -506,8 +508,17 @@ tbody tr.is-selected {
   }
 }
 .product-cell {
-  min-width: 260px;
-  max-width: 360px;
+  width: 220px;
+  max-width: 220px;
+  overflow: hidden;
+}
+.product-cell .editable-field {
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis !important;
+  white-space: nowrap !important;
 }
 .note-cell {
   min-width: 180px;
