@@ -88,4 +88,22 @@ describe('queryTransactions', () => {
     expect(result.items.map(({ id }) => id)).toEqual(['record-4']);
     expect(result.total).toBe(1);
   });
+
+  it('sorts transactions by purchaseDate descending placing null values at the end', () => {
+    const records = [
+      { ...record(1), purchaseDate: '2026-01-10' },
+      { ...record(2), purchaseDate: null },
+      { ...record(3), purchaseDate: '2026-08-12' },
+    ];
+
+    const result = queryTransactions(records, {
+      page: 1,
+      pageSize: 20,
+      sort: 'purchaseDate',
+      order: 'desc',
+    });
+
+    expect(result.items.map(({ id }) => id)).toEqual(['record-3', 'record-1', 'record-2']);
+  });
 });
+

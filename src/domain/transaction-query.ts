@@ -53,10 +53,14 @@ export function queryTransactions(
       : [...filtered].sort((a, b) => {
           const left = a[sort];
           const right = b[sort];
+          if ((left === null || left === undefined) && (right === null || right === undefined))
+            return 0;
+          if (left === null || left === undefined) return 1;
+          if (right === null || right === undefined) return -1;
           const result =
             typeof left === 'number' && typeof right === 'number'
               ? left - right
-              : String(left ?? '').localeCompare(String(right ?? ''), 'zh-CN');
+              : String(left).localeCompare(String(right), 'zh-CN');
           return query.order === 'asc' ? result : -result;
         });
   const focusIndex = query.focusId

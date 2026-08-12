@@ -21,7 +21,7 @@ type DeleteIntent = { kind: 'single'; record: Transaction } | { kind: 'batch'; c
 const DEFAULT_QUERY = {
   page: 1,
   pageSize: 20,
-  sort: 'sourceOrder',
+  sort: 'purchaseDate',
   order: 'desc',
 } as const;
 

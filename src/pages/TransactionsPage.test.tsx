@@ -160,7 +160,7 @@ describe('TransactionsPage focused navigation', () => {
 
     await waitFor(() =>
       expect(apiClient.transactions).toHaveBeenCalledWith(
-        expect.objectContaining({ sort: 'sourceOrder', order: 'desc' }),
+        expect.objectContaining({ sort: 'purchaseDate', order: 'desc' }),
       ),
     );
 
@@ -170,7 +170,7 @@ describe('TransactionsPage focused navigation', () => {
       expect(apiClient.transactions).toHaveBeenLastCalledWith({
         page: 1,
         pageSize: 20,
-        sort: 'sourceOrder',
+        sort: 'purchaseDate',
         order: 'desc',
       }),
     );
