@@ -4,6 +4,7 @@ import { X } from 'lucide-react';
 import {
   TRANSACTION_STATUSES,
   transactionSchema,
+  type EditableTransactionField,
   type Transaction,
   type TransactionInput,
 } from '../../domain/transaction';
@@ -34,6 +35,7 @@ export function TransactionDrawer({
   record,
   open,
   saving,
+  initialFocus = 'title',
   onClose,
   onSave,
   onDelete,
@@ -41,13 +43,18 @@ export function TransactionDrawer({
   record: Transaction | null;
   open: boolean;
   saving: boolean;
+  initialFocus?: EditableTransactionField;
   onClose: () => void;
   onSave: (value: TransactionInput) => Promise<void>;
   onDelete?: () => Promise<void>;
 }) {
   const [form, setForm] = useState<TransactionForm>(empty);
   const [error, setError] = useState('');
-  const titleRef = useRef<HTMLInputElement>(null);
+  const fieldRefs = useRef<
+    Partial<
+      Record<EditableTransactionField, HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>
+    >
+  >({});
   const dialogRef = useRef<HTMLElement>(null);
   const closeHandler = useRef(onClose);
   const savingValue = useRef(saving);
@@ -79,7 +86,15 @@ export function TransactionDrawer({
     const previousOverflow = document.body.style.overflow;
     document.body.style.overflow = 'hidden';
     const focusTimer = window.setTimeout(() => {
-      if (!document.querySelector('.confirm-layer')) titleRef.current?.focus();
+      if (document.querySelector('.confirm-layer')) return;
+      const target = fieldRefs.current[initialFocus] ?? fieldRefs.current.title;
+      target?.focus();
+      if (
+        target instanceof HTMLTextAreaElement ||
+        (target instanceof HTMLInputElement && target.type === 'text')
+      ) {
+        target.setSelectionRange(target.value.length, target.value.length);
+      }
     }, 0);
     const handleKey = (event: KeyboardEvent) => {
       if (document.querySelector('.confirm-layer')) return;
@@ -114,7 +129,7 @@ export function TransactionDrawer({
       document.body.style.overflow = previousOverflow;
       previousFocus?.focus();
     };
-  }, [open]);
+  }, [initialFocus, open]);
   if (!open) return null;
   const set = <K extends keyof TransactionForm>(key: K, value: TransactionForm[K]) =>
     setForm((current) => ({ ...current, [key]: value }));
@@ -173,7 +188,9 @@ export function TransactionDrawer({
           <label>
             商品名称
             <input
-              ref={titleRef}
+              ref={(element) => {
+                fieldRefs.current.title = element ?? undefined;
+              }}
               value={form.title}
               onChange={(event) => set('title', event.target.value)}
               required
@@ -182,6 +199,9 @@ export function TransactionDrawer({
           <label>
             状态
             <select
+              ref={(element) => {
+                fieldRefs.current.status = element ?? undefined;
+              }}
               value={form.status}
               onChange={(event) => set('status', event.target.value as TransactionInput['status'])}
             >
@@ -197,6 +217,9 @@ export function TransactionDrawer({
             <label>
               售价
               <input
+                ref={(element) => {
+                  fieldRefs.current.salePrice = element ?? undefined;
+                }}
                 type="number"
                 min="0"
                 step="0.01"
@@ -209,6 +232,9 @@ export function TransactionDrawer({
             <label>
               购入成本
               <input
+                ref={(element) => {
+                  fieldRefs.current.costPrice = element ?? undefined;
+                }}
                 type="number"
                 min="0"
                 step="0.01"
@@ -223,6 +249,9 @@ export function TransactionDrawer({
             <label>
               运费
               <input
+                ref={(element) => {
+                  fieldRefs.current.shippingFee = element ?? undefined;
+                }}
                 type="number"
                 min="0"
                 step="0.01"
@@ -235,6 +264,9 @@ export function TransactionDrawer({
             <label>
               购入日期
               <input
+                ref={(element) => {
+                  fieldRefs.current.purchaseDate = element ?? undefined;
+                }}
                 type="date"
                 value={form.purchaseDate ?? ''}
                 onChange={(event) => set('purchaseDate', event.target.value || null)}
@@ -243,6 +275,9 @@ export function TransactionDrawer({
             <label>
               售出日期
               <input
+                ref={(element) => {
+                  fieldRefs.current.soldDate = element ?? undefined;
+                }}
                 type="date"
                 value={form.soldDate ?? ''}
                 onChange={(event) => set('soldDate', event.target.value || null)}
@@ -257,6 +292,9 @@ export function TransactionDrawer({
           <label>
             备注
             <textarea
+              ref={(element) => {
+                fieldRefs.current.note = element ?? undefined;
+              }}
               rows={4}
               value={form.note ?? ''}
               onChange={(event) => set('note', event.target.value || null)}

@@ -1,5 +1,5 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { act, cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { act, cleanup, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { MemoryRouter, useLocation } from 'react-router-dom';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { apiClient, type TransactionPage } from '../api/client';
@@ -164,7 +164,7 @@ describe('TransactionsPage focused navigation', () => {
       ),
     );
 
-    fireEvent.click(await screen.findByRole('button', { name: /成交价/ }));
+    fireEvent.click(await screen.findByRole('button', { name: /^成交价$/ }));
     await waitFor(() =>
       expect(apiClient.transactions).toHaveBeenLastCalledWith(
         expect.objectContaining({ sort: 'salePrice', order: 'desc' }),
@@ -232,6 +232,27 @@ describe('TransactionsPage focused navigation', () => {
           to: '2026-08-12',
         }),
       ),
+    );
+  });
+
+  it('opens an editable list field and focuses its matching drawer control', async () => {
+    vi.spyOn(apiClient, 'transactions').mockResolvedValue({
+      items: [target],
+      total: 1,
+      page: 1,
+      pageSize: 20,
+      warnings: [],
+    });
+    renderPage('/transactions');
+
+    const statusFields = await screen.findAllByRole('button', {
+      name: '编辑交易状态：已售出',
+    });
+    fireEvent.click(statusFields[0]);
+
+    const dialog = await screen.findByRole('dialog');
+    await waitFor(() =>
+      expect(within(dialog).getByRole('combobox', { name: '状态' })).toHaveFocus(),
     );
   });
 });

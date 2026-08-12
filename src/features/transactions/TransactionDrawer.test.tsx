@@ -120,4 +120,37 @@ describe('TransactionDrawer', () => {
     expect(screen.queryByRole('alertdialog')).not.toBeInTheDocument();
     expect(screen.getByRole('dialog')).toBeInTheDocument();
   });
+
+  it('focuses the requested editable field', async () => {
+    render(
+      <TransactionDrawer
+        record={record}
+        open
+        saving={false}
+        initialFocus="status"
+        onClose={vi.fn()}
+        onSave={vi.fn()}
+      />,
+    );
+
+    expect(await screen.findByRole('combobox', { name: '状态' })).toHaveFocus();
+  });
+
+  it('places the text cursor at the end of the requested field', async () => {
+    render(
+      <TransactionDrawer
+        record={{ ...record, note: '已有备注' }}
+        open
+        saving={false}
+        initialFocus="note"
+        onClose={vi.fn()}
+        onSave={vi.fn()}
+      />,
+    );
+
+    const note = await screen.findByRole('textbox', { name: '备注' });
+    expect(note).toHaveFocus();
+    expect(note).toHaveProperty('selectionStart', 4);
+    expect(note).toHaveProperty('selectionEnd', 4);
+  });
 });

@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
 import { TransactionList } from './TransactionList';
 import type { Transaction } from '../../domain/transaction';
@@ -152,5 +152,95 @@ describe('TransactionList', () => {
     expect(
       container.querySelectorAll('[data-transaction-id="2"][data-focused="true"]'),
     ).toHaveLength(0);
+  });
+
+  it('opens each editable desktop field with its matching focus target', () => {
+    const onOpen = vi.fn();
+    const { container } = render(
+      <TransactionList
+        records={[record]}
+        selected={new Set()}
+        onToggle={vi.fn()}
+        onOpen={onOpen}
+        onSort={vi.fn()}
+        sort="soldDate"
+        order="desc"
+      />,
+    );
+
+    const editableFields = [
+      'title',
+      'status',
+      'purchaseDate',
+      'soldDate',
+      'costPrice',
+      'shippingFee',
+      'salePrice',
+      'note',
+    ];
+    const buttons = container.querySelectorAll<HTMLButtonElement>(
+      '.desktop-list [data-edit-field]',
+    );
+    expect([...buttons].map((button) => button.dataset.editField)).toEqual(editableFields);
+
+    buttons.forEach((button, index) => {
+      fireEvent.click(button);
+      expect(onOpen).toHaveBeenNthCalledWith(index + 1, record, editableFields[index]);
+    });
+  });
+
+  it('keeps calculated desktop fields read-only', () => {
+    const { container } = render(
+      <TransactionList
+        records={[record]}
+        selected={new Set()}
+        onToggle={vi.fn()}
+        onOpen={vi.fn()}
+        onSort={vi.fn()}
+        sort="soldDate"
+        order="desc"
+      />,
+    );
+
+    const row = container.querySelector('.desktop-list tbody tr');
+    expect(row).toHaveTextContent('131 天');
+    expect(row).toHaveTextContent('¥4,118.00');
+    expect(row).toHaveTextContent('+¥1,082.00');
+    expect(row?.querySelector('[data-edit-field="holdingDays"]')).toBeNull();
+    expect(row?.querySelector('[data-edit-field="totalCost"]')).toBeNull();
+    expect(row?.querySelector('[data-edit-field="profit"]')).toBeNull();
+  });
+
+  it('provides the same editable field targets in the mobile card', () => {
+    const onOpen = vi.fn();
+    const { container } = render(
+      <TransactionList
+        records={[record]}
+        selected={new Set()}
+        onToggle={vi.fn()}
+        onOpen={onOpen}
+        onSort={vi.fn()}
+        sort="soldDate"
+        order="desc"
+      />,
+    );
+
+    const editableFields = [
+      'title',
+      'status',
+      'purchaseDate',
+      'soldDate',
+      'costPrice',
+      'shippingFee',
+      'salePrice',
+      'note',
+    ];
+    const buttons = container.querySelectorAll<HTMLButtonElement>('.mobile-list [data-edit-field]');
+    expect([...buttons].map((button) => button.dataset.editField)).toEqual(editableFields);
+
+    buttons.forEach((button, index) => {
+      fireEvent.click(button);
+      expect(onOpen).toHaveBeenNthCalledWith(index + 1, record, editableFields[index]);
+    });
   });
 });

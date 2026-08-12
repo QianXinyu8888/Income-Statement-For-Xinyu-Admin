@@ -17,6 +17,7 @@ export const transactionSchema = z.object({
 });
 
 export type TransactionInput = z.infer<typeof transactionSchema>;
+export type EditableTransactionField = keyof TransactionInput;
 
 export interface Transaction {
   id: string;

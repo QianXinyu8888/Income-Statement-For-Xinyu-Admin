@@ -3,7 +3,12 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Download, Filter, Plus, Search, SlidersHorizontal } from 'lucide-react';
 import { useSearchParams } from 'react-router-dom';
 import { apiClient, type TransactionQuery } from '../api/client';
-import type { Transaction, TransactionInput, TransactionStatus } from '../domain/transaction';
+import type {
+  EditableTransactionField,
+  Transaction,
+  TransactionInput,
+  TransactionStatus,
+} from '../domain/transaction';
 import { TRANSACTION_STATUSES } from '../domain/transaction';
 import { downloadCsv, downloadExcel } from '../domain/export';
 import { ErrorState, LoadingState } from '../components/LoadingState';
@@ -33,6 +38,7 @@ export default function TransactionsPage() {
   const [search, setSearch] = useState('');
   const [selected, setSelected] = useState(new Set<string>());
   const [editing, setEditing] = useState<Transaction | null>(null);
+  const [initialFocus, setInitialFocus] = useState<EditableTransactionField>('title');
   const [drawer, setDrawer] = useState(false);
   const [moreFilters, setMoreFilters] = useState(false);
   const [notice, setNotice] = useState('');
@@ -133,8 +139,9 @@ export default function TransactionsPage() {
       window.clearTimeout(timer);
     };
   }, [focusedId, result.data?.page]);
-  const open = (record: Transaction | null) => {
+  const open = (record: Transaction | null, field: EditableTransactionField = 'title') => {
     setEditing(record);
+    setInitialFocus(field);
     setDrawer(true);
   };
   const sort = (field: TransactionQuery['sort']) =>
@@ -427,6 +434,7 @@ export default function TransactionsPage() {
         record={editing}
         open={drawer}
         saving={save.isPending || remove.isPending}
+        initialFocus={initialFocus}
         onClose={() => setDrawer(false)}
         onSave={(input) => save.mutateAsync({ record: editing, input }).then(() => undefined)}
         onDelete={
