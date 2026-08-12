@@ -27,9 +27,6 @@ describe('TransactionList', () => {
         selected={new Set()}
         onToggle={vi.fn()}
         onOpen={vi.fn()}
-        onSort={vi.fn()}
-        sort="soldDate"
-        order="desc"
       />,
     );
     expect(screen.getAllByText('iPhone 15 Pro').length).toBeGreaterThan(0);
@@ -56,12 +53,9 @@ describe('TransactionList', () => {
         selected={new Set()}
         onToggle={vi.fn()}
         onOpen={vi.fn()}
-        onSort={vi.fn()}
-        sort="soldDate"
-        order="desc"
       />,
     );
-    expect(screen.getAllByRole('button', { name: /总成本/ }).length).toBeGreaterThan(0);
+    expect(screen.getAllByRole('columnheader', { name: '总成本' }).length).toBeGreaterThan(0);
     expect(screen.queryByText('-¥105.00')).not.toBeInTheDocument();
     expect(screen.getAllByText('—').length).toBeGreaterThan(0);
   });
@@ -73,9 +67,6 @@ describe('TransactionList', () => {
         selected={new Set()}
         onToggle={vi.fn()}
         onOpen={vi.fn()}
-        onSort={vi.fn()}
-        sort="soldDate"
-        order="desc"
       />,
     );
 
@@ -107,9 +98,6 @@ describe('TransactionList', () => {
         selected={new Set()}
         onToggle={vi.fn()}
         onOpen={vi.fn()}
-        onSort={vi.fn()}
-        sort="soldDate"
-        order="desc"
       />,
     );
 
@@ -139,9 +127,6 @@ describe('TransactionList', () => {
         focusedId="1"
         onToggle={vi.fn()}
         onOpen={vi.fn()}
-        onSort={vi.fn()}
-        sort="soldDate"
-        order="desc"
       />,
     );
 
@@ -162,9 +147,6 @@ describe('TransactionList', () => {
         selected={new Set()}
         onToggle={vi.fn()}
         onOpen={onOpen}
-        onSort={vi.fn()}
-        sort="soldDate"
-        order="desc"
       />,
     );
 
@@ -196,9 +178,6 @@ describe('TransactionList', () => {
         selected={new Set()}
         onToggle={vi.fn()}
         onOpen={vi.fn()}
-        onSort={vi.fn()}
-        sort="soldDate"
-        order="desc"
       />,
     );
 
@@ -219,9 +198,6 @@ describe('TransactionList', () => {
         selected={new Set()}
         onToggle={vi.fn()}
         onOpen={onOpen}
-        onSort={vi.fn()}
-        sort="soldDate"
-        order="desc"
       />,
     );
 

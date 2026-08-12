@@ -105,13 +105,13 @@ export const apiClient = {
       '/transactions/batch-delete',
       { method: 'POST', body: JSON.stringify({ ids }) },
     ),
-  summary: (from?: string, to?: string) =>
-    api<AnalyticsSummary>(
-      `/analytics/summary?${new URLSearchParams(
-        Object.entries({ from, to })
-          .filter(([, value]) => value)
-          .map(([key, value]) => [key, String(value)]),
-      )}`,
-    ),
+  summary: (from?: string, to?: string) => {
+    const params = new URLSearchParams(
+      Object.entries({ from, to })
+        .filter(([, value]) => Boolean(value))
+        .map(([key, value]) => [key, String(value)]),
+    ).toString();
+    return api<AnalyticsSummary>(`/analytics/summary${params ? `?${params}` : ''}`);
+  },
   health: () => api<{ connected: boolean; checkedAt: string }>('/system/health'),
 };

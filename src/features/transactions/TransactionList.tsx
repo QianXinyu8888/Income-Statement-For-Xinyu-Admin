@@ -1,4 +1,3 @@
-import { ArrowDown, ArrowUp, ChevronsUpDown } from 'lucide-react';
 import type { ReactNode } from 'react';
 import type { EditableTransactionField, Transaction } from '../../domain/transaction';
 import { StatusBadge } from '../../components/StatusBadge';
@@ -11,47 +10,12 @@ const money = new Intl.NumberFormat('zh-CN', {
 const display = (value: string | number | null) => value ?? '—';
 const displayMoney = (value: number | null) => (value === null ? '—' : money.format(value));
 
-type SortKey =
-  | 'soldDate'
-  | 'purchaseDate'
-  | 'title'
-  | 'salePrice'
-  | 'costPrice'
-  | 'totalCost'
-  | 'profit'
-  | 'status';
-
 interface Props {
   records: Transaction[];
   selected: Set<string>;
   focusedId?: string | null;
   onToggle: (id: string) => void;
   onOpen: (record: Transaction, field: EditableTransactionField) => void;
-  onSort: (key: SortKey) => void;
-  sort: string;
-  order: 'asc' | 'desc';
-}
-
-function SortLabel({
-  field,
-  label,
-  sort,
-  order,
-  onSort,
-}: {
-  field: SortKey;
-  label: string;
-  sort: string;
-  order: string;
-  onSort: (key: SortKey) => void;
-}) {
-  const Icon = sort !== field ? ChevronsUpDown : order === 'asc' ? ArrowUp : ArrowDown;
-  return (
-    <button className="sort-button" onClick={() => onSort(field)}>
-      {label}
-      <Icon size={13} />
-    </button>
-  );
 }
 
 function Profit({ value, visible }: { value: number | null; visible: boolean }) {
@@ -99,9 +63,6 @@ export function TransactionList({
   focusedId,
   onToggle,
   onOpen,
-  onSort,
-  sort,
-  order,
 }: Props) {
   const label = (record: Transaction) => record.title ?? '未命名交易';
   const showProfit = (record: Transaction) =>
@@ -115,32 +76,16 @@ export function TransactionList({
               <th className="check-cell">
                 <span className="sr-only">选择</span>
               </th>
-              <th>
-                <SortLabel field="title" label="商品名称" {...{ sort, order, onSort }} />
-              </th>
-              <th>
-                <SortLabel field="status" label="交易状态" {...{ sort, order, onSort }} />
-              </th>
-              <th>
-                <SortLabel field="purchaseDate" label="购入日期" {...{ sort, order, onSort }} />
-              </th>
-              <th>
-                <SortLabel field="soldDate" label="售出日期" {...{ sort, order, onSort }} />
-              </th>
+              <th>商品名称</th>
+              <th>交易状态</th>
+              <th>购入日期</th>
+              <th>售出日期</th>
               <th className="number">持有天数</th>
-              <th className="number">
-                <SortLabel field="costPrice" label="购入成本" {...{ sort, order, onSort }} />
-              </th>
+              <th className="number">购入成本</th>
               <th className="number">运费</th>
-              <th className="number">
-                <SortLabel field="totalCost" label="总成本" {...{ sort, order, onSort }} />
-              </th>
-              <th className="number">
-                <SortLabel field="salePrice" label="成交价" {...{ sort, order, onSort }} />
-              </th>
-              <th className="number">
-                <SortLabel field="profit" label="利润" {...{ sort, order, onSort }} />
-              </th>
+              <th className="number">总成本</th>
+              <th className="number">成交价</th>
+              <th className="number">利润</th>
               <th>备注</th>
             </tr>
           </thead>

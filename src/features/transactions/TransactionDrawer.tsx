@@ -185,9 +185,11 @@ export function TransactionDrawer({
           </button>
         </header>
         <form onSubmit={submit}>
-          <label>
+          <label htmlFor="tx-title">
             商品名称
             <input
+              id="tx-title"
+              name="title"
               ref={(element) => {
                 fieldRefs.current.title = element ?? undefined;
               }}
@@ -196,9 +198,11 @@ export function TransactionDrawer({
               required
             />
           </label>
-          <label>
+          <label htmlFor="tx-status">
             状态
             <select
+              id="tx-status"
+              name="status"
               ref={(element) => {
                 fieldRefs.current.status = element ?? undefined;
               }}
@@ -214,9 +218,11 @@ export function TransactionDrawer({
             </select>
           </label>
           <div className="form-grid">
-            <label>
+            <label htmlFor="tx-sale-price">
               售价
               <input
+                id="tx-sale-price"
+                name="salePrice"
                 ref={(element) => {
                   fieldRefs.current.salePrice = element ?? undefined;
                 }}
@@ -229,9 +235,11 @@ export function TransactionDrawer({
                 }
               />
             </label>
-            <label>
+            <label htmlFor="tx-cost-price">
               购入成本
               <input
+                id="tx-cost-price"
+                name="costPrice"
                 ref={(element) => {
                   fieldRefs.current.costPrice = element ?? undefined;
                 }}
@@ -246,9 +254,11 @@ export function TransactionDrawer({
             </label>
           </div>
           <div className="form-grid">
-            <label>
+            <label htmlFor="tx-shipping-fee">
               运费
               <input
+                id="tx-shipping-fee"
+                name="shippingFee"
                 ref={(element) => {
                   fieldRefs.current.shippingFee = element ?? undefined;
                 }}
@@ -261,9 +271,11 @@ export function TransactionDrawer({
                 }
               />
             </label>
-            <label>
+            <label htmlFor="tx-purchase-date">
               购入日期
               <input
+                id="tx-purchase-date"
+                name="purchaseDate"
                 ref={(element) => {
                   fieldRefs.current.purchaseDate = element ?? undefined;
                 }}
@@ -272,9 +284,11 @@ export function TransactionDrawer({
                 onChange={(event) => set('purchaseDate', event.target.value || null)}
               />
             </label>
-            <label>
+            <label htmlFor="tx-sold-date">
               售出日期
               <input
+                id="tx-sold-date"
+                name="soldDate"
                 ref={(element) => {
                   fieldRefs.current.soldDate = element ?? undefined;
                 }}
@@ -289,9 +303,11 @@ export function TransactionDrawer({
             <strong>{displayedTotalCost === null ? '—' : money.format(displayedTotalCost)}</strong>
             <small>{record ? '只读公式字段' : '保存后以飞书公式结果为准'}</small>
           </div>
-          <label>
+          <label htmlFor="tx-note">
             备注
             <textarea
+              id="tx-note"
+              name="note"
               ref={(element) => {
                 fieldRefs.current.note = element ?? undefined;
               }}

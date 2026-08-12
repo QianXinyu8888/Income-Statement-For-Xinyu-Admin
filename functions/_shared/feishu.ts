@@ -47,7 +47,17 @@ function recordsPath(env: AppEnv) {
   return `/bitable/v1/apps/${env.bitableAppToken}/tables/${env.transactionsTableId}/records`;
 }
 
+let recordsCache: { data: FeishuRecord[]; expiresAt: number } | null = null;
+
+export function clearRecordsCache(): void {
+  recordsCache = null;
+}
+
 export async function listRecords(env: AppEnv): Promise<FeishuRecord[]> {
+  const now = Date.now();
+  if (recordsCache && recordsCache.expiresAt > now) {
+    return recordsCache.data;
+  }
   const records: FeishuRecord[] = [];
   let pageToken = '';
   do {
@@ -62,6 +72,10 @@ export async function listRecords(env: AppEnv): Promise<FeishuRecord[]> {
     records.push(...(payload.data?.items ?? []));
     pageToken = payload.data?.has_more ? (payload.data.page_token ?? '') : '';
   } while (pageToken);
+  recordsCache = {
+    data: records,
+    expiresAt: now + 30 * 1000,
+  };
   return records;
 }
 
@@ -75,6 +89,7 @@ export async function createRecord(
   env: AppEnv,
   fields: Record<string, unknown>,
 ): Promise<FeishuRecord> {
+  clearRecordsCache();
   const payload = await request<{ data?: { record?: FeishuRecord } }>(env, recordsPath(env), {
     method: 'POST',
     body: JSON.stringify({ fields }),
@@ -88,6 +103,7 @@ export async function updateRecord(
   id: string,
   fields: Record<string, unknown>,
 ): Promise<FeishuRecord> {
+  clearRecordsCache();
   const payload = await request<{ data?: { record?: FeishuRecord } }>(
     env,
     `${recordsPath(env)}/${encodeURIComponent(id)}`,
@@ -101,5 +117,6 @@ export async function updateRecord(
 }
 
 export async function deleteRecord(env: AppEnv, id: string): Promise<void> {
+  clearRecordsCache();
   await request(env, `${recordsPath(env)}/${encodeURIComponent(id)}`, { method: 'DELETE' });
 }

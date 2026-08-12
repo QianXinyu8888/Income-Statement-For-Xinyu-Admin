@@ -1,9 +1,19 @@
+import { useEffect, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { apiClient } from '../api/client';
 
 export default function SettingsPage() {
   const session = useQuery({ queryKey: ['session'], queryFn: apiClient.session, retry: false });
   const health = useQuery({ queryKey: ['health'], queryFn: apiClient.health, retry: false });
+  const [reduceMotion, setReduceMotion] = useState<boolean>(() => {
+    return localStorage.getItem('reduce-motion') === 'true';
+  });
+
+  useEffect(() => {
+    localStorage.setItem('reduce-motion', String(reduceMotion));
+    document.documentElement.classList.toggle('reduce-motion', reduceMotion);
+  }, [reduceMotion]);
+
   return (
     <section className="page page--narrow">
       <header className="page-header">
@@ -40,6 +50,33 @@ export default function SettingsPage() {
           </dd>
         </div>
       </dl>
+
+      <header className="page-header" style={{ marginTop: '24px' }}>
+        <div>
+          <h2>界面与动画偏好</h2>
+          <p>个性化显示与界面交互支持</p>
+        </div>
+      </header>
+      <dl className="settings-list" role="group" aria-label="界面与动画偏好">
+        <div>
+          <dt>
+            <label htmlFor="reduce-motion-toggle" style={{ cursor: 'pointer' }}>
+              缩减界面动画 (Reduced Motion)
+            </label>
+          </dt>
+          <dd>
+            <input
+              id="reduce-motion-toggle"
+              name="reduceMotion"
+              type="checkbox"
+              checked={reduceMotion}
+              onChange={(e) => setReduceMotion(e.target.checked)}
+              style={{ width: '18px', height: '18px', cursor: 'pointer' }}
+            />
+          </dd>
+        </div>
+      </dl>
+
       <div className="security-note">
         <strong>安全提示</strong>
         <p>
@@ -49,3 +86,4 @@ export default function SettingsPage() {
     </section>
   );
 }
+

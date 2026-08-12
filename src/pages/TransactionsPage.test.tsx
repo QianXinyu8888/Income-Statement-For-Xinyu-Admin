@@ -164,13 +164,6 @@ describe('TransactionsPage focused navigation', () => {
       ),
     );
 
-    fireEvent.click(await screen.findByRole('button', { name: /^成交价$/ }));
-    await waitFor(() =>
-      expect(apiClient.transactions).toHaveBeenLastCalledWith(
-        expect.objectContaining({ sort: 'salePrice', order: 'desc' }),
-      ),
-    );
-
     fireEvent.click(screen.getByRole('button', { name: /筛选/ }));
     fireEvent.click(screen.getByRole('button', { name: '重置筛选' }));
     await waitFor(() =>

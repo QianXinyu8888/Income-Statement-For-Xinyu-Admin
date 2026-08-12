@@ -144,13 +144,6 @@ export default function TransactionsPage() {
     setInitialFocus(field);
     setDrawer(true);
   };
-  const sort = (field: TransactionQuery['sort']) =>
-    setQuery((current) => ({
-      ...current,
-      page: 1,
-      sort: field,
-      order: current.sort === field && current.order === 'desc' ? 'asc' : 'desc',
-    }));
   const submitSearch = () => setQuery((current) => ({ ...current, page: 1, q: search }));
   const runExport = async (format: 'csv' | 'excel') => {
     if (exporting) return;
@@ -207,6 +200,8 @@ export default function TransactionsPage() {
         <div className="search-box">
           <Search size={16} />
           <input
+            id="tx-search-input"
+            name="search"
             aria-label="搜索交易"
             placeholder="搜索商品名称"
             value={search}
@@ -220,6 +215,8 @@ export default function TransactionsPage() {
           </button>
         </div>
         <select
+          id="tx-status-filter"
+          name="statusFilter"
           aria-label="状态"
           value={query.status ?? ''}
           onChange={(event) =>
@@ -236,6 +233,8 @@ export default function TransactionsPage() {
           ))}
         </select>
         <input
+          id="tx-from-date-filter"
+          name="fromDateFilter"
           aria-label="开始日期"
           type="date"
           value={query.from ?? ''}
@@ -272,9 +271,11 @@ export default function TransactionsPage() {
       </div>
       {moreFilters && (
         <div className="filter-panel">
-          <label className="filter-panel__mobile-only">
+          <label className="filter-panel__mobile-only" htmlFor="tx-panel-status-select">
             状态
             <select
+              id="tx-panel-status-select"
+              name="panelStatus"
               aria-label="移动端状态筛选"
               value={query.status ?? ''}
               onChange={(event) =>
@@ -291,9 +292,11 @@ export default function TransactionsPage() {
               ))}
             </select>
           </label>
-          <label className="filter-panel__mobile-only">
+          <label className="filter-panel__mobile-only" htmlFor="tx-panel-from-date">
             开始日期
             <input
+              id="tx-panel-from-date"
+              name="panelFromDate"
               aria-label="移动端开始日期"
               type="date"
               value={query.from ?? ''}
@@ -306,9 +309,11 @@ export default function TransactionsPage() {
               }
             />
           </label>
-          <label>
+          <label htmlFor="tx-panel-to-date">
             结束日期
             <input
+              id="tx-panel-to-date"
+              name="panelToDate"
               aria-label="结束日期"
               type="date"
               value={query.to ?? ''}
@@ -379,9 +384,6 @@ export default function TransactionsPage() {
             })
           }
           onOpen={open}
-          onSort={sort}
-          sort={query.sort ?? 'soldDate'}
-          order={query.order ?? 'desc'}
         />
       )}
       {result.data && result.data.total > result.data.pageSize && (
