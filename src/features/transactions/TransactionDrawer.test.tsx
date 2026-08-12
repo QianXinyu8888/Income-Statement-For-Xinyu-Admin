@@ -1,8 +1,9 @@
 import { useState } from 'react';
-import { cleanup, render, screen } from '@testing-library/react';
+import { cleanup, render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import type { Transaction } from '../../domain/transaction';
+import { ConfirmDialog } from '../../components/ConfirmDialog';
 import { TransactionDrawer } from './TransactionDrawer';
 
 afterEach(cleanup);
@@ -34,6 +35,31 @@ function DrawerHarness() {
         saving={false}
         onClose={() => setOpen(false)}
         onSave={vi.fn()}
+      />
+    </>
+  );
+}
+
+function NestedDialogHarness() {
+  const [drawerOpen, setDrawerOpen] = useState(true);
+  const [confirmOpen, setConfirmOpen] = useState(true);
+  return (
+    <>
+      <TransactionDrawer
+        record={record}
+        open={drawerOpen}
+        saving={false}
+        onClose={() => setDrawerOpen(false)}
+        onSave={vi.fn()}
+        onDelete={vi.fn()}
+      />
+      <ConfirmDialog
+        open={confirmOpen}
+        title="删除这条交易？"
+        description="删除后无法恢复"
+        confirmLabel="删除"
+        onCancel={() => setConfirmOpen(false)}
+        onConfirm={vi.fn()}
       />
     </>
   );
@@ -79,5 +105,19 @@ describe('TransactionDrawer', () => {
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
     expect(trigger).toHaveFocus();
     expect(document.body.style.overflow).toBe('');
+  });
+
+  it('defers Escape and Tab handling to a nested confirmation dialog', async () => {
+    const user = userEvent.setup();
+    render(<NestedDialogHarness />);
+    const confirmation = screen.getByRole('alertdialog');
+
+    expect(within(confirmation).getByRole('button', { name: '取消' })).toHaveFocus();
+    await user.tab({ shift: true });
+    expect(within(confirmation).getByRole('button', { name: '删除' })).toHaveFocus();
+
+    await user.keyboard('{Escape}');
+    expect(screen.queryByRole('alertdialog')).not.toBeInTheDocument();
+    expect(screen.getByRole('dialog')).toBeInTheDocument();
   });
 });

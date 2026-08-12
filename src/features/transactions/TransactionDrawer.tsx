@@ -78,8 +78,11 @@ export function TransactionDrawer({
       document.activeElement instanceof HTMLElement ? document.activeElement : null;
     const previousOverflow = document.body.style.overflow;
     document.body.style.overflow = 'hidden';
-    const focusTimer = window.setTimeout(() => titleRef.current?.focus(), 0);
+    const focusTimer = window.setTimeout(() => {
+      if (!document.querySelector('.confirm-layer')) titleRef.current?.focus();
+    }, 0);
     const handleKey = (event: KeyboardEvent) => {
+      if (document.querySelector('.confirm-layer')) return;
       if (event.key === 'Escape') {
         event.preventDefault();
         event.stopPropagation();
