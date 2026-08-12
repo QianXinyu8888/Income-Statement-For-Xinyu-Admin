@@ -37,10 +37,10 @@ export function ConfirmDialog({
       document.activeElement instanceof HTMLElement ? document.activeElement : null;
     cancelButton.current?.focus();
     const handleKey = (event: KeyboardEvent) => {
-      if (event.key === 'Escape' && !pendingValue.current) {
+      if (event.key === 'Escape') {
         event.preventDefault();
         event.stopPropagation();
-        cancelHandler.current();
+        if (!pendingValue.current) cancelHandler.current();
         return;
       }
       if (event.key !== 'Tab') return;

@@ -384,6 +384,9 @@ button:disabled {
   color: var(--muted);
   font-size: 12px;
 }
+.filter-panel__mobile-only {
+  display: none !important;
+}
 .table-wrap {
   border: 1px solid var(--border);
   border-radius: 8px;
@@ -823,15 +826,34 @@ tbody tr.is-selected {
   color: var(--muted);
   font-size: 11px;
 }
-.simple-chart__item > div {
+.simple-chart__plot {
   height: 160px;
-  display: flex;
-  align-items: flex-end;
+  width: 100%;
+  display: grid;
+  grid-template-rows: 1fr 1fr;
+  justify-items: center;
+  position: relative;
+}
+.simple-chart__plot::after {
+  content: '';
+  position: absolute;
+  inset: 50% 0 auto;
+  border-top: 1px solid var(--border);
 }
 .simple-chart i {
   display: block;
   width: 22px;
   border-radius: 3px 3px 0 0;
+}
+.simple-chart__plot[data-direction='positive'] i {
+  grid-row: 1;
+  align-self: end;
+  transform-origin: bottom;
+}
+.simple-chart__plot[data-direction='negative'] i {
+  grid-row: 2;
+  align-self: start;
+  transform-origin: top;
 }
 .bar-positive {
   background: var(--accent);
@@ -1003,6 +1025,9 @@ tbody tr.is-selected {
   line-height: 1.6;
 }
 @media (max-width: 900px) {
+  .filter-panel__mobile-only {
+    display: grid !important;
+  }
   .metric-grid {
     grid-template-columns: repeat(2, 1fr);
   }
@@ -1120,8 +1145,17 @@ tbody tr.is-selected {
   .mobile-row.is-selected {
     background: var(--accent-soft);
   }
-  .mobile-row > input {
-    margin-top: 4px;
+  .mobile-row__check {
+    width: 44px;
+    height: 44px;
+    flex: 0 0 44px;
+    display: grid;
+    place-items: center;
+    margin: -10px -10px 0;
+  }
+  .mobile-row__check input {
+    width: 18px;
+    height: 18px;
   }
   .mobile-row__content {
     flex: 1;
@@ -1712,7 +1746,7 @@ tbody tr:nth-child(n + 5),
   grid-template-rows: 20px 1fr 24px;
   font-size: 12px;
 }
-.simple-chart__item > div {
+.simple-chart__plot {
   height: 300px;
 }
 .simple-chart i {
@@ -1947,10 +1981,11 @@ tbody tr:nth-child(n + 5),
     padding: 16px 4px;
     gap: 12px;
   }
-  .mobile-row > input {
-    width: 18px;
-    height: 18px;
-    margin-top: 3px;
+  .mobile-row__check {
+    margin-top: -8px;
+  }
+  .mobile-row__heading {
+    min-height: 44px;
   }
   .mobile-row__heading {
     padding-bottom: 9px;
@@ -1994,7 +2029,7 @@ tbody tr:nth-child(n + 5),
     font-size: 12px;
   }
   .bulk-bar button {
-    min-height: 40px;
+    min-height: 44px;
     padding-inline: 10px;
   }
   @keyframes bulk-enter {
@@ -2035,6 +2070,10 @@ tbody tr:nth-child(n + 5),
   .drawer > header {
     min-height: 86px;
     padding: 17px 18px;
+  }
+  .drawer > header .icon-button {
+    width: 44px;
+    height: 44px;
   }
   .drawer h2 {
     font-size: 20px;
@@ -2117,7 +2156,7 @@ tbody tr:nth-child(n + 5),
   .simple-chart__item {
     min-width: 58px;
   }
-  .simple-chart__item > div {
+  .simple-chart__plot {
     height: 260px;
   }
   .analytics-grid {
@@ -2137,6 +2176,9 @@ tbody tr:nth-child(n + 5),
   }
   .analytics-stat-card {
     padding: 16px;
+  }
+  .drilldown-product {
+    min-height: 44px;
   }
   .date-range {
     width: 100%;

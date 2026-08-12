@@ -48,6 +48,11 @@ export function TransactionDrawer({
   const [form, setForm] = useState<TransactionForm>(empty);
   const [error, setError] = useState('');
   const titleRef = useRef<HTMLInputElement>(null);
+  const dialogRef = useRef<HTMLElement>(null);
+  const closeHandler = useRef(onClose);
+  const savingValue = useRef(saving);
+  closeHandler.current = onClose;
+  savingValue.current = saving;
   useEffect(() => {
     if (open) {
       setForm(
@@ -65,16 +70,48 @@ export function TransactionDrawer({
           : empty,
       );
       setError('');
-      setTimeout(() => titleRef.current?.focus(), 0);
     }
   }, [open, record]);
   useEffect(() => {
-    const close = (event: KeyboardEvent) => {
-      if (event.key === 'Escape' && open) onClose();
+    if (!open) return;
+    const previousFocus =
+      document.activeElement instanceof HTMLElement ? document.activeElement : null;
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    const focusTimer = window.setTimeout(() => titleRef.current?.focus(), 0);
+    const handleKey = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        event.preventDefault();
+        event.stopPropagation();
+        if (!savingValue.current) closeHandler.current();
+        return;
+      }
+      if (event.key !== 'Tab') return;
+      const focusable = dialogRef.current?.querySelectorAll<HTMLElement>(
+        'button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])',
+      );
+      if (!focusable?.length) return;
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+      if (event.shiftKey && document.activeElement === first) {
+        event.preventDefault();
+        last.focus();
+      } else if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault();
+        first.focus();
+      } else if (!dialogRef.current?.contains(document.activeElement)) {
+        event.preventDefault();
+        first.focus();
+      }
     };
-    window.addEventListener('keydown', close);
-    return () => window.removeEventListener('keydown', close);
-  }, [open, onClose]);
+    document.addEventListener('keydown', handleKey);
+    return () => {
+      window.clearTimeout(focusTimer);
+      document.removeEventListener('keydown', handleKey);
+      document.body.style.overflow = previousOverflow;
+      previousFocus?.focus();
+    };
+  }, [open]);
   if (!open) return null;
   const set = <K extends keyof TransactionForm>(key: K, value: TransactionForm[K]) =>
     setForm((current) => ({ ...current, [key]: value }));
@@ -105,7 +142,13 @@ export function TransactionDrawer({
   return createPortal(
     <div className="drawer-layer" role="presentation">
       <button className="drawer-backdrop" onClick={onClose} aria-label="关闭编辑面板" />
-      <section className="drawer" role="dialog" aria-modal="true" aria-labelledby="drawer-title">
+      <section
+        ref={dialogRef}
+        className="drawer"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="drawer-title"
+      >
         <header>
           <div>
             <h2 id="drawer-title">{record ? '编辑交易' : '新增交易'}</h2>

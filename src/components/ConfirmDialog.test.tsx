@@ -112,4 +112,25 @@ describe('ConfirmDialog', () => {
 
     expect(onConfirm).toHaveBeenCalledOnce();
   });
+
+  it('consumes Escape while confirmation is pending', async () => {
+    const user = userEvent.setup();
+    const escaped = vi.fn();
+    window.addEventListener('keydown', escaped);
+    render(
+      <ConfirmDialog
+        open
+        pending
+        title="删除交易？"
+        description="删除后无法恢复"
+        confirmLabel="删除"
+        onCancel={vi.fn()}
+        onConfirm={vi.fn()}
+      />,
+    );
+
+    await user.keyboard('{Escape}');
+    expect(escaped).not.toHaveBeenCalled();
+    window.removeEventListener('keydown', escaped);
+  });
 });

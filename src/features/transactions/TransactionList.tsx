@@ -164,12 +164,14 @@ export function TransactionList({
             data-transaction-id={record.id}
             data-focused={focusedId === record.id || undefined}
           >
-            <input
-              type="checkbox"
-              checked={selected.has(record.id)}
-              onChange={() => onToggle(record.id)}
-              aria-label={`选择 ${label(record)}`}
-            />
+            <label className="mobile-row__check">
+              <input
+                type="checkbox"
+                checked={selected.has(record.id)}
+                onChange={() => onToggle(record.id)}
+                aria-label={`选择 ${label(record)}`}
+              />
+            </label>
             <div className="mobile-row__content">
               <button className="mobile-row__heading" onClick={() => onOpen(record)}>
                 <strong>{record.title ?? '—'}</strong>

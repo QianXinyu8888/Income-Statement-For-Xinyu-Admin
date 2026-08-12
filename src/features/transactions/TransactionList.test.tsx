@@ -126,6 +126,9 @@ describe('TransactionList', () => {
     expect(mobile!).toHaveTextContent('成交价¥5,200.00');
     expect(mobile!).toHaveTextContent('利润+¥1,082.00');
     expect(mobile!).toHaveTextContent('备注顺丰到付');
+    expect(
+      screen.getAllByRole('checkbox', { name: '选择 iPhone 15 Pro' })[1].closest('label'),
+    ).toHaveClass('mobile-row__check');
   });
 
   it('marks the focused transaction in desktop and mobile views', () => {

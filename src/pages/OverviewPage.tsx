@@ -63,10 +63,13 @@ export default function OverviewPage() {
             {monthly.map((item) => (
               <div key={item.month} className="simple-chart__item">
                 <span>{item.month.slice(5)}</span>
-                <div>
+                <div
+                  className="simple-chart__plot"
+                  data-direction={item.profit >= 0 ? 'positive' : 'negative'}
+                >
                   <i
                     className={item.profit >= 0 ? 'bar-positive' : 'bar-negative'}
-                    style={{ height: `${Math.max(4, (Math.abs(item.profit) / max) * 150)}px` }}
+                    style={{ height: `${Math.max(4, (Math.abs(item.profit) / max) * 100)}%` }}
                   />
                 </div>
                 <strong>{money.format(item.profit)}</strong>

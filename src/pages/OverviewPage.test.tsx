@@ -48,4 +48,18 @@ describe('OverviewPage', () => {
     expect(screen.getByRole('status')).toHaveTextContent('65 条已售出记录字段不完整');
     expect(screen.getByText('月度利润')).toBeInTheDocument();
   });
+
+  it('marks negative profit bars to extend below the zero baseline', async () => {
+    vi.spyOn(apiClient, 'summary').mockResolvedValue({
+      ...summary,
+      monthly: [{ month: '2026-07', revenue: 500, profit: -210, count: 1 }],
+    });
+    const { container } = renderPage();
+
+    expect(await screen.findByText('-¥210.00')).toBeInTheDocument();
+    expect(container.querySelector('.simple-chart__plot')).toHaveAttribute(
+      'data-direction',
+      'negative',
+    );
+  });
 });

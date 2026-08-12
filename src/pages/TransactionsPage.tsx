@@ -265,9 +265,44 @@ export default function TransactionsPage() {
       </div>
       {moreFilters && (
         <div className="filter-panel">
+          <label className="filter-panel__mobile-only">
+            状态
+            <select
+              aria-label="移动端状态筛选"
+              value={query.status ?? ''}
+              onChange={(event) =>
+                setQuery((current) => ({
+                  ...current,
+                  page: 1,
+                  status: (event.target.value || undefined) as TransactionStatus | undefined,
+                }))
+              }
+            >
+              <option value="">全部状态</option>
+              {TRANSACTION_STATUSES.map((status) => (
+                <option key={status}>{status}</option>
+              ))}
+            </select>
+          </label>
+          <label className="filter-panel__mobile-only">
+            开始日期
+            <input
+              aria-label="移动端开始日期"
+              type="date"
+              value={query.from ?? ''}
+              onChange={(event) =>
+                setQuery((current) => ({
+                  ...current,
+                  page: 1,
+                  from: event.target.value || undefined,
+                }))
+              }
+            />
+          </label>
           <label>
             结束日期
             <input
+              aria-label="结束日期"
               type="date"
               value={query.to ?? ''}
               onChange={(event) =>

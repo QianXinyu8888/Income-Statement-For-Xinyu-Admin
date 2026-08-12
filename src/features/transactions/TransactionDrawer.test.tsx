@@ -1,4 +1,6 @@
+import { useState } from 'react';
 import { cleanup, render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import type { Transaction } from '../../domain/transaction';
 import { TransactionDrawer } from './TransactionDrawer';
@@ -21,6 +23,22 @@ const record: Transaction = {
   note: null,
 };
 
+function DrawerHarness() {
+  const [open, setOpen] = useState(false);
+  return (
+    <>
+      <button onClick={() => setOpen(true)}>打开新增交易</button>
+      <TransactionDrawer
+        record={null}
+        open={open}
+        saving={false}
+        onClose={() => setOpen(false)}
+        onSave={vi.fn()}
+      />
+    </>
+  );
+}
+
 describe('TransactionDrawer', () => {
   it('mounts the fixed overlay at the document root', () => {
     render(
@@ -41,5 +59,25 @@ describe('TransactionDrawer', () => {
     expect(screen.getByText('总成本（飞书）').parentElement).toHaveTextContent('—');
     expect(screen.queryByText('¥120.00')).not.toBeInTheDocument();
     expect(screen.queryByLabelText('排序')).not.toBeInTheDocument();
+  });
+
+  it('traps focus, locks scrolling, and restores the trigger after Escape', async () => {
+    const user = userEvent.setup();
+    render(<DrawerHarness />);
+    const trigger = screen.getByRole('button', { name: '打开新增交易' });
+    await user.click(trigger);
+
+    expect(screen.getByRole('textbox', { name: '商品名称' })).toHaveFocus();
+    expect(document.body.style.overflow).toBe('hidden');
+
+    const close = screen.getByRole('button', { name: /^关闭$/ });
+    close.focus();
+    await user.tab({ shift: true });
+    expect(screen.getByRole('button', { name: '保存' })).toHaveFocus();
+
+    await user.keyboard('{Escape}');
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+    expect(trigger).toHaveFocus();
+    expect(document.body.style.overflow).toBe('');
   });
 });
