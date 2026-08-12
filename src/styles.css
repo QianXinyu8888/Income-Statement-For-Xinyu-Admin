@@ -404,10 +404,11 @@ table {
 }
 th,
 td {
-  height: 48px;
-  padding: 0 14px;
+  min-height: 48px;
+  padding: 8px 14px;
   border-bottom: 1px solid var(--border);
   text-align: left;
+  vertical-align: middle;
   white-space: nowrap;
 }
 th {
@@ -508,17 +509,19 @@ tbody tr.is-selected {
   }
 }
 .product-cell {
-  width: 220px;
-  max-width: 220px;
-  overflow: hidden;
+  width: 240px;
+  max-width: 240px;
+  vertical-align: middle;
 }
 .product-cell .editable-field {
   display: block;
   width: 100%;
   max-width: 100%;
-  overflow: hidden;
-  text-overflow: ellipsis !important;
-  white-space: nowrap !important;
+  white-space: normal !important;
+  word-break: break-word !important;
+  overflow-wrap: break-word !important;
+  line-height: 1.45;
+  text-align: left;
 }
 .note-cell {
   min-width: 180px;
