@@ -604,12 +604,105 @@ tbody tr.is-selected {
     transform: rotate(360deg);
   }
 }
-.pagination {
+.pagination-wrap {
   display: flex;
-  justify-content: center;
+  flex-wrap: wrap;
   align-items: center;
-  gap: 12px;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 14px 18px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  font-size: 13px;
   color: var(--muted);
+}
+.pagination-summary {
+  font-size: 13px;
+}
+.pagination-highlight {
+  color: var(--text);
+  font-weight: 600;
+}
+.pagination-controls {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.pagination-pages {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.pagination-num {
+  min-width: 32px;
+  height: 32px;
+  padding: 0 6px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: transparent;
+  color: var(--text);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s ease;
+}
+.pagination-num:hover:not(.is-active) {
+  background: var(--surface-2);
+  border-color: var(--muted);
+}
+.pagination-num.is-active {
+  background: var(--accent);
+  color: #000;
+  border-color: var(--accent);
+  font-weight: 700;
+}
+.pagination-ellipsis {
+  padding: 0 4px;
+  color: var(--muted);
+}
+.pagination-nav-btn {
+  height: 32px;
+  line-height: 1;
+  padding: 0 10px;
+}
+.pagination-jump-form {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.pagination-jump-label,
+.pagination-jump-suffix {
+  font-size: 13px;
+}
+.pagination-jump-input {
+  width: 52px;
+  height: 32px;
+  text-align: center;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--surface-2);
+  color: var(--text);
+  font-size: 13px;
+  padding: 0 4px;
+}
+.pagination-jump-input:focus {
+  outline: 2px solid var(--accent);
+  border-color: var(--accent);
+}
+.pagination-jump-btn {
+  height: 32px;
+  padding: 0 12px;
+}
+@media (max-width: 768px) {
+  .pagination-wrap {
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }
 }
 .bulk-bar {
   position: fixed;

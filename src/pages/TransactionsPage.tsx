@@ -15,6 +15,7 @@ import { ErrorState, LoadingState } from '../components/LoadingState';
 import { TransactionList } from '../features/transactions/TransactionList';
 import { TransactionDrawer } from '../features/transactions/TransactionDrawer';
 import { ConfirmDialog } from '../components/ConfirmDialog';
+import { Pagination } from '../components/Pagination';
 
 type DeleteIntent = { kind: 'single'; record: Transaction } | { kind: 'batch'; count: number };
 
@@ -386,26 +387,15 @@ export default function TransactionsPage() {
           onOpen={open}
         />
       )}
-      {result.data && result.data.total > result.data.pageSize && (
-        <div className="pagination">
-          <button
-            className="button button--secondary"
-            disabled={result.data.page === 1}
-            onClick={() => setQuery((current) => ({ ...current, page: result.data.page - 1 }))}
-          >
-            上一页
-          </button>
-          <span>
-            第 {result.data.page} / {Math.ceil(result.data.total / result.data.pageSize)} 页
-          </span>
-          <button
-            className="button button--secondary"
-            disabled={result.data.page >= Math.ceil(result.data.total / result.data.pageSize)}
-            onClick={() => setQuery((current) => ({ ...current, page: result.data.page + 1 }))}
-          >
-            下一页
-          </button>
-        </div>
+      {result.data && result.data.total > 0 && (
+        <Pagination
+          page={result.data.page}
+          pageSize={result.data.pageSize}
+          total={result.data.total}
+          onPageChange={(targetPage) =>
+            setQuery((current) => ({ ...current, page: targetPage }))
+          }
+        />
       )}
       {selected.size > 0 && (
         <div className="bulk-bar" role="region" aria-label="批量操作">
