@@ -15,6 +15,29 @@ function routePath(value: unknown): string {
   return Array.isArray(value) ? value.join('/') : String(value ?? '');
 }
 
+function fieldText(value: unknown, fallback = ''): string {
+  const scalar =
+    typeof value === 'object' && value !== null && 'name' in value
+      ? (value as { name?: unknown }).name
+      : value;
+  return String(scalar ?? fallback).trim() || fallback;
+}
+
+function activeUserRecord(
+  users: Awaited<ReturnType<typeof listUsers>>,
+  username: string,
+) {
+  return users.find(({ fields = {} }) => {
+    return (
+      fieldText(fields['用户名']) === username && fieldText(fields['状态'], '正常') !== '禁用'
+    );
+  });
+}
+
+function userRole(fields: Record<string, unknown> = {}): string {
+  return fieldText(fields['角色'], '用户');
+}
+
 export const onRequest: PagesFunction = async ({ request, env, params }) => {
   const path = routePath(params.path);
   try {
@@ -25,23 +48,14 @@ export const onRequest: PagesFunction = async ({ request, env, params }) => {
       const { username, password } = credentialsSchema.parse(await request.json());
       const users = await listUsers(config);
       const matched = users.find(({ fields = {} }) => {
-        const status =
-          typeof fields['状态'] === 'object' && fields['状态'] !== null
-            ? String((fields['状态'] as { name?: unknown }).name ?? '')
-            : String(fields['状态'] ?? '正常');
         return (
-          String(fields['用户名'] ?? '').trim() === username &&
+          fieldText(fields['用户名']) === username &&
           String(fields['密码'] ?? '') === password &&
-          status !== '禁用'
+          fieldText(fields['状态'], '正常') !== '禁用'
         );
       });
       if (!matched) return errorResponse(request, 401, 'INVALID_CREDENTIALS', '账号或密码错误');
-      const roleValue = matched.fields?.['角色'];
-      const role =
-        typeof roleValue === 'object' && roleValue !== null
-          ? String((roleValue as { name?: unknown }).name ?? '用户')
-          : String(roleValue ?? '用户');
-      const user = { username, role };
+      const user = { username, role: userRole(matched.fields) };
       const token = await createSessionToken(user, config.sessionSecret);
       return jsonResponse(request, { user }, 200, {
         'Set-Cookie': sessionCookie(token, new URL(request.url).protocol === 'https:'),
@@ -53,10 +67,15 @@ export const onRequest: PagesFunction = async ({ request, env, params }) => {
       });
     }
     if (path === 'session' && request.method === 'GET') {
-      const user = await requireUser(request, config);
-      return user
-        ? jsonResponse(request, { user })
-        : errorResponse(request, 401, 'UNAUTHENTICATED', '请重新登录');
+      const sessionUser = await requireUser(request, config);
+      if (!sessionUser)
+        return errorResponse(request, 401, 'UNAUTHENTICATED', '请重新登录');
+      const matched = activeUserRecord(await listUsers(config), sessionUser.username);
+      if (!matched)
+        return errorResponse(request, 401, 'ACCOUNT_UNAVAILABLE', '账号不存在或已禁用');
+      return jsonResponse(request, {
+        user: { username: sessionUser.username, role: userRole(matched.fields) },
+      });
     }
     return errorResponse(request, 404, 'NOT_FOUND', '接口不存在');
   } catch (error) {

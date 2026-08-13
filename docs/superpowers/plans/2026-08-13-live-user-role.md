@@ -23,7 +23,7 @@
 - 创建：`functions/api/v1/auth/[[path]].test.ts`
 - 修改：`functions/api/v1/auth/[[path]].ts`
 
-- [ ] **步骤 1：编写失败的 API 测试**
+- [x] **步骤 1：编写失败的 API 测试**
 
 使用 `vi.mock` 隔离环境解析、Session 验证和飞书读取，调用 `onRequest` 并断言：令牌角色为“用户”时，飞书记录角色“管理员”覆盖旧值；角色为空时返回“用户”；记录不存在或状态为“禁用”时返回 401。
 
@@ -32,12 +32,12 @@ expect(payload.data.user).toEqual({ username: 'xinyu', role: '管理员' });
 expect(listUsers).toHaveBeenCalledOnce();
 ```
 
-- [ ] **步骤 2：运行测试并确认红灯**
+- [x] **步骤 2：运行测试并确认红灯**
 
 运行：`npm test -- 'functions/api/v1/auth/[[path]].test.ts'`
 预期：最新角色断言失败，因为 session 分支仍直接返回令牌用户且未调用 `listUsers`。
 
-- [ ] **步骤 3：实现最少后端改动**
+- [x] **步骤 3：实现最少后端改动**
 
 在认证路由中提取用户记录解析函数，统一处理“状态”和“角色”；登录继续按用户名、密码和启用状态匹配，session 分支则按令牌用户名匹配启用记录并返回最新角色。角色字段缺失或空字符串时使用“用户”，用户不存在或已禁用时返回 `ACCOUNT_UNAVAILABLE` 401。
 
@@ -49,7 +49,7 @@ return user
   : errorResponse(request, 401, 'ACCOUNT_UNAVAILABLE', '账号不存在或已禁用');
 ```
 
-- [ ] **步骤 4：运行 API 测试确认绿灯**
+- [x] **步骤 4：运行 API 测试确认绿灯**
 
 运行：`npm test -- 'functions/api/v1/auth/[[path]].test.ts'`
 预期：该测试文件全部通过。
