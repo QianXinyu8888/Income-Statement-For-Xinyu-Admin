@@ -3,7 +3,12 @@ import { useQuery } from '@tanstack/react-query';
 import { apiClient } from '../api/client';
 
 export default function SettingsPage() {
-  const session = useQuery({ queryKey: ['session'], queryFn: apiClient.session, retry: false });
+  const session = useQuery({
+    queryKey: ['session'],
+    queryFn: apiClient.session,
+    retry: false,
+    refetchOnMount: 'always',
+  });
   const health = useQuery({ queryKey: ['health'], queryFn: apiClient.health, retry: false });
   const [reduceMotion, setReduceMotion] = useState<boolean>(() => {
     return localStorage.getItem('reduce-motion') === 'true';
@@ -32,7 +37,13 @@ export default function SettingsPage() {
         <div>
           <dt>账号权限</dt>
           <dd>
-            <strong>{session.data?.user.role ?? '用户'}</strong>
+            <strong>
+              {session.isFetching
+                ? '同步中'
+                : session.isError
+                  ? '同步失败'
+                  : (session.data?.user.role ?? '用户')}
+            </strong>
           </dd>
         </div>
         <div>
@@ -77,13 +88,6 @@ export default function SettingsPage() {
         </div>
       </dl>
 
-      <div className="security-note">
-        <strong>安全提示</strong>
-        <p>
-          账号由飞书用户表管理。当前仍按既定要求使用明文密码，请严格限制用户表和飞书应用的访问权限。
-        </p>
-      </div>
     </section>
   );
 }
-

@@ -60,7 +60,7 @@ return user
 - 修改：`src/pages/SettingsPage.test.tsx`
 - 修改：`src/pages/SettingsPage.tsx`
 
-- [ ] **步骤 1：编写失败的页面测试**
+- [x] **步骤 1：编写失败的页面测试**
 
 预填充 `['session']` 为旧角色，渲染设置页后断言 `apiClient.session` 仍被调用并最终显示新角色；另断言页面不存在“安全提示”。
 
@@ -70,12 +70,12 @@ expect(await screen.findByText('管理员')).toBeInTheDocument();
 expect(screen.queryByText('安全提示')).not.toBeInTheDocument();
 ```
 
-- [ ] **步骤 2：运行测试并确认红灯**
+- [x] **步骤 2：运行测试并确认红灯**
 
 运行：`npm test -- src/pages/SettingsPage.test.tsx`
 预期：缓存角色保持“用户”，且“安全提示”仍存在。
 
-- [ ] **步骤 3：实现最少前端改动**
+- [x] **步骤 3：实现最少前端改动**
 
 为 session 查询增加 `refetchOnMount: 'always'`；角色显示根据请求状态输出“同步中”“同步失败”或最新 `user.role`；删除 `.security-note` JSX 区块。
 
@@ -88,7 +88,7 @@ const session = useQuery({
 });
 ```
 
-- [ ] **步骤 4：运行页面测试确认绿灯**
+- [x] **步骤 4：运行页面测试确认绿灯**
 
 运行：`npm test -- src/pages/SettingsPage.test.tsx`
 预期：该测试文件全部通过。
