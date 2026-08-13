@@ -114,6 +114,8 @@ git diff --check
 
 验证结果：相关测试 8/8 通过，lint 和 diff 检查通过。完整测试、类型检查与构建仅因基线已存在的 `src/components/Pagination` 缺失而失败；用户已确认可在该已知基线问题下继续。
 
+代码审查补充：`listUsers()` 原先只读取首 500 条记录，已增加飞书分页遍历及跨页测试；更新后的相关测试 10/10 通过。
+
 - [x] **步骤 2：检查需求和变更范围**
 
 检查 `git diff -- functions/api/v1/auth/[[path]].ts functions/api/v1/auth/[[path]].test.ts src/pages/SettingsPage.tsx src/pages/SettingsPage.test.tsx`，确认角色来自飞书最新记录、进入设置页强制刷新、安全提示已删除，且无无关修改。

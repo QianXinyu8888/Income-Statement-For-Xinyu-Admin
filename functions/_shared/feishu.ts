@@ -80,9 +80,19 @@ export async function listRecords(env: AppEnv): Promise<FeishuRecord[]> {
 }
 
 export async function listUsers(env: AppEnv): Promise<FeishuRecord[]> {
-  const path = `/bitable/v1/apps/${env.bitableAppToken}/tables/${env.usersTableId}/records?page_size=500`;
-  const payload = await request<{ data?: { items?: FeishuRecord[] } }>(env, path);
-  return payload.data?.items ?? [];
+  const records: FeishuRecord[] = [];
+  let pageToken = '';
+  do {
+    const params = new URLSearchParams({ page_size: '500' });
+    if (pageToken) params.set('page_token', pageToken);
+    const path = `/bitable/v1/apps/${env.bitableAppToken}/tables/${env.usersTableId}/records?${params}`;
+    const payload = await request<{
+      data?: { items?: FeishuRecord[]; has_more?: boolean; page_token?: string };
+    }>(env, path);
+    records.push(...(payload.data?.items ?? []));
+    pageToken = payload.data?.has_more ? (payload.data.page_token ?? '') : '';
+  } while (pageToken);
+  return records;
 }
 
 export async function createRecord(
