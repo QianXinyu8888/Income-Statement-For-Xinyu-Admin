@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Download, Filter, Plus, Search, SlidersHorizontal } from 'lucide-react';
+import { Download, Plus, RotateCcw, Search, SlidersHorizontal } from 'lucide-react';
+
 import { useSearchParams } from 'react-router-dom';
 import { apiClient, type TransactionQuery } from '../api/client';
 import type {
@@ -41,11 +42,21 @@ export default function TransactionsPage() {
   const [editing, setEditing] = useState<Transaction | null>(null);
   const [initialFocus, setInitialFocus] = useState<EditableTransactionField>('title');
   const [drawer, setDrawer] = useState(false);
-  const [moreFilters, setMoreFilters] = useState(false);
   const [notice, setNotice] = useState('');
   const [deleteIntent, setDeleteIntent] = useState<DeleteIntent | null>(null);
   const [exporting, setExporting] = useState(false);
   const [focusedId, setFocusedId] = useState<string | null>(null);
+
+  const hasActiveFilters = Boolean(
+    search || query.status || query.from || query.to || query.q
+  );
+
+  const handleResetFilters = () => {
+    setSearch('');
+    setQuery({ ...DEFAULT_QUERY });
+  };
+
+
   const result = useQuery({
     queryKey: ['transactions', query],
     queryFn: () => apiClient.transactions(query),
@@ -146,13 +157,12 @@ export default function TransactionsPage() {
     setDrawer(true);
   };
   const submitSearch = () => setQuery((current) => ({ ...current, page: 1, q: search }));
-  const runExport = async (format: 'csv' | 'excel') => {
+  const runExportExcel = async () => {
     if (exporting) return;
     setExporting(true);
     try {
       const exported = await exportAll.mutateAsync();
-      if (format === 'csv') downloadCsv(exported.items, '交易明细.csv');
-      else await downloadExcel(exported.items, '交易明细.xlsx');
+      await downloadExcel(exported.items, '交易明细.xlsx');
       setNotice(
         exported.warnings.length
           ? `已导出全部 ${exported.total} 条记录；${exported.warnings.length} 个字段无法识别，已留空`
@@ -164,6 +174,7 @@ export default function TransactionsPage() {
       setExporting(false);
     }
   };
+
   const confirmDelete = async () => {
     if (!deleteIntent) return;
     try {
@@ -243,117 +254,31 @@ export default function TransactionsPage() {
             setQuery((current) => ({ ...current, page: 1, from: event.target.value || undefined }))
           }
         />
+
+
         <button
-          className="button button--secondary filter-button"
-          onClick={() => setMoreFilters(!moreFilters)}
+          className="button button--secondary reset-button"
+          onClick={handleResetFilters}
+          disabled={!hasActiveFilters}
+          aria-label="重置筛选"
+          title="重置所有搜索和筛选条件"
         >
-          <Filter size={15} />
-          更多筛选
+          <RotateCcw size={14} />
+          重置筛选
         </button>
         <div className="toolbar-spacer" />
         <button
           className="icon-button"
-          title="导出 CSV"
-          onClick={() => runExport('csv')}
+          title="导出 Excel"
+          onClick={runExportExcel}
           disabled={exporting}
         >
           <Download size={17} />
-          <span className="sr-only">导出 CSV</span>
-        </button>
-        <button
-          className="icon-button"
-          title="导出 Excel"
-          onClick={() => runExport('excel')}
-          disabled={exporting}
-        >
-          <SlidersHorizontal size={17} />
           <span className="sr-only">导出 Excel</span>
         </button>
+
       </div>
-      {moreFilters && (
-        <div className="filter-panel">
-          <label className="filter-panel__mobile-only" htmlFor="tx-panel-status-select">
-            状态
-            <select
-              id="tx-panel-status-select"
-              name="panelStatus"
-              aria-label="移动端状态筛选"
-              value={query.status ?? ''}
-              onChange={(event) =>
-                setQuery((current) => ({
-                  ...current,
-                  page: 1,
-                  status: (event.target.value || undefined) as TransactionStatus | undefined,
-                }))
-              }
-            >
-              <option value="">全部状态</option>
-              {TRANSACTION_STATUSES.map((status) => (
-                <option key={status}>{status}</option>
-              ))}
-            </select>
-          </label>
-          <label className="filter-panel__mobile-only" htmlFor="tx-panel-from-date">
-            开始日期
-            <input
-              id="tx-panel-from-date"
-              name="panelFromDate"
-              aria-label="移动端开始日期"
-              type="date"
-              value={query.from ?? ''}
-              onChange={(event) =>
-                setQuery((current) => ({
-                  ...current,
-                  page: 1,
-                  from: event.target.value || undefined,
-                }))
-              }
-            />
-          </label>
-          <label htmlFor="tx-panel-to-date">
-            结束日期
-            <input
-              id="tx-panel-to-date"
-              name="panelToDate"
-              aria-label="结束日期"
-              type="date"
-              value={query.to ?? ''}
-              onChange={(event) =>
-                setQuery((current) => ({
-                  ...current,
-                  page: 1,
-                  to: event.target.value || undefined,
-                }))
-              }
-            />
-          </label>
-          <button
-            className="text-button"
-            onClick={() => {
-              setSearch('');
-              setQuery({ ...DEFAULT_QUERY });
-            }}
-          >
-            重置筛选
-          </button>
-          <div className="mobile-export-actions">
-            <button
-              className="button button--secondary"
-              onClick={() => runExport('csv')}
-              disabled={exporting}
-            >
-              导出全部 CSV
-            </button>
-            <button
-              className="button button--secondary"
-              onClick={() => runExport('excel')}
-              disabled={exporting}
-            >
-              导出全部 Excel
-            </button>
-          </div>
-        </div>
-      )}
+
       {result.data && result.data.warnings.length > 0 && (
         <div className="data-note" role="status">
           有 {result.data.warnings.length} 个飞书字段无法识别，相关位置已显示为 —。

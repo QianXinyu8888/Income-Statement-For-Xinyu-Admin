@@ -1,4 +1,7 @@
+import { useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
+
+
 import { apiClient } from '../api/client';
 import { ErrorState, LoadingState } from '../components/LoadingState';
 
@@ -11,8 +14,26 @@ const money = new Intl.NumberFormat('zh-CN', {
 
 const formatMoney = (value: number | null) => (value === null ? '—' : money.format(value));
 
+
+const formatYearMonth = (monthStr: string) => {
+  if (!monthStr || typeof monthStr !== 'string' || !monthStr.includes('-')) {
+    return monthStr || '—';
+  }
+  const [year, month] = monthStr.split('-');
+  return `${year}.${month}`;
+};
+
+
 export default function OverviewPage() {
   const summary = useQuery({ queryKey: ['summary'], queryFn: () => apiClient.summary() });
+
+  // 确保 Hook 无条件在组件顶部按恒定顺序触发 (遵循 Rules of Hooks)
+  const monthly = useMemo(() => {
+    const list = summary.data?.monthly;
+    if (!list || !Array.isArray(list)) return [];
+    return [...list].sort((a, b) => String(a.month ?? '').localeCompare(String(b.month ?? '')));
+  }, [summary.data?.monthly]);
+
   if (summary.isLoading) return <LoadingState label="正在计算经营数据" />;
   if (summary.isError)
     return <ErrorState message={summary.error.message} onRetry={() => summary.refetch()} />;
@@ -28,10 +49,11 @@ export default function OverviewPage() {
     },
     { key: 'count', label: '成交笔数', value: `${data.count} 笔` },
   ];
-  const monthly = data.monthly.filter(
-    (item): item is typeof item & { profit: number } => item.profit !== null,
-  );
-  const max = Math.max(...monthly.map((item) => Math.abs(item.profit)), 1);
+
+  const max = Math.max(...monthly.map((item) => Math.abs(item.profit ?? 0)), 1);
+
+
+
   return (
     <section className="page">
       <header className="page-header">
@@ -54,32 +76,62 @@ export default function OverviewPage() {
         </div>
       )}
       <section className="panel">
-        <header>
-          <h2>月度利润</h2>
+        <header className="panel-header-row">
+          <h2 id="overview-monthly-profit-title">月度利润</h2>
           <span>最近 {monthly.length} 个月</span>
         </header>
         {monthly.length ? (
-          <div className="simple-chart">
-            {monthly.map((item) => (
-              <div key={item.month} className="simple-chart__item">
-                <span>{item.month.slice(5)}</span>
-                <div
-                  className="simple-chart__plot"
-                  data-direction={item.profit >= 0 ? 'positive' : 'negative'}
-                >
-                  <i
-                    className={item.profit >= 0 ? 'bar-positive' : 'bar-negative'}
-                    style={{ height: `${Math.max(4, (Math.abs(item.profit) / max) * 100)}%` }}
-                  />
-                </div>
-                <strong>{money.format(item.profit)}</strong>
-              </div>
-            ))}
+          <div className="simple-chart-wrapper">
+            <div
+              className="simple-chart"
+              role="region"
+              aria-labelledby="overview-monthly-profit-title"
+            >
+              {monthly.map((item, index) => {
+                const profitVal = item.profit ?? 0;
+                const ariaText = `${item.month} 利润：${formatMoney(item.profit)}`;
+                return (
+                  <div
+                    key={item.month}
+                    className="simple-chart__item"
+                    role="img"
+                    aria-label={ariaText}
+                    style={{ '--bar-index': index } as React.CSSProperties}
+                  >
+                    <div
+                      className="simple-chart__plot"
+                      data-direction={profitVal >= 0 ? 'positive' : 'negative'}
+                    >
+                      <i
+                        className={
+                          item.profit === null
+                            ? 'bar-empty'
+                            : profitVal >= 0
+                            ? 'bar-positive'
+                            : 'bar-negative'
+                        }
+                        style={{
+                          height: `${item.profit === null ? 4 : Math.max(4, (Math.abs(profitVal) / max) * 100)}%`,
+                        }}
+                      />
+                    </div>
+                    <div className="simple-chart__info">
+                      <span className="simple-chart__month">{formatYearMonth(item.month)}</span>
+                      <strong className="simple-chart__amount">{formatMoney(item.profit)}</strong>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
           </div>
         ) : (
           <div className="empty-inline">暂无已售出交易</div>
         )}
       </section>
+
     </section>
   );
 }
+
+
+

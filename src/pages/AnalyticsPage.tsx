@@ -2,10 +2,10 @@ import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { ChevronDown, ChevronRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import { Bar, BarChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
 import { apiClient } from '../api/client';
 import { ErrorState, LoadingState } from '../components/LoadingState';
 import type { AnalyticsOrderIndexItem } from '../domain/analytics';
+import { MonthlyProfitChart } from '../features/analytics/MonthlyProfitChart';
 
 const money = new Intl.NumberFormat('zh-CN', {
   style: 'currency',
@@ -115,25 +115,14 @@ export default function AnalyticsPage() {
               条已售出记录字段不完整，图表和金额只使用飞书中的真实值。
             </div>
           )}
-          <section className="panel panel--wide">
+          <section className="panel panel--wide monthly-profit-panel">
             <header>
-              <h2>月度趋势</h2>
-            </header>
-            {summary.data!.monthly.some((item) => item.profit !== null) ? (
-              <div className="chart" role="img" aria-label="月度利润趋势图">
-                <ResponsiveContainer width="100%" height="100%">
-                  <BarChart data={summary.data!.monthly.filter((item) => item.profit !== null)}>
-                    <CartesianGrid stroke="var(--border)" vertical={false} />
-                    <XAxis dataKey="month" tickLine={false} axisLine={false} />
-                    <YAxis tickLine={false} axisLine={false} />
-                    <Tooltip />
-                    <Bar dataKey="profit" name="利润" fill="var(--accent)" radius={[4, 4, 0, 0]} />
-                  </BarChart>
-                </ResponsiveContainer>
+              <div className="monthly-profit-panel__title">
+                <h2>月度利润</h2>
+                <span>按月对比</span>
               </div>
-            ) : (
-              <div className="empty-inline">暂无可用利润数据</div>
-            )}
+            </header>
+            <MonthlyProfitChart monthly={summary.data!.monthly} />
           </section>
           <section className="panel analytics-stat-card">
             <StatCardTitle>利润区间</StatCardTitle>

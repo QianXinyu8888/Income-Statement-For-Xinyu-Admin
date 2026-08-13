@@ -23,6 +23,7 @@
 ### 任务 1：月度利润数据与坐标范围纯函数
 
 **文件：**
+
 - 创建：`src/features/analytics/monthly-profit-chart.ts`
 - 测试：`src/features/analytics/monthly-profit-chart.test.ts`
 
@@ -140,6 +141,7 @@ git commit -m "feat: 增加月度利润图表数据处理"
 ### 任务 2：直接标数图表组件
 
 **文件：**
+
 - 创建：`src/features/analytics/MonthlyProfitChart.tsx`
 - 测试：`src/features/analytics/MonthlyProfitChart.test.tsx`
 
@@ -150,7 +152,14 @@ import { render, screen } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
 import { MonthlyProfitChart } from './MonthlyProfitChart';
 
-vi.stubGlobal('ResizeObserver', class { observe() {} unobserve() {} disconnect() {} });
+vi.stubGlobal(
+  'ResizeObserver',
+  class {
+    observe() {}
+    unobserve() {}
+    disconnect() {}
+  },
+);
 const monthly = Array.from({ length: 10 }, (_, index) => ({
   month: `2026-${String(index + 1).padStart(2, '0')}`,
   revenue: 1000,
@@ -214,6 +223,7 @@ git commit -m "feat: 新增直接标数月度利润图表"
 ### 任务 3：页面接入、样式与完整验证
 
 **文件：**
+
 - 修改：`src/pages/AnalyticsPage.tsx`
 - 修改：`src/pages/AnalyticsPage.test.tsx`
 - 修改：`src/styles.css`
@@ -256,17 +266,58 @@ expect(screen.getByTestId('monthly-profit-scroll')).toBeInTheDocument();
 在 `src/styles.css` 现有图表规则附近添加：
 
 ```css
-:root { --profit-strong: #0f7a42; }
-[data-theme='dark'] { --profit-strong: #79e6a8; }
-.monthly-profit-panel { overflow: hidden; }
-.monthly-profit-panel > header > div { display: flex; align-items: baseline; gap: 10px; }
-.monthly-profit-chart { max-width: 100%; margin-top: 18px; }
-.monthly-profit-chart__scroll { max-width: 100%; overflow-x: auto; overflow-y: hidden; overscroll-behavior-inline: contain; }
-.monthly-profit-chart__canvas { height: 330px; max-width: none; }
-.monthly-profit-chart__label { fill: var(--text); font-size: 11px; font-weight: 650; font-variant-numeric: tabular-nums; }
-.monthly-profit-tooltip { max-width: min(220px, calc(100vw - 32px)); padding: 10px 12px; border: 1px solid var(--border); border-radius: 9px; background: var(--surface); box-shadow: var(--shadow-float); }
-.monthly-profit-tooltip strong { display: block; margin-top: 3px; font-variant-numeric: tabular-nums; }
-@media (max-width: 720px) { .monthly-profit-chart__canvas { height: 300px; } }
+:root {
+  --profit-strong: #0f7a42;
+}
+[data-theme='dark'] {
+  --profit-strong: #79e6a8;
+}
+.monthly-profit-panel {
+  overflow: hidden;
+}
+.monthly-profit-panel > header > div {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+}
+.monthly-profit-chart {
+  max-width: 100%;
+  margin-top: 18px;
+}
+.monthly-profit-chart__scroll {
+  max-width: 100%;
+  overflow-x: auto;
+  overflow-y: hidden;
+  overscroll-behavior-inline: contain;
+}
+.monthly-profit-chart__canvas {
+  height: 330px;
+  max-width: none;
+}
+.monthly-profit-chart__label {
+  fill: var(--text);
+  font-size: 11px;
+  font-weight: 650;
+  font-variant-numeric: tabular-nums;
+}
+.monthly-profit-tooltip {
+  max-width: min(220px, calc(100vw - 32px));
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: 9px;
+  background: var(--surface);
+  box-shadow: var(--shadow-float);
+}
+.monthly-profit-tooltip strong {
+  display: block;
+  margin-top: 3px;
+  font-variant-numeric: tabular-nums;
+}
+@media (max-width: 720px) {
+  .monthly-profit-chart__canvas {
+    height: 300px;
+  }
+}
 ```
 
 只在准确定位后修改 `src/styles.css`，保留其中当前已有的用户改动。

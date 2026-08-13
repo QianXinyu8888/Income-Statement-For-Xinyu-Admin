@@ -17,7 +17,10 @@ const summary: AnalyticsSummary = {
   returnCount: 1,
   returnLoss: 45,
   incompleteCount: 0,
-  monthly: [{ month: '2026-08', revenue: 1000, profit: 600, count: 1 }],
+  monthly: [
+    { month: '2026-07', revenue: 1000, profit: 600, count: 1 },
+    { month: '2026-08', revenue: 500, profit: -100, count: 1 },
+  ],
   brackets: [
     {
       name: '高收益',
@@ -110,7 +113,10 @@ describe('AnalyticsPage drilldown', () => {
     vi.spyOn(apiClient, 'summary').mockResolvedValue(summary);
     renderPage();
 
-    expect(await screen.findByRole('img', { name: '月度利润趋势图' })).toBeInTheDocument();
+    expect(await screen.findByRole('heading', { name: '月度利润' })).toBeInTheDocument();
+    expect(screen.getByText('按月对比')).toBeInTheDocument();
+    expect(screen.getByRole('img', { name: '月度利润趋势图' })).toBeInTheDocument();
+    expect(screen.getByTestId('monthly-profit-scroll')).toBeInTheDocument();
     expect(screen.queryByText('占比')).not.toBeInTheDocument();
     expect(screen.queryByText('成交金额')).not.toBeInTheDocument();
   });

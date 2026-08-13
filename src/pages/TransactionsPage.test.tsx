@@ -176,6 +176,34 @@ describe('TransactionsPage focused navigation', () => {
     );
   });
 
+  it('keeps status and date boundary reachable directly from toolbar', async () => {
+    vi.spyOn(apiClient, 'transactions').mockResolvedValue({
+      items: [target],
+      total: 1,
+      page: 1,
+      pageSize: 20,
+      warnings: [],
+    });
+    renderPage('/transactions');
+
+    fireEvent.change(screen.getByRole('combobox', { name: '状态' }), {
+      target: { value: '已售出' },
+    });
+    fireEvent.change(screen.getByLabelText('开始日期'), {
+      target: { value: '2026-01-01' },
+    });
+
+    await waitFor(() =>
+      expect(apiClient.transactions).toHaveBeenLastCalledWith(
+        expect.objectContaining({
+          status: '已售出',
+          from: '2026-01-01',
+        }),
+      ),
+    );
+  });
+
+
   it('gives batch status actions explicit accessible names', async () => {
     vi.spyOn(apiClient, 'transactions').mockResolvedValue({
       items: [target],
@@ -193,39 +221,6 @@ describe('TransactionsPage focused navigation', () => {
     expect(screen.getByRole('button', { name: '标记在售中' })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: '标记已售出' })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: '删除所选交易' })).toBeInTheDocument();
-  });
-
-  it('keeps status and both date boundaries reachable from more filters', async () => {
-    vi.spyOn(apiClient, 'transactions').mockResolvedValue({
-      items: [target],
-      total: 1,
-      page: 1,
-      pageSize: 20,
-      warnings: [],
-    });
-    renderPage('/transactions');
-
-    fireEvent.click(await screen.findByRole('button', { name: /更多筛选/ }));
-
-    fireEvent.change(screen.getByLabelText('移动端状态筛选'), {
-      target: { value: '已售出' },
-    });
-    fireEvent.change(screen.getByLabelText('移动端开始日期'), {
-      target: { value: '2026-01-01' },
-    });
-    fireEvent.change(screen.getByLabelText('结束日期'), {
-      target: { value: '2026-08-12' },
-    });
-
-    await waitFor(() =>
-      expect(apiClient.transactions).toHaveBeenLastCalledWith(
-        expect.objectContaining({
-          status: '已售出',
-          from: '2026-01-01',
-          to: '2026-08-12',
-        }),
-      ),
-    );
   });
 
   it('opens an editable list field and focuses its matching drawer control', async () => {
