@@ -1562,6 +1562,50 @@ select.pagination-select option {
 .settings-list dd {
   margin: 0;
 }
+.theme-segmented {
+  max-width: 360px;
+  margin: 0;
+  padding: 3px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  display: flex;
+  background: var(--surface-2);
+}
+.theme-segmented label {
+  min-width: 0;
+  flex: 1;
+  position: relative;
+  cursor: pointer;
+}
+.theme-segmented input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+}
+.theme-segmented span {
+  min-height: 32px;
+  padding: 6px 10px;
+  border-radius: 5px;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.2;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.theme-segmented input:checked + span {
+  background: var(--surface);
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.12);
+  color: var(--text);
+  font-weight: 600;
+}
+.theme-segmented input:focus-visible + span {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
 .connected {
   color: var(--profit);
 }
@@ -2752,6 +2796,10 @@ tbody tr:nth-child(n + 5),
   }
   .settings-list > div {
     min-height: 62px;
+  }
+  .theme-segmented {
+    width: 100%;
+    max-width: 100%;
   }
   .security-note {
     font-size: 14px;

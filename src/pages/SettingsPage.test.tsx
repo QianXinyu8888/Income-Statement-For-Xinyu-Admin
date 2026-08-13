@@ -1,20 +1,30 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { render, screen } from '@testing-library/react';
+import { cleanup, render, screen, within } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { apiClient } from '../api/client';
+import { BrowserPreferencesProvider } from '../preferences/BrowserPreferencesContext';
 import SettingsPage from './SettingsPage';
 
 function renderPage() {
   const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
   return render(
     <QueryClientProvider client={client}>
-      <SettingsPage />
+      <BrowserPreferencesProvider>
+        <SettingsPage />
+      </BrowserPreferencesProvider>
     </QueryClientProvider>,
   );
 }
 
 describe('SettingsPage', () => {
-  afterEach(() => vi.restoreAllMocks());
+  afterEach(() => {
+    cleanup();
+    vi.restoreAllMocks();
+    localStorage.clear();
+    delete document.documentElement.dataset.theme;
+    document.documentElement.classList.remove('reduce-motion');
+  });
 
   it('presents account and service metadata as a named description list', async () => {
     vi.spyOn(apiClient, 'session').mockResolvedValue({
@@ -27,5 +37,22 @@ describe('SettingsPage', () => {
     expect(metadata.tagName).toBe('DL');
     expect(await screen.findByText('xinyu')).toBeInTheDocument();
     expect(await screen.findByText('正常')).toHaveClass('connected');
+  });
+
+  it('chooses system, light or dark theme and keeps reduced motion in browser preferences', async () => {
+    vi.spyOn(apiClient, 'session').mockResolvedValue({
+      user: { username: 'xinyu', role: '管理员' },
+    });
+    vi.spyOn(apiClient, 'health').mockResolvedValue({ connected: true, checkedAt: '2026-08-13' });
+    const user = userEvent.setup();
+    renderPage();
+
+    const theme = await screen.findByRole('radiogroup', { name: '主题模式' });
+    expect(within(theme).getByRole('radio', { name: '跟随系统' })).toBeChecked();
+    await user.click(within(theme).getByRole('radio', { name: '深色' }));
+    expect(document.documentElement).toHaveAttribute('data-theme', 'dark');
+
+    await user.click(screen.getByRole('checkbox', { name: /缩减界面动画/ }));
+    expect(document.documentElement).toHaveClass('reduce-motion');
   });
 });
