@@ -5,6 +5,8 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { apiClient, type TransactionPage } from '../api/client';
 import type { AnalyticsSummary } from '../domain/analytics';
 import type { Transaction } from '../domain/transaction';
+import { BrowserPreferencesProvider } from '../preferences/BrowserPreferencesContext';
+import { PREFERENCES_STORAGE_KEY } from '../preferences/browser-preferences';
 import TransactionsPage from './TransactionsPage';
 
 const target: Transaction = {
@@ -47,10 +49,12 @@ function renderPage(initialEntry = '/transactions?focus=target') {
   const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
   return render(
     <QueryClientProvider client={client}>
-      <MemoryRouter initialEntries={[initialEntry]}>
-        <TransactionsPage />
-        <LocationSearch />
-      </MemoryRouter>
+      <BrowserPreferencesProvider>
+        <MemoryRouter initialEntries={[initialEntry]}>
+          <TransactionsPage />
+          <LocationSearch />
+        </MemoryRouter>
+      </BrowserPreferencesProvider>
     </QueryClientProvider>,
   );
 }
@@ -79,6 +83,7 @@ describe('TransactionsPage focused navigation', () => {
     vi.unstubAllGlobals();
     vi.useRealTimers();
     scrollIntoView.mockReset();
+    localStorage.clear();
   });
 
   it('loads the target page, scrolls to the order, and clears highlighting after 1.5 seconds', async () => {
@@ -203,7 +208,6 @@ describe('TransactionsPage focused navigation', () => {
     );
   });
 
-
   it('gives batch status actions explicit accessible names', async () => {
     vi.spyOn(apiClient, 'transactions').mockResolvedValue({
       items: [target],
@@ -242,5 +246,34 @@ describe('TransactionsPage focused navigation', () => {
     await waitFor(() =>
       expect(within(dialog).getByRole('combobox', { name: '状态' })).toHaveFocus(),
     );
+  });
+
+  it('restores the same stored field preferences in desktop and mobile lists', async () => {
+    localStorage.setItem(
+      PREFERENCES_STORAGE_KEY,
+      JSON.stringify({
+        version: 1,
+        themeMode: 'system',
+        visibleTransactionFields: ['title', 'profit'],
+        analysisMonth: '2026-08',
+        reduceMotion: false,
+      }),
+    );
+    vi.spyOn(apiClient, 'transactions').mockResolvedValue({
+      items: [target],
+      total: 1,
+      page: 1,
+      pageSize: 20,
+      warnings: [],
+    });
+
+    const { container } = renderPage('/transactions');
+
+    expect(await screen.findByRole('button', { name: '选择显示字段' })).toBeInTheDocument();
+    expect(screen.getByRole('columnheader', { name: '商品名称' })).toBeInTheDocument();
+    expect(screen.getByRole('columnheader', { name: '利润' })).toBeInTheDocument();
+    expect(screen.queryByRole('columnheader', { name: '交易状态' })).not.toBeInTheDocument();
+    expect(container.querySelector('.mobile-list')).toHaveTextContent('利润+¥690.00');
+    expect(container.querySelector('.mobile-list')).not.toHaveTextContent('交易状态已售出');
   });
 });

@@ -1,6 +1,10 @@
 import type { ReactNode } from 'react';
 import type { EditableTransactionField, Transaction } from '../../domain/transaction';
 import { StatusBadge } from '../../components/StatusBadge';
+import {
+  ALL_TRANSACTION_FIELDS,
+  type TransactionFieldId,
+} from '../../preferences/browser-preferences';
 
 const money = new Intl.NumberFormat('zh-CN', {
   style: 'currency',
@@ -13,6 +17,7 @@ const displayMoney = (value: number | null) => (value === null ? '—' : money.f
 interface Props {
   records: Transaction[];
   selected: Set<string>;
+  visibleFields: TransactionFieldId[];
   focusedId?: string | null;
   onToggle: (id: string) => void;
   onOpen: (record: Transaction, field: EditableTransactionField) => void;
@@ -63,6 +68,7 @@ function EditableField({
 export function TransactionList({
   records,
   selected,
+  visibleFields,
   focusedId,
   onToggle,
   onOpen,
@@ -70,26 +76,35 @@ export function TransactionList({
   const label = (record: Transaction) => record.title ?? '未命名交易';
   const showProfit = (record: Transaction) =>
     record.status === '已售出' || record.status === '已退货';
+  const visible = new Set<TransactionFieldId>(['title', ...visibleFields]);
+  const shows = (field: TransactionFieldId) => visible.has(field);
+  const optionalCount = ALL_TRANSACTION_FIELDS.filter(
+    (field) => field !== 'title' && visible.has(field),
+  ).length;
+  const tableMinWidth = Math.max(640, 362 + optionalCount * 118);
+  const hasMobileDetails = ALL_TRANSACTION_FIELDS.some(
+    (field) => field !== 'title' && field !== 'status' && visible.has(field),
+  );
   return (
     <>
       <div className="table-wrap desktop-list">
-        <table aria-label="交易明细">
+        <table aria-label="交易明细" style={{ minWidth: tableMinWidth }}>
           <thead>
             <tr>
               <th className="check-cell">
                 <span className="sr-only">选择</span>
               </th>
               <th>商品名称</th>
-              <th>交易状态</th>
-              <th>购入日期</th>
-              <th>售出日期</th>
-              <th className="number">持有天数</th>
-              <th className="number">购入成本</th>
-              <th className="number">运费</th>
-              <th className="number">总成本</th>
-              <th className="number">成交价</th>
-              <th className="number">利润</th>
-              <th>备注</th>
+              {shows('status') && <th>交易状态</th>}
+              {shows('purchaseDate') && <th>购入日期</th>}
+              {shows('soldDate') && <th>售出日期</th>}
+              {shows('holdingDays') && <th className="number">持有天数</th>}
+              {shows('costPrice') && <th className="number">购入成本</th>}
+              {shows('shippingFee') && <th className="number">运费</th>}
+              {shows('totalCost') && <th className="number">总成本</th>}
+              {shows('salePrice') && <th className="number">成交价</th>}
+              {shows('profit') && <th className="number">利润</th>}
+              {shows('note') && <th>备注</th>}
             </tr>
           </thead>
           <tbody>
@@ -120,83 +135,103 @@ export function TransactionList({
                     {record.title ?? '—'}
                   </EditableField>
                 </td>
-                <td>
-                  <EditableField
-                    field="status"
-                    label="交易状态"
-                    value={record.status ?? '空'}
-                    onClick={() => onOpen(record, 'status')}
-                  >
-                    <StatusBadge status={record.status} />
-                  </EditableField>
-                </td>
-                <td className="muted">
-                  <EditableField
-                    field="purchaseDate"
-                    label="购入日期"
-                    value={display(record.purchaseDate).toString()}
-                    onClick={() => onOpen(record, 'purchaseDate')}
-                  >
-                    {display(record.purchaseDate)}
-                  </EditableField>
-                </td>
-                <td className="muted">
-                  <EditableField
-                    field="soldDate"
-                    label="售出日期"
-                    value={display(record.soldDate).toString()}
-                    onClick={() => onOpen(record, 'soldDate')}
-                  >
-                    {display(record.soldDate)}
-                  </EditableField>
-                </td>
-                <td className="number muted">
-                  {record.holdingDays === null ? '—' : `${record.holdingDays} 天`}
-                </td>
-                <td className="number muted">
-                  <EditableField
-                    field="costPrice"
-                    label="购入成本"
-                    value={displayMoney(record.costPrice)}
-                    onClick={() => onOpen(record, 'costPrice')}
-                  >
-                    {displayMoney(record.costPrice)}
-                  </EditableField>
-                </td>
-                <td className="number muted">
-                  <EditableField
-                    field="shippingFee"
-                    label="运费"
-                    value={displayMoney(record.shippingFee)}
-                    onClick={() => onOpen(record, 'shippingFee')}
-                  >
-                    {displayMoney(record.shippingFee)}
-                  </EditableField>
-                </td>
-                <td className="number muted">{displayMoney(record.totalCost)}</td>
-                <td className="number">
-                  <EditableField
-                    field="salePrice"
-                    label="成交价"
-                    value={displayMoney(record.salePrice)}
-                    onClick={() => onOpen(record, 'salePrice')}
-                  >
-                    {displayMoney(record.salePrice)}
-                  </EditableField>
-                </td>
-                <td className="number">
-                  <Profit value={record.profit} visible={showProfit(record)} />
-                </td>
-                <td className="note-cell">
-                  <EditableField
-                    field="note"
-                    label="备注"
-                    value={record.note || '空'}
-                    onClick={() => onOpen(record, 'note')}
-                  >
-                    {record.note || '—'}
-                  </EditableField>
-                </td>
+                {shows('status') && (
+                  <td>
+                    <EditableField
+                      field="status"
+                      label="交易状态"
+                      value={record.status ?? '空'}
+                      onClick={() => onOpen(record, 'status')}
+                    >
+                      <StatusBadge status={record.status} />
+                    </EditableField>
+                  </td>
+                )}
+                {shows('purchaseDate') && (
+                  <td className="muted">
+                    <EditableField
+                      field="purchaseDate"
+                      label="购入日期"
+                      value={display(record.purchaseDate).toString()}
+                      onClick={() => onOpen(record, 'purchaseDate')}
+                    >
+                      {display(record.purchaseDate)}
+                    </EditableField>
+                  </td>
+                )}
+                {shows('soldDate') && (
+                  <td className="muted">
+                    <EditableField
+                      field="soldDate"
+                      label="售出日期"
+                      value={display(record.soldDate).toString()}
+                      onClick={() => onOpen(record, 'soldDate')}
+                    >
+                      {display(record.soldDate)}
+                    </EditableField>
+                  </td>
+                )}
+                {shows('holdingDays') && (
+                  <td className="number muted">
+                    {record.holdingDays === null ? '—' : `${record.holdingDays} 天`}
+                  </td>
+                )}
+                {shows('costPrice') && (
+                  <td className="number muted">
+                    <EditableField
+                      field="costPrice"
+                      label="购入成本"
+                      value={displayMoney(record.costPrice)}
+                      onClick={() => onOpen(record, 'costPrice')}
+                    >
+                      {displayMoney(record.costPrice)}
+                    </EditableField>
+                  </td>
+                )}
+                {shows('shippingFee') && (
+                  <td className="number muted">
+                    <EditableField
+                      field="shippingFee"
+                      label="运费"
+                      value={displayMoney(record.shippingFee)}
+                      onClick={() => onOpen(record, 'shippingFee')}
+                    >
+                      {displayMoney(record.shippingFee)}
+                    </EditableField>
+                  </td>
+                )}
+                {shows('totalCost') && (
+                  <td className="number muted">{displayMoney(record.totalCost)}</td>
+                )}
+                {shows('salePrice') && (
+                  <td className="number">
+                    <EditableField
+                      field="salePrice"
+                      label="成交价"
+                      value={displayMoney(record.salePrice)}
+                      onClick={() => onOpen(record, 'salePrice')}
+                    >
+                      {displayMoney(record.salePrice)}
+                    </EditableField>
+                  </td>
+                )}
+                {shows('profit') && (
+                  <td className="number">
+                    <Profit value={record.profit} visible={showProfit(record)} />
+                  </td>
+                )}
+                {shows('note') && (
+                  <td className="note-cell">
+                    <EditableField
+                      field="note"
+                      label="备注"
+                      value={record.note || '空'}
+                      onClick={() => onOpen(record, 'note')}
+                    >
+                      {record.note || '—'}
+                    </EditableField>
+                  </td>
+                )}
               </tr>
             ))}
           </tbody>
@@ -228,112 +263,134 @@ export function TransactionList({
                 >
                   <strong>{record.title ?? '—'}</strong>
                 </EditableField>
-                <span className="mobile-row__status">
-                  <span className="sr-only">交易状态</span>
-                  <EditableField
-                    field="status"
-                    label="交易状态"
-                    value={record.status ?? '空'}
-                    onClick={() => onOpen(record, 'status')}
-                  >
-                    <StatusBadge status={record.status} />
-                  </EditableField>
-                </span>
+                {shows('status') && (
+                  <span className="mobile-row__status">
+                    <span className="sr-only">交易状态</span>
+                    <EditableField
+                      field="status"
+                      label="交易状态"
+                      value={record.status ?? '空'}
+                      onClick={() => onOpen(record, 'status')}
+                    >
+                      <StatusBadge status={record.status} />
+                    </EditableField>
+                  </span>
+                )}
               </div>
-              <dl className="mobile-row__details">
-                <div>
-                  <dt>购入日期</dt>
-                  <dd>
-                    <EditableField
-                      field="purchaseDate"
-                      label="购入日期"
-                      value={display(record.purchaseDate).toString()}
-                      onClick={() => onOpen(record, 'purchaseDate')}
-                    >
-                      {display(record.purchaseDate)}
-                    </EditableField>
-                  </dd>
-                </div>
-                <div>
-                  <dt>售出日期</dt>
-                  <dd>
-                    <EditableField
-                      field="soldDate"
-                      label="售出日期"
-                      value={display(record.soldDate).toString()}
-                      onClick={() => onOpen(record, 'soldDate')}
-                    >
-                      {display(record.soldDate)}
-                    </EditableField>
-                  </dd>
-                </div>
-                <div>
-                  <dt>持有天数</dt>
-                  <dd>{record.holdingDays === null ? '—' : `${record.holdingDays} 天`}</dd>
-                </div>
-                <div>
-                  <dt>购入成本</dt>
-                  <dd>
-                    <EditableField
-                      field="costPrice"
-                      label="购入成本"
-                      value={displayMoney(record.costPrice)}
-                      onClick={() => onOpen(record, 'costPrice')}
-                    >
-                      {displayMoney(record.costPrice)}
-                    </EditableField>
-                  </dd>
-                </div>
-                <div>
-                  <dt>运费</dt>
-                  <dd>
-                    <EditableField
-                      field="shippingFee"
-                      label="运费"
-                      value={displayMoney(record.shippingFee)}
-                      onClick={() => onOpen(record, 'shippingFee')}
-                    >
-                      {displayMoney(record.shippingFee)}
-                    </EditableField>
-                  </dd>
-                </div>
-                <div>
-                  <dt>总成本</dt>
-                  <dd>{displayMoney(record.totalCost)}</dd>
-                </div>
-                <div>
-                  <dt>成交价</dt>
-                  <dd>
-                    <EditableField
-                      field="salePrice"
-                      label="成交价"
-                      value={displayMoney(record.salePrice)}
-                      onClick={() => onOpen(record, 'salePrice')}
-                    >
-                      {displayMoney(record.salePrice)}
-                    </EditableField>
-                  </dd>
-                </div>
-                <div>
-                  <dt>利润</dt>
-                  <dd>
-                    <Profit value={record.profit} visible={showProfit(record)} />
-                  </dd>
-                </div>
-                <div className="mobile-row__note">
-                  <dt>备注</dt>
-                  <dd>
-                    <EditableField
-                      field="note"
-                      label="备注"
-                      value={record.note || '空'}
-                      onClick={() => onOpen(record, 'note')}
-                    >
-                      {record.note || '—'}
-                    </EditableField>
-                  </dd>
-                </div>
-              </dl>
+              {hasMobileDetails && (
+                <dl className="mobile-row__details">
+                  {shows('purchaseDate') && (
+                    <div>
+                      <dt>购入日期</dt>
+                      <dd>
+                        <EditableField
+                          field="purchaseDate"
+                          label="购入日期"
+                          value={display(record.purchaseDate).toString()}
+                          onClick={() => onOpen(record, 'purchaseDate')}
+                        >
+                          {display(record.purchaseDate)}
+                        </EditableField>
+                      </dd>
+                    </div>
+                  )}
+                  {shows('soldDate') && (
+                    <div>
+                      <dt>售出日期</dt>
+                      <dd>
+                        <EditableField
+                          field="soldDate"
+                          label="售出日期"
+                          value={display(record.soldDate).toString()}
+                          onClick={() => onOpen(record, 'soldDate')}
+                        >
+                          {display(record.soldDate)}
+                        </EditableField>
+                      </dd>
+                    </div>
+                  )}
+                  {shows('holdingDays') && (
+                    <div>
+                      <dt>持有天数</dt>
+                      <dd>{record.holdingDays === null ? '—' : `${record.holdingDays} 天`}</dd>
+                    </div>
+                  )}
+                  {shows('costPrice') && (
+                    <div>
+                      <dt>购入成本</dt>
+                      <dd>
+                        <EditableField
+                          field="costPrice"
+                          label="购入成本"
+                          value={displayMoney(record.costPrice)}
+                          onClick={() => onOpen(record, 'costPrice')}
+                        >
+                          {displayMoney(record.costPrice)}
+                        </EditableField>
+                      </dd>
+                    </div>
+                  )}
+                  {shows('shippingFee') && (
+                    <div>
+                      <dt>运费</dt>
+                      <dd>
+                        <EditableField
+                          field="shippingFee"
+                          label="运费"
+                          value={displayMoney(record.shippingFee)}
+                          onClick={() => onOpen(record, 'shippingFee')}
+                        >
+                          {displayMoney(record.shippingFee)}
+                        </EditableField>
+                      </dd>
+                    </div>
+                  )}
+                  {shows('totalCost') && (
+                    <div>
+                      <dt>总成本</dt>
+                      <dd>{displayMoney(record.totalCost)}</dd>
+                    </div>
+                  )}
+                  {shows('salePrice') && (
+                    <div>
+                      <dt>成交价</dt>
+                      <dd>
+                        <EditableField
+                          field="salePrice"
+                          label="成交价"
+                          value={displayMoney(record.salePrice)}
+                          onClick={() => onOpen(record, 'salePrice')}
+                        >
+                          {displayMoney(record.salePrice)}
+                        </EditableField>
+                      </dd>
+                    </div>
+                  )}
+                  {shows('profit') && (
+                    <div>
+                      <dt>利润</dt>
+                      <dd>
+                        <Profit value={record.profit} visible={showProfit(record)} />
+                      </dd>
+                    </div>
+                  )}
+                  {shows('note') && (
+                    <div className="mobile-row__note">
+                      <dt>备注</dt>
+                      <dd>
+                        <EditableField
+                          field="note"
+                          label="备注"
+                          value={record.note || '空'}
+                          onClick={() => onOpen(record, 'note')}
+                        >
+                          {record.note || '—'}
+                        </EditableField>
+                      </dd>
+                    </div>
+                  )}
+                </dl>
+              )}
             </div>
           </article>
         ))}

@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Download, Plus, RotateCcw, Search, SlidersHorizontal } from 'lucide-react';
+import { Download, Plus, RotateCcw, Search } from 'lucide-react';
 
 import { useSearchParams } from 'react-router-dom';
 import { apiClient, type TransactionQuery } from '../api/client';
@@ -11,12 +11,14 @@ import type {
   TransactionStatus,
 } from '../domain/transaction';
 import { TRANSACTION_STATUSES } from '../domain/transaction';
-import { downloadCsv, downloadExcel } from '../domain/export';
+import { downloadExcel } from '../domain/export';
 import { ErrorState, LoadingState } from '../components/LoadingState';
 import { TransactionList } from '../features/transactions/TransactionList';
 import { TransactionDrawer } from '../features/transactions/TransactionDrawer';
 import { ConfirmDialog } from '../components/ConfirmDialog';
 import { Pagination } from '../components/Pagination';
+import { ColumnVisibilityPanel } from '../features/transactions/ColumnVisibilityPanel';
+import { useBrowserPreferences } from '../preferences/BrowserPreferencesContext';
 
 type DeleteIntent = { kind: 'single'; record: Transaction } | { kind: 'batch'; count: number };
 
@@ -30,6 +32,11 @@ const DEFAULT_QUERY = {
 export default function TransactionsPage() {
   const client = useQueryClient();
   const [searchParams, setSearchParams] = useSearchParams();
+  const {
+    preferences: { visibleTransactionFields },
+    setTransactionFieldVisible,
+    resetTransactionFields,
+  } = useBrowserPreferences();
   const now = new Date();
   const month = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
   const monthEnd = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
@@ -55,7 +62,6 @@ export default function TransactionsPage() {
     setSearch('');
     setQuery({ ...DEFAULT_QUERY });
   };
-
 
   const result = useQuery({
     queryKey: ['transactions', query],
@@ -255,7 +261,6 @@ export default function TransactionsPage() {
           }
         />
 
-
         <button
           className="button button--secondary reset-button"
           onClick={handleResetFilters}
@@ -267,6 +272,11 @@ export default function TransactionsPage() {
           重置筛选
         </button>
         <div className="toolbar-spacer" />
+        <ColumnVisibilityPanel
+          visibleFields={visibleTransactionFields}
+          onFieldVisible={setTransactionFieldVisible}
+          onReset={resetTransactionFields}
+        />
         <button
           className="icon-button"
           title="导出 Excel"
@@ -276,7 +286,6 @@ export default function TransactionsPage() {
           <Download size={17} />
           <span className="sr-only">导出 Excel</span>
         </button>
-
       </div>
 
       {result.data && result.data.warnings.length > 0 && (
@@ -300,6 +309,7 @@ export default function TransactionsPage() {
         <TransactionList
           records={records}
           selected={selected}
+          visibleFields={visibleTransactionFields}
           focusedId={focusedId}
           onToggle={(id) =>
             setSelected((current) => {
