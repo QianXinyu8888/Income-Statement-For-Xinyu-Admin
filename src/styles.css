@@ -1424,34 +1424,126 @@ select.pagination-select option {
   color: var(--muted);
 }
 .analysis-month-control {
-  display: flex;
-  align-items: center;
-  gap: 8px;
+  position: relative;
+  z-index: 12;
+  flex: 0 0 auto;
   max-width: 100%;
 }
-.analysis-month-control input,
-.analysis-month-control button {
+.analysis-month-trigger {
+  min-height: 44px;
   min-width: 0;
   max-width: 100%;
-  min-height: 44px;
+  padding: 0 12px;
+  border: 1px solid var(--border-strong);
+  border-radius: 9px;
+  background: var(--surface);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  white-space: nowrap;
 }
-.analysis-month-control label {
+.analysis-month-trigger:hover,
+.analysis-month-trigger[aria-expanded='true'] {
+  background: var(--surface-2);
+  border-color: color-mix(in srgb, var(--border-strong), var(--accent) 30%);
+}
+.analysis-month-trigger svg:last-child {
   color: var(--muted);
-  white-space: nowrap;
+  transition: transform 160ms ease;
 }
-.analysis-month-control input {
+.analysis-month-trigger[aria-expanded='true'] svg:last-child {
+  transform: rotate(180deg);
+}
+.analysis-month-popover {
+  position: absolute;
+  z-index: 50;
+  top: calc(100% + 8px);
+  right: 0;
+  width: min(320px, calc(100vw - 32px));
+  padding: 12px;
+  border: 1px solid var(--border-strong);
+  border-radius: 12px;
+  background: var(--surface);
+  box-shadow: var(--shadow-float);
+}
+.analysis-month-popover__year {
+  display: grid;
+  grid-template-columns: 44px 1fr 44px;
+  align-items: center;
+  gap: 4px;
+}
+.analysis-month-popover__year strong {
+  text-align: center;
+  font-size: 15px;
+}
+.analysis-month-popover__year button {
+  width: 44px;
   height: 44px;
-  background: var(--surface);
-  border: 1px solid var(--border-strong);
-  border-radius: 9px;
-  padding: 0 12px;
+  padding: 0;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  display: grid;
+  place-items: center;
+  color: var(--muted);
 }
-.analysis-month-control button {
+.analysis-month-popover__year button:hover {
+  background: var(--surface-2);
+  color: var(--text);
+}
+.analysis-month-popover__months {
+  margin-top: 8px;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 6px;
+}
+.analysis-month-popover__months button {
+  min-width: 0;
+  min-height: 52px;
+  padding: 5px 8px;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  background: transparent;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1px;
+}
+.analysis-month-popover__months button:hover {
+  border-color: var(--border);
+  background: var(--surface-2);
+}
+.analysis-month-popover__months button.is-selected {
+  border-color: var(--accent);
+  background: var(--accent);
+  color: var(--surface);
+  font-weight: 700;
+}
+.analysis-month-popover__months small {
+  color: var(--accent);
+  font-size: 10px;
+  line-height: 1.15;
+}
+.analysis-month-popover__months .is-selected small {
+  color: inherit;
+}
+.analysis-month-popover__footer {
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px solid var(--border);
+}
+.analysis-month-popover__footer button {
+  width: 100%;
+  min-height: 44px;
   border: 1px solid var(--border-strong);
-  border-radius: 9px;
+  border-radius: 8px;
   background: var(--surface);
-  padding: 0 12px;
-  white-space: nowrap;
+  font-weight: 600;
+}
+.analysis-month-popover__footer button:hover {
+  background: var(--surface-2);
 }
 .stat-list {
   margin-top: 14px;
@@ -1582,17 +1674,17 @@ select.pagination-select option {
   margin: 0;
 }
 .theme-segmented {
-  max-width: 360px;
+  width: min(300px, 100%);
   margin: 0;
   padding: 3px;
   border: 1px solid var(--border);
   border-radius: 8px;
-  display: flex;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   background: var(--surface-2);
 }
 .theme-segmented label {
   min-width: 0;
-  flex: 1;
   position: relative;
   cursor: pointer;
 }
@@ -1603,16 +1695,14 @@ select.pagination-select option {
   opacity: 0;
 }
 .theme-segmented span {
-  min-height: 32px;
-  padding: 6px 10px;
+  min-height: 44px;
+  padding: 6px 8px;
   border-radius: 5px;
   display: grid;
   place-items: center;
-  overflow: hidden;
   color: var(--muted);
   font-size: 13px;
   line-height: 1.2;
-  text-overflow: ellipsis;
   white-space: nowrap;
 }
 .theme-segmented input:checked + span {
@@ -1658,6 +1748,18 @@ select.pagination-select option {
   .toolbar > input[type='date'],
   .toolbar > select {
     display: none;
+  }
+  .settings-list > div:has(.theme-segmented) {
+    padding-block: 14px;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    gap: 10px;
+  }
+  .settings-list > div:has(.theme-segmented) dd {
+    width: 100%;
+  }
+  .settings-list > div:has(.theme-segmented) .theme-segmented {
+    width: 100%;
   }
 }
 @media (max-width: 680px) {
@@ -2805,16 +2907,23 @@ tbody tr:nth-child(n + 5),
   }
   .analysis-month-control {
     width: 100%;
-    flex-wrap: wrap;
     margin-top: 8px;
   }
-  .analysis-month-control input,
-  .analysis-month-control button {
-    flex: 1 1 100%;
+  .analysis-month-trigger {
     width: 100%;
+    justify-content: space-between;
   }
-  .analysis-month-control label {
-    flex-basis: 100%;
+  .analysis-month-popover {
+    position: fixed;
+    top: auto;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    max-height: min(78dvh, 620px);
+    padding: 14px 16px calc(14px + env(safe-area-inset-bottom));
+    border-width: 1px 0 0;
+    border-radius: 16px 16px 0 0;
   }
   .settings-list {
     padding-inline: 16px;
