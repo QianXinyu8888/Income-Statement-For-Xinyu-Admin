@@ -82,9 +82,22 @@ export function TransactionList({
     (field) => field !== 'title' && visible.has(field),
   ).length;
   const tableMinWidth = Math.max(640, 362 + optionalCount * 118);
-  const hasMobileDetails = ALL_TRANSACTION_FIELDS.some(
+  const mobileDetailFields = ALL_TRANSACTION_FIELDS.filter(
     (field) => field !== 'title' && field !== 'status' && visible.has(field),
   );
+  const hasMobileDetails = mobileDetailFields.length > 0;
+  const wideMobileDetail =
+    mobileDetailFields.length % 2 === 1
+      ? mobileDetailFields[mobileDetailFields.length - 1]
+      : null;
+  const mobileDetailClass = (field: TransactionFieldId) =>
+    [
+      'mobile-row__detail',
+      field === 'note' && 'mobile-row__note',
+      field === wideMobileDetail && 'mobile-row__detail--wide',
+    ]
+      .filter(Boolean)
+      .join(' ');
   return (
     <>
       <div className="table-wrap desktop-list">
@@ -241,7 +254,13 @@ export function TransactionList({
         {records.map((record) => (
           <article
             key={record.id}
-            className={selected.has(record.id) ? 'mobile-row is-selected' : 'mobile-row'}
+            className={[
+              'mobile-row',
+              selected.has(record.id) && 'is-selected',
+              !hasMobileDetails && 'mobile-row--compact',
+            ]
+              .filter(Boolean)
+              .join(' ')}
             data-transaction-id={record.id}
             data-focused={focusedId === record.id || undefined}
           >
@@ -280,7 +299,7 @@ export function TransactionList({
               {hasMobileDetails && (
                 <dl className="mobile-row__details">
                   {shows('purchaseDate') && (
-                    <div>
+                    <div className={mobileDetailClass('purchaseDate')}>
                       <dt>购入日期</dt>
                       <dd>
                         <EditableField
@@ -295,7 +314,7 @@ export function TransactionList({
                     </div>
                   )}
                   {shows('soldDate') && (
-                    <div>
+                    <div className={mobileDetailClass('soldDate')}>
                       <dt>售出日期</dt>
                       <dd>
                         <EditableField
@@ -310,13 +329,13 @@ export function TransactionList({
                     </div>
                   )}
                   {shows('holdingDays') && (
-                    <div>
+                    <div className={mobileDetailClass('holdingDays')}>
                       <dt>持有天数</dt>
                       <dd>{record.holdingDays === null ? '—' : `${record.holdingDays} 天`}</dd>
                     </div>
                   )}
                   {shows('costPrice') && (
-                    <div>
+                    <div className={mobileDetailClass('costPrice')}>
                       <dt>购入成本</dt>
                       <dd>
                         <EditableField
@@ -331,7 +350,7 @@ export function TransactionList({
                     </div>
                   )}
                   {shows('shippingFee') && (
-                    <div>
+                    <div className={mobileDetailClass('shippingFee')}>
                       <dt>运费</dt>
                       <dd>
                         <EditableField
@@ -346,13 +365,13 @@ export function TransactionList({
                     </div>
                   )}
                   {shows('totalCost') && (
-                    <div>
+                    <div className={mobileDetailClass('totalCost')}>
                       <dt>总成本</dt>
                       <dd>{displayMoney(record.totalCost)}</dd>
                     </div>
                   )}
                   {shows('salePrice') && (
-                    <div>
+                    <div className={mobileDetailClass('salePrice')}>
                       <dt>成交价</dt>
                       <dd>
                         <EditableField
@@ -367,7 +386,7 @@ export function TransactionList({
                     </div>
                   )}
                   {shows('profit') && (
-                    <div>
+                    <div className={mobileDetailClass('profit')}>
                       <dt>利润</dt>
                       <dd>
                         <Profit value={record.profit} visible={showProfit(record)} />
@@ -375,7 +394,7 @@ export function TransactionList({
                     </div>
                   )}
                   {shows('note') && (
-                    <div className="mobile-row__note">
+                    <div className={mobileDetailClass('note')}>
                       <dt>备注</dt>
                       <dd>
                         <EditableField

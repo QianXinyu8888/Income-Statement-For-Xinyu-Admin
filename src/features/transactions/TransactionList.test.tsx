@@ -262,6 +262,59 @@ describe('TransactionList', () => {
 
     expect(screen.getByRole('columnheader', { name: '商品名称' })).toBeInTheDocument();
     expect(container.querySelector('.mobile-list')).toHaveTextContent('iPhone 15 Pro');
+    expect(container.querySelector('.mobile-row')).toHaveClass('mobile-row--compact');
     expect(container.querySelector('.mobile-row__details')).not.toBeInTheDocument();
+  });
+
+  it('lets a single mobile detail span the full row', () => {
+    const { container } = render(
+      <TransactionList
+        records={[record]}
+        selected={new Set()}
+        visibleFields={['title', 'profit']}
+        onToggle={vi.fn()}
+        onOpen={vi.fn()}
+      />,
+    );
+
+    const details = container.querySelectorAll('.mobile-row__details > div');
+    expect(details).toHaveLength(1);
+    expect(details[0]).toHaveClass('mobile-row__detail', 'mobile-row__detail--wide');
+  });
+
+  it('lets only the last detail span the full row when the visible count is odd', () => {
+    const { container } = render(
+      <TransactionList
+        records={[record]}
+        selected={new Set()}
+        visibleFields={['title', 'purchaseDate', 'soldDate', 'profit']}
+        onToggle={vi.fn()}
+        onOpen={vi.fn()}
+      />,
+    );
+
+    const details = container.querySelectorAll('.mobile-row__details > div');
+    expect(details).toHaveLength(3);
+    expect(details[0]).toHaveClass('mobile-row__detail');
+    expect(details[0]).not.toHaveClass('mobile-row__detail--wide');
+    expect(details[1]).not.toHaveClass('mobile-row__detail--wide');
+    expect(details[2]).toHaveClass('mobile-row__detail', 'mobile-row__detail--wide');
+  });
+
+  it('keeps a final note in the second column when the detail count is even', () => {
+    const { container } = render(
+      <TransactionList
+        records={[record]}
+        selected={new Set()}
+        visibleFields={['title', 'profit', 'note']}
+        onToggle={vi.fn()}
+        onOpen={vi.fn()}
+      />,
+    );
+
+    const details = container.querySelectorAll('.mobile-row__details > div');
+    expect(details).toHaveLength(2);
+    expect(details[1]).toHaveClass('mobile-row__detail', 'mobile-row__note');
+    expect(details[1]).not.toHaveClass('mobile-row__detail--wide');
   });
 });

@@ -1,14 +1,14 @@
 import { useState } from 'react';
 import { cleanup, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { afterEach, describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import {
   ALL_TRANSACTION_FIELDS,
   type TransactionFieldId,
 } from '../../preferences/browser-preferences';
 import { ColumnVisibilityPanel } from './ColumnVisibilityPanel';
 
-function Harness() {
+function Harness({ onOutsideClick = () => undefined }: { onOutsideClick?: () => void }) {
   const [visible, setVisible] = useState<TransactionFieldId[]>([...ALL_TRANSACTION_FIELDS]);
   return (
     <>
@@ -23,7 +23,7 @@ function Harness() {
         }
         onReset={() => setVisible([...ALL_TRANSACTION_FIELDS])}
       />
-      <button type="button">面板外按钮</button>
+      <button type="button" onClick={onOutsideClick}>面板外按钮</button>
     </>
   );
 }
@@ -39,7 +39,9 @@ describe('ColumnVisibilityPanel', () => {
     await user.click(trigger);
 
     expect(trigger).toHaveAttribute('aria-expanded', 'true');
-    expect(screen.getByRole('dialog', { name: '显示字段' })).toBeInTheDocument();
+    expect(screen.getByRole('dialog', { name: '显示字段' })).toHaveClass(
+      'column-visibility__panel',
+    );
     expect(screen.getByRole('checkbox', { name: '商品名称' })).toBeDisabled();
     expect(screen.getByRole('checkbox', { name: '交易状态' })).toHaveFocus();
     await user.click(screen.getByRole('checkbox', { name: '备注' }));
@@ -53,11 +55,25 @@ describe('ColumnVisibilityPanel', () => {
 
   it('closes when clicking outside and returns focus to the trigger', async () => {
     const user = userEvent.setup();
-    render(<Harness />);
+    const onOutsideClick = vi.fn();
+    render(<Harness onOutsideClick={onOutsideClick} />);
     const trigger = screen.getByRole('button', { name: '选择显示字段' });
 
     await user.click(trigger);
     await user.click(screen.getByRole('button', { name: '面板外按钮' }));
+
+    expect(trigger).toHaveAttribute('aria-expanded', 'false');
+    expect(trigger).toHaveFocus();
+    expect(onOutsideClick).toHaveBeenCalledOnce();
+  });
+
+  it('closes from the explicit close button and returns focus to the trigger', async () => {
+    const user = userEvent.setup();
+    render(<Harness />);
+    const trigger = screen.getByRole('button', { name: '选择显示字段' });
+
+    await user.click(trigger);
+    await user.click(screen.getByRole('button', { name: '关闭字段选择' }));
 
     expect(trigger).toHaveAttribute('aria-expanded', 'false');
     expect(trigger).toHaveFocus();
