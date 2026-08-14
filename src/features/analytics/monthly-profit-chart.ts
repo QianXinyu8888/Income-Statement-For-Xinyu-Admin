@@ -12,7 +12,6 @@ export type MonthlyProfitDatum = MonthlyItem & {
   compactProfit: string;
   sign: ProfitSign;
   isHighestPositive: boolean;
-  isCurrentMonth: boolean;
 };
 
 const compactNumber = (value: number) => value.toFixed(1).replace(/\.0$/, '');
@@ -157,7 +156,6 @@ export function buildMonthlyProfitData(
       compactProfit: hasProfit ? formatCompactCny(profit) : '—',
       sign: profit > 0 ? 'positive' : profit < 0 ? 'negative' : 'zero',
       isHighestPositive: hasProfit && profit > 0 && profit === highestPositive,
-      isCurrentMonth: item.month === currentMonth,
     };
   });
 }

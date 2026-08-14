@@ -77,16 +77,10 @@ describe('monthly profit chart helpers', () => {
       '2026-08',
     );
 
-    expect(
-      result.map(({ month, axisLabel, isCurrentMonth }) => ({
-        month,
-        axisLabel,
-        isCurrentMonth,
-      })),
-    ).toEqual([
-      { month: '2026-08', axisLabel: '2026.08', isCurrentMonth: true },
-      { month: '2026-07', axisLabel: '2026.07', isCurrentMonth: false },
-      { month: '2026-06', axisLabel: '2026.06', isCurrentMonth: false },
+    expect(result.map(({ month, axisLabel }) => ({ month, axisLabel }))).toEqual([
+      { month: '2026-08', axisLabel: '2026.08' },
+      { month: '2026-07', axisLabel: '2026.07' },
+      { month: '2026-06', axisLabel: '2026.06' },
     ]);
   });
 

@@ -3006,10 +3006,6 @@ tbody tr:nth-child(n + 5),
   font-size: 11px;
   font-variant-numeric: tabular-nums;
 }
-.monthly-profit-chart__axis-tick.is-current text {
-  fill: var(--text);
-  font-weight: 750;
-}
 .monthly-profit-tooltip {
   max-width: min(220px, calc(100vw - 32px));
   padding: 10px 12px;

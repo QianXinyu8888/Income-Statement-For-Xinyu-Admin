@@ -78,11 +78,7 @@ function MonthAxisTick({ x = 0, y = 0, payload, data }: MonthAxisTickProps) {
   if (!item) return null;
 
   return (
-    <g
-      className={`monthly-profit-chart__axis-tick${item.isCurrentMonth ? ' is-current' : ''}`}
-      data-testid={item.isCurrentMonth ? 'current-month-tick' : undefined}
-      transform={`translate(${x} ${y})`}
-    >
+    <g className="monthly-profit-chart__axis-tick" transform={`translate(${x} ${y})`}>
       <text textAnchor="middle">
         <tspan x="0" dy="1.35em">
           {item.axisLabel}

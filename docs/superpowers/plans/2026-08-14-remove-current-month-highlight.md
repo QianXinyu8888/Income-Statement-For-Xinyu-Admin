@@ -4,7 +4,7 @@
 
 **目标：** 删除月度利润图对当前月份的专属视觉与内部标记，使所有横轴月份标签完全一致。
 
-**架构：** 继续由共享 `MonthlyProfitChart` 同时服务概览页和分析页，但从数据模型、渲染组件和样式表中移除 `isCurrentMonth` 分支。测试先约束横轴不再生成当前月专属类名或测试标记，再做最小实现。
+**架构：** 分析页继续使用 `MonthlyProfitChart`，并从其数据模型、渲染组件和样式表中移除 `isCurrentMonth` 分支；概览页的独立轻量图表原本没有当前月高亮，无需修改。测试先约束分析页横轴不再生成当前月专属类名或测试标记，再做最小实现。
 
 **技术栈：** React、TypeScript、Recharts、Vitest、Testing Library、CSS
 
