@@ -62,6 +62,7 @@ describe('SettingsPage', () => {
     const user = userEvent.setup();
     const rendered = renderPage();
 
+    expect(await screen.findByRole('group', { name: '界面偏好' })).toBeInTheDocument();
     const theme = await screen.findByRole('radiogroup', { name: '主题模式' });
     expect(within(theme).getByRole('radio', { name: '跟随系统' })).toBeChecked();
     await user.click(within(theme).getByRole('radio', { name: '深色' }));

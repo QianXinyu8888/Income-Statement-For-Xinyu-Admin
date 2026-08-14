@@ -49,11 +49,11 @@ export default function SettingsPage() {
 
       <header className="page-header" style={{ marginTop: '24px' }}>
         <div>
-          <h2>界面与动画偏好</h2>
-          <p>个性化显示与界面交互支持</p>
+          <h2>界面偏好</h2>
+          <p>个性化主题显示</p>
         </div>
       </header>
-      <dl className="settings-list" role="group" aria-label="界面与动画偏好">
+      <dl className="settings-list" role="group" aria-label="界面偏好">
         <div>
           <dt>主题模式</dt>
           <dd>
