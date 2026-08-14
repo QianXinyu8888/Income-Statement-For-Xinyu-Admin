@@ -71,9 +71,9 @@ export default function SettingsPage() {
             <fieldset className="theme-segmented" role="radiogroup" aria-label="主题模式">
               {(
                 [
-                  ['system', '跟随系统'],
                   ['light', '浅色'],
                   ['dark', '深色'],
+                  ['system', '跟随系统'],
                 ] as const
               ).map(([value, label]) => (
                 <label key={value}>

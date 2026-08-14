@@ -105,6 +105,11 @@ describe('SettingsPage', () => {
 
     expect(await screen.findByRole('group', { name: '界面偏好' })).toBeInTheDocument();
     const theme = await screen.findByRole('radiogroup', { name: '主题模式' });
+    expect(
+      within(theme)
+        .getAllByRole('radio')
+        .map((radio) => radio.closest('label')?.textContent?.trim()),
+    ).toEqual(['浅色', '深色', '跟随系统']);
     expect(within(theme).getByRole('radio', { name: '跟随系统' })).toBeChecked();
     await user.click(within(theme).getByRole('radio', { name: '深色' }));
     expect(document.documentElement).toHaveAttribute('data-theme', 'dark');
