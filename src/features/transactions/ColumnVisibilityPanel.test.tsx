@@ -37,6 +37,7 @@ describe('ColumnVisibilityPanel', () => {
     const user = userEvent.setup();
     render(<Harness />);
     const trigger = screen.getByRole('button', { name: '选择显示字段' });
+    expect(trigger).toHaveTextContent('自定义字段显示');
 
     await user.click(trigger);
 

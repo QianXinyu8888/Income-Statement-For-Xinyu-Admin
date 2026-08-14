@@ -6,9 +6,8 @@ export default function SettingsPage() {
   const session = useQuery({ queryKey: ['session'], queryFn: apiClient.session, retry: false });
   const health = useQuery({ queryKey: ['health'], queryFn: apiClient.health, retry: false });
   const {
-    preferences: { themeMode, reduceMotion },
+    preferences: { themeMode },
     setThemeMode,
-    setReduceMotion,
   } = useBrowserPreferences();
 
   return (
@@ -78,23 +77,6 @@ export default function SettingsPage() {
                 </label>
               ))}
             </fieldset>
-          </dd>
-        </div>
-        <div>
-          <dt>
-            <label htmlFor="reduce-motion-toggle" style={{ cursor: 'pointer' }}>
-              缩减界面动画 (Reduced Motion)
-            </label>
-          </dt>
-          <dd>
-            <input
-              id="reduce-motion-toggle"
-              name="reduceMotion"
-              type="checkbox"
-              checked={reduceMotion}
-              onChange={(event) => setReduceMotion(event.target.checked)}
-              style={{ width: '18px', height: '18px', cursor: 'pointer' }}
-            />
           </dd>
         </div>
       </dl>

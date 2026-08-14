@@ -40,7 +40,7 @@ describe('SettingsPage', () => {
     expect(await screen.findByText('正常')).toHaveClass('connected');
   });
 
-  it('switches system → dark → light → system and keeps reduced motion in browser preferences', async () => {
+  it('switches system → dark → light → system without a manual reduced-motion control', async () => {
     vi.spyOn(apiClient, 'session').mockResolvedValue({
       user: { username: 'xinyu', role: '管理员' },
     });
@@ -71,9 +71,7 @@ describe('SettingsPage', () => {
     expect(document.documentElement).toHaveAttribute('data-theme', 'light');
     await user.click(within(theme).getByRole('radio', { name: '跟随系统' }));
     expect(document.documentElement).toHaveAttribute('data-theme', 'dark');
-
-    await user.click(screen.getByRole('checkbox', { name: /缩减界面动画/ }));
-    expect(document.documentElement).toHaveClass('reduce-motion');
+    expect(screen.queryByRole('checkbox', { name: /缩减界面动画/ })).not.toBeInTheDocument();
 
     rendered.unmount();
     expect(addEventListener).toHaveBeenCalledWith('change', expect.any(Function));
