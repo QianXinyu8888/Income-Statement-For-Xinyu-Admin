@@ -17,7 +17,6 @@ interface BrowserPreferencesContextValue {
   setTransactionFieldVisible: (field: TransactionFieldId, visible: boolean) => void;
   resetTransactionFields: () => void;
   setAnalysisMonth: (month: string) => void;
-  setReduceMotion: (value: boolean) => void;
 }
 
 const BrowserPreferencesContext = createContext<BrowserPreferencesContextValue | null>(null);
@@ -46,8 +45,7 @@ export function BrowserPreferencesProvider({ children }: { children: React.React
   useEffect(() => {
     const effectiveTheme = preferences.themeMode === 'system' ? systemTheme : preferences.themeMode;
     document.documentElement.dataset.theme = effectiveTheme;
-    document.documentElement.classList.toggle('reduce-motion', preferences.reduceMotion);
-  }, [preferences.reduceMotion, preferences.themeMode, systemTheme]);
+  }, [preferences.themeMode, systemTheme]);
 
   useEffect(() => {
     if (preferences.themeMode !== 'system') return;
@@ -101,8 +99,6 @@ export function BrowserPreferencesProvider({ children }: { children: React.React
           updatePreferences((current) => ({ ...current, analysisMonth }));
         }
       },
-      setReduceMotion: (reduceMotion) =>
-        updatePreferences((current) => ({ ...current, reduceMotion })),
     }),
     [effectiveTheme, preferences, updatePreferences],
   );

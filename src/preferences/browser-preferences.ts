@@ -22,7 +22,6 @@ export interface BrowserPreferencesV1 {
   themeMode: ThemeMode;
   visibleTransactionFields: TransactionFieldId[];
   analysisMonth: string;
-  reduceMotion: boolean;
 }
 
 type PreferenceStorage = Pick<Storage, 'getItem' | 'setItem'>;
@@ -43,7 +42,6 @@ function defaults(now: Date): BrowserPreferencesV1 {
     themeMode: 'system',
     visibleTransactionFields: [...ALL_TRANSACTION_FIELDS],
     analysisMonth: localMonth(now),
-    reduceMotion: false,
   };
 }
 
@@ -56,11 +54,9 @@ export function readPreferences(
     const raw = storage.getItem(PREFERENCES_STORAGE_KEY);
     if (!raw) {
       const legacyTheme = storage.getItem('theme');
-      const legacyMotion = storage.getItem('reduce-motion');
       return {
         ...fallback,
         themeMode: legacyTheme === 'light' || legacyTheme === 'dark' ? legacyTheme : 'system',
-        reduceMotion: legacyMotion === 'true',
       };
     }
     const parsed = JSON.parse(raw) as Record<string, unknown>;
@@ -79,8 +75,6 @@ export function readPreferences(
       analysisMonth: isValidMonth(parsed.analysisMonth)
         ? parsed.analysisMonth
         : fallback.analysisMonth,
-      reduceMotion:
-        typeof parsed.reduceMotion === 'boolean' ? parsed.reduceMotion : fallback.reduceMotion,
     };
   } catch {
     return fallback;

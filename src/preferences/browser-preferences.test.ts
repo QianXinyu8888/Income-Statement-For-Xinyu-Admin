@@ -19,25 +19,23 @@ class MemoryStorage implements Pick<Storage, 'getItem' | 'setItem'> {
 const august = new Date(2026, 7, 13, 12);
 
 describe('browser preferences storage', () => {
-  it('defaults a new browser to system theme, all fields, this month and full motion', () => {
+  it('defaults a new browser to system theme, all fields and this month', () => {
     const storage = new MemoryStorage();
     expect(readPreferences(storage, august)).toEqual({
       version: 1,
       themeMode: 'system',
       visibleTransactionFields: ALL_TRANSACTION_FIELDS,
       analysisMonth: '2026-08',
-      reduceMotion: false,
     });
   });
 
-  it('migrates legacy explicit theme and reduced motion values', () => {
+  it('migrates a legacy explicit theme and ignores legacy reduced motion', () => {
     const storage = new MemoryStorage();
     storage.values.set('theme', 'dark');
     storage.values.set('reduce-motion', 'true');
-    expect(readPreferences(storage, august)).toMatchObject({
-      themeMode: 'dark',
-      reduceMotion: true,
-    });
+    const preferences = readPreferences(storage, august);
+    expect(preferences).toMatchObject({ themeMode: 'dark' });
+    expect(preferences).not.toHaveProperty('reduceMotion');
   });
 
   it('filters unknown fields, deduplicates values and restores the required title field', () => {
@@ -49,7 +47,6 @@ describe('browser preferences storage', () => {
         themeMode: 'light',
         visibleTransactionFields: ['profit', 'futureField', 'profit'],
         analysisMonth: '2026-03',
-        reduceMotion: false,
       }),
     );
     expect(readPreferences(storage, august).visibleTransactionFields).toEqual(['title', 'profit']);
@@ -76,7 +73,6 @@ describe('browser preferences storage', () => {
         themeMode: 'system',
         visibleTransactionFields: ['title'],
         analysisMonth: '2026-13',
-        reduceMotion: false,
       }),
     );
     expect(readPreferences(storage, august).analysisMonth).toBe('2026-08');

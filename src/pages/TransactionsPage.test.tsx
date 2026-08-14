@@ -270,7 +270,6 @@ describe('TransactionsPage focused navigation', () => {
         themeMode: 'system',
         visibleTransactionFields: ['title', 'profit'],
         analysisMonth: '2026-08',
-        reduceMotion: false,
       }),
     );
     vi.spyOn(apiClient, 'transactions').mockResolvedValue({

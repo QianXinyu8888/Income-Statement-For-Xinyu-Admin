@@ -2,6 +2,7 @@ import { act, cleanup, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { BrowserPreferencesProvider, useBrowserPreferences } from './BrowserPreferencesContext';
+import { PREFERENCES_STORAGE_KEY } from './browser-preferences';
 
 function Consumer() {
   const value = useBrowserPreferences();
@@ -12,7 +13,6 @@ function Consumer() {
       <button onClick={value.toggleTheme}>快捷切换</button>
       <button onClick={() => value.setThemeMode('system')}>系统</button>
       <button onClick={() => value.setThemeMode('dark')}>深色</button>
-      <button onClick={() => value.setReduceMotion(true)}>缩减动画</button>
     </>
   );
 }
@@ -43,7 +43,6 @@ describe('BrowserPreferencesProvider', () => {
     cleanup();
     localStorage.clear();
     document.documentElement.removeAttribute('data-theme');
-    document.documentElement.classList.remove('reduce-motion');
     vi.unstubAllGlobals();
   });
 
@@ -74,14 +73,23 @@ describe('BrowserPreferencesProvider', () => {
     expect(document.documentElement).toHaveAttribute('data-theme', 'light');
   });
 
-  it('applies reduced motion to the document root', async () => {
+  it('ignores a stored manual reduced-motion value', () => {
     installMatchMedia(false);
+    localStorage.setItem(
+      PREFERENCES_STORAGE_KEY,
+      JSON.stringify({
+        version: 1,
+        themeMode: 'system',
+        visibleTransactionFields: ['title'],
+        analysisMonth: '2026-08',
+        reduceMotion: true,
+      }),
+    );
     render(
       <BrowserPreferencesProvider>
         <Consumer />
       </BrowserPreferencesProvider>,
     );
-    await userEvent.click(screen.getByRole('button', { name: '缩减动画' }));
-    expect(document.documentElement).toHaveClass('reduce-motion');
+    expect(document.documentElement).not.toHaveClass('reduce-motion');
   });
 });

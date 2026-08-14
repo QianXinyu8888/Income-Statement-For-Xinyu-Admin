@@ -24,7 +24,6 @@ describe('SettingsPage', () => {
     vi.unstubAllGlobals();
     localStorage.clear();
     delete document.documentElement.dataset.theme;
-    document.documentElement.classList.remove('reduce-motion');
   });
 
   it('presents account and service metadata as a named description list', async () => {
