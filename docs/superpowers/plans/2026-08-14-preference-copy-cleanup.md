@@ -13,6 +13,7 @@
 ### 任务 1：锁定新文案和设置页行为
 
 **文件：**
+
 - 修改：`src/features/transactions/ColumnVisibilityPanel.test.tsx`
 - 修改：`src/pages/SettingsPage.test.tsx`
 
@@ -39,6 +40,7 @@
 ### 任务 2：移除手动缩减动画偏好数据流
 
 **文件：**
+
 - 修改：`src/preferences/browser-preferences.test.ts`
 - 修改：`src/preferences/BrowserPreferencesContext.test.tsx`
 - 修改：`src/preferences/browser-preferences.ts`
@@ -69,6 +71,7 @@
 ### 任务 3：验证响应式与全量回归
 
 **文件：**
+
 - 验证：`src/features/transactions/ColumnVisibilityPanel.tsx`
 - 验证：`src/styles.css`
 

@@ -72,7 +72,8 @@ export function ColumnVisibilityPanel({ visibleFields, onFieldVisible, onReset }
         aria-controls={panelId}
         onClick={() => setOpen((value) => !value)}
       >
-        <Columns3 size={16} aria-hidden="true" />自定义字段显示
+        <Columns3 size={16} aria-hidden="true" />
+        自定义字段显示
       </button>
       {open && (
         <div
