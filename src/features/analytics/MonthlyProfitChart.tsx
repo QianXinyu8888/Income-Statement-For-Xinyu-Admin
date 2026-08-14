@@ -84,11 +84,8 @@ function MonthAxisTick({ x = 0, y = 0, payload, data }: MonthAxisTickProps) {
       transform={`translate(${x} ${y})`}
     >
       <text textAnchor="middle">
-        <tspan x="0" dy="1em">
-          {item.yearLabel}
-        </tspan>
         <tspan x="0" dy="1.35em">
-          {item.monthLabel}
+          {item.axisLabel}
         </tspan>
       </text>
     </g>

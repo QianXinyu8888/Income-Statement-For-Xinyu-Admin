@@ -145,8 +145,8 @@ describe('AnalyticsPage drilldown', () => {
     expect(screen.getByText('按月对比')).toBeInTheDocument();
     expect(screen.getByRole('img', { name: '月度利润趋势图' })).toBeInTheDocument();
     expect(screen.getByTestId('monthly-profit-scroll')).toBeInTheDocument();
-    expect(screen.getByText('7月')).toBeInTheDocument();
-    expect(screen.getByText('8月')).toBeInTheDocument();
+    expect(screen.getByText('2026.07')).toBeInTheDocument();
+    expect(screen.getByText('2026.08')).toBeInTheDocument();
     expect(screen.queryByText('占比')).not.toBeInTheDocument();
     expect(screen.queryByText('成交金额')).not.toBeInTheDocument();
   });

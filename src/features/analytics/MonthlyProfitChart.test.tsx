@@ -71,17 +71,17 @@ describe('MonthlyProfitChart', () => {
       [...container.querySelectorAll('.monthly-profit-chart__axis-tick')].map((tick) =>
         tick.textContent?.replace(/\s/g, ''),
       ),
-    ).toEqual(['26年8月', '26年7月', '26年6月']);
+    ).toEqual(['2026.08', '2026.07', '2026.06']);
     expect(screen.getByText('¥0')).toBeInTheDocument();
   });
 
-  it('renders the current month as a compact two-line year-month tick', () => {
+  it('renders the current month as a single dotted year-month tick', () => {
     render(<MonthlyProfitChart monthly={monthly} />);
 
     const currentTick = screen.getByTestId('current-month-tick');
     expect(currentTick).toHaveClass('is-current');
-    expect(currentTick).toHaveTextContent('26年8月');
-    expect(currentTick.querySelectorAll('tspan')).toHaveLength(2);
+    expect(currentTick).toHaveTextContent('2026.08');
+    expect(currentTick.querySelectorAll('tspan')).toHaveLength(1);
   });
 
   it('keeps a month with unavailable profit visible without inventing zero', () => {

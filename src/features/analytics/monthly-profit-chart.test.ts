@@ -3,12 +3,19 @@ import {
   buildMonthlyProfitData,
   completeMonthlyProfitMonths,
   formatCompactCny,
+  formatMonthAxisLabel,
   getBarLabelY,
   getProfitDomain,
   getTooltipPosition,
 } from './monthly-profit-chart';
 
 describe('monthly profit chart helpers', () => {
+  it('formats valid month keys as four-digit dotted axis labels', () => {
+    expect(formatMonthAxisLabel('2026-08')).toBe('2026.08');
+    expect(formatMonthAxisLabel('2026-12')).toBe('2026.12');
+    expect(formatMonthAxisLabel('invalid')).toBe('invalid');
+  });
+
   it('fills missing months backwards from the current month and excludes future data', () => {
     const result = completeMonthlyProfitMonths(
       [
@@ -71,16 +78,15 @@ describe('monthly profit chart helpers', () => {
     );
 
     expect(
-      result.map(({ month, yearLabel, monthLabel, isCurrentMonth }) => ({
+      result.map(({ month, axisLabel, isCurrentMonth }) => ({
         month,
-        yearLabel,
-        monthLabel,
+        axisLabel,
         isCurrentMonth,
       })),
     ).toEqual([
-      { month: '2026-08', yearLabel: '26年', monthLabel: '8月', isCurrentMonth: true },
-      { month: '2026-07', yearLabel: '26年', monthLabel: '7月', isCurrentMonth: false },
-      { month: '2026-06', yearLabel: '26年', monthLabel: '6月', isCurrentMonth: false },
+      { month: '2026-08', axisLabel: '2026.08', isCurrentMonth: true },
+      { month: '2026-07', axisLabel: '2026.07', isCurrentMonth: false },
+      { month: '2026-06', axisLabel: '2026.06', isCurrentMonth: false },
     ]);
   });
 

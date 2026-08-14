@@ -2,7 +2,10 @@ import { useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { apiClient } from '../api/client';
 import { ErrorState, LoadingState } from '../components/LoadingState';
-import { completeMonthlyProfitMonths } from '../features/analytics/monthly-profit-chart';
+import {
+  completeMonthlyProfitMonths,
+  formatMonthAxisLabel,
+} from '../features/analytics/monthly-profit-chart';
 
 const money = new Intl.NumberFormat('zh-CN', {
   style: 'currency',
@@ -12,14 +15,6 @@ const money = new Intl.NumberFormat('zh-CN', {
 });
 
 const formatMoney = (value: number | null) => (value === null ? '—' : money.format(value));
-
-const formatYearMonth = (monthStr: string) => {
-  if (!monthStr || typeof monthStr !== 'string' || !monthStr.includes('-')) {
-    return monthStr || '—';
-  }
-  const [year, month] = monthStr.split('-');
-  return `${year}.${month}`;
-};
 
 export default function OverviewPage() {
   const summary = useQuery({ queryKey: ['summary'], queryFn: () => apiClient.summary() });
@@ -110,7 +105,9 @@ export default function OverviewPage() {
                       />
                     </div>
                     <div className="simple-chart__info">
-                      <span className="simple-chart__month">{formatYearMonth(item.month)}</span>
+                      <span className="simple-chart__month">
+                        {formatMonthAxisLabel(item.month)}
+                      </span>
                       <strong className="simple-chart__amount">{formatMoney(item.profit)}</strong>
                     </div>
                   </div>

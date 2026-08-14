@@ -7,8 +7,7 @@ export type ProfitSign = 'positive' | 'negative' | 'zero';
 export type MonthlyProfitDatum = MonthlyItem & {
   profit: number;
   hasProfit: boolean;
-  yearLabel: string;
-  monthLabel: string;
+  axisLabel: string;
   tooltipMonth: string;
   compactProfit: string;
   sign: ProfitSign;
@@ -31,6 +30,11 @@ export function formatCompactCny(value: number) {
   return `${sign}¥${new Intl.NumberFormat('zh-CN', {
     maximumFractionDigits: absolute > 0 && absolute < 1 ? 2 : 0,
   }).format(absolute)}`;
+}
+
+export function formatMonthAxisLabel(value: string) {
+  const match = /^(\d{4})-(0[1-9]|1[0-2])$/.exec(value);
+  return match ? `${match[1]}.${match[2]}` : value;
 }
 
 export function getProfitDomain(values: number[]): [number, number] {
@@ -148,8 +152,7 @@ export function buildMonthlyProfitData(
       ...item,
       profit,
       hasProfit,
-      yearLabel: `${year.slice(-2)}年`,
-      monthLabel: `${month}月`,
+      axisLabel: formatMonthAxisLabel(item.month),
       tooltipMonth: `${year} 年 ${month} 月`,
       compactProfit: hasProfit ? formatCompactCny(profit) : '—',
       sign: profit > 0 ? 'positive' : profit < 0 ? 'negative' : 'zero',
