@@ -93,7 +93,7 @@ export default function AnalyticsPage() {
     queryFn: () => apiClient.summary(),
   });
   return (
-    <section className="page">
+    <section className="page page--analytics">
       <header className="page-header">
         <div>
           <h1>利润分析</h1>

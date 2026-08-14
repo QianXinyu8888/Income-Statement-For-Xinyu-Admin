@@ -1460,8 +1460,8 @@ select.pagination-select option {
   z-index: 50;
   top: calc(100% + 8px);
   right: 0;
-  width: min(320px, calc(100vw - 32px));
-  padding: 12px;
+  width: min(288px, calc(100vw - 32px));
+  padding: 10px;
   border: 1px solid var(--border-strong);
   border-radius: 12px;
   background: var(--surface);
@@ -1493,15 +1493,15 @@ select.pagination-select option {
   color: var(--text);
 }
 .analysis-month-popover__months {
-  margin-top: 8px;
+  margin-top: 6px;
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 6px;
+  gap: 4px;
 }
 .analysis-month-popover__months button {
   min-width: 0;
-  min-height: 52px;
-  padding: 5px 8px;
+  min-height: 46px;
+  padding: 4px 7px;
   border: 1px solid transparent;
   border-radius: 8px;
   background: transparent;
@@ -1530,8 +1530,8 @@ select.pagination-select option {
   color: inherit;
 }
 .analysis-month-popover__footer {
-  margin-top: 10px;
-  padding-top: 10px;
+  margin-top: 8px;
+  padding-top: 8px;
   border-top: 1px solid var(--border);
 }
 .analysis-month-popover__footer button {
@@ -3256,6 +3256,7 @@ tbody tr:nth-child(n + 5),
 }
 
 @media (max-width: 680px) {
+  .page--analytics,
   .page--transactions {
     animation: none;
   }

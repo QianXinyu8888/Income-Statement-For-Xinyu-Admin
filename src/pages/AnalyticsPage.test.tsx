@@ -138,8 +138,9 @@ describe('AnalyticsPage drilldown', () => {
 
   it('renders the unfiltered multi-month trend without inventing aggregate columns', async () => {
     mockSummaries();
-    renderPage();
+    const { container } = renderPage();
 
+    expect(container.querySelector('.page')).toHaveClass('page--analytics');
     expect(await screen.findByRole('heading', { name: '月度利润' })).toBeInTheDocument();
     expect(screen.getByText('按月对比')).toBeInTheDocument();
     expect(screen.getByRole('img', { name: '月度利润趋势图' })).toBeInTheDocument();
