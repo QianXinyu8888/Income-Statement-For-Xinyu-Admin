@@ -1,7 +1,6 @@
 import { useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 
-
 import { apiClient } from '../api/client';
 import { ErrorState, LoadingState } from '../components/LoadingState';
 
@@ -14,7 +13,6 @@ const money = new Intl.NumberFormat('zh-CN', {
 
 const formatMoney = (value: number | null) => (value === null ? '—' : money.format(value));
 
-
 const formatYearMonth = (monthStr: string) => {
   if (!monthStr || typeof monthStr !== 'string' || !monthStr.includes('-')) {
     return monthStr || '—';
@@ -22,7 +20,6 @@ const formatYearMonth = (monthStr: string) => {
   const [year, month] = monthStr.split('-');
   return `${year}.${month}`;
 };
-
 
 export default function OverviewPage() {
   const summary = useQuery({ queryKey: ['summary'], queryFn: () => apiClient.summary() });
@@ -51,8 +48,6 @@ export default function OverviewPage() {
   ];
 
   const max = Math.max(...monthly.map((item) => Math.abs(item.profit ?? 0)), 1);
-
-
 
   return (
     <section className="page">
@@ -107,8 +102,8 @@ export default function OverviewPage() {
                           item.profit === null
                             ? 'bar-empty'
                             : profitVal >= 0
-                            ? 'bar-positive'
-                            : 'bar-negative'
+                              ? 'bar-positive'
+                              : 'bar-negative'
                         }
                         style={{
                           height: `${item.profit === null ? 4 : Math.max(4, (Math.abs(profitVal) / max) * 100)}%`,
@@ -128,10 +123,6 @@ export default function OverviewPage() {
           <div className="empty-inline">暂无已售出交易</div>
         )}
       </section>
-
     </section>
   );
 }
-
-
-

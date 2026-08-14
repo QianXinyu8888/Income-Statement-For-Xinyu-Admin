@@ -54,7 +54,8 @@ export function BrowserPreferencesProvider({ children }: { children: React.React
 
     const mediaQuery = window.matchMedia?.('(prefers-color-scheme: dark)');
     if (!mediaQuery) return;
-    const handleChange = (event: MediaQueryListEvent) => setSystemTheme(event.matches ? 'dark' : 'light');
+    const handleChange = (event: MediaQueryListEvent) =>
+      setSystemTheme(event.matches ? 'dark' : 'light');
     setSystemTheme(mediaQuery.matches ? 'dark' : 'light');
     mediaQuery.addEventListener('change', handleChange);
     return () => mediaQuery.removeEventListener('change', handleChange);
@@ -62,9 +63,12 @@ export function BrowserPreferencesProvider({ children }: { children: React.React
 
   const effectiveTheme = preferences.themeMode === 'system' ? systemTheme : preferences.themeMode;
 
-  const updatePreferences = useCallback((updater: (current: BrowserPreferencesV1) => BrowserPreferencesV1) => {
-    setPreferences(updater);
-  }, []);
+  const updatePreferences = useCallback(
+    (updater: (current: BrowserPreferencesV1) => BrowserPreferencesV1) => {
+      setPreferences(updater);
+    },
+    [],
+  );
 
   const value = useMemo<BrowserPreferencesContextValue>(
     () => ({
@@ -103,11 +107,17 @@ export function BrowserPreferencesProvider({ children }: { children: React.React
     [effectiveTheme, preferences, updatePreferences],
   );
 
-  return <BrowserPreferencesContext.Provider value={value}>{children}</BrowserPreferencesContext.Provider>;
+  return (
+    <BrowserPreferencesContext.Provider value={value}>
+      {children}
+    </BrowserPreferencesContext.Provider>
+  );
 }
 
+// eslint-disable-next-line react-refresh/only-export-components
 export function useBrowserPreferences(): BrowserPreferencesContextValue {
   const value = useContext(BrowserPreferencesContext);
-  if (!value) throw new Error('useBrowserPreferences must be used within BrowserPreferencesProvider');
+  if (!value)
+    throw new Error('useBrowserPreferences must be used within BrowserPreferencesProvider');
   return value;
 }

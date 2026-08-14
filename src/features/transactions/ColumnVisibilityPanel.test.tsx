@@ -23,7 +23,9 @@ function Harness({ onOutsideClick = () => undefined }: { onOutsideClick?: () => 
         }
         onReset={() => setVisible([...ALL_TRANSACTION_FIELDS])}
       />
-      <button type="button" onClick={onOutsideClick}>面板外按钮</button>
+      <button type="button" onClick={onOutsideClick}>
+        面板外按钮
+      </button>
     </>
   );
 }

@@ -54,9 +54,7 @@ export default function TransactionsPage() {
   const [exporting, setExporting] = useState(false);
   const [focusedId, setFocusedId] = useState<string | null>(null);
 
-  const hasActiveFilters = Boolean(
-    search || query.status || query.from || query.to || query.q
-  );
+  const hasActiveFilters = Boolean(search || query.status || query.from || query.to || query.q);
 
   const handleResetFilters = () => {
     setSearch('');
@@ -327,9 +325,7 @@ export default function TransactionsPage() {
           page={result.data.page}
           pageSize={result.data.pageSize}
           total={result.data.total}
-          onPageChange={(targetPage) =>
-            setQuery((current) => ({ ...current, page: targetPage }))
-          }
+          onPageChange={(targetPage) => setQuery((current) => ({ ...current, page: targetPage }))}
         />
       )}
       {selected.size > 0 && (

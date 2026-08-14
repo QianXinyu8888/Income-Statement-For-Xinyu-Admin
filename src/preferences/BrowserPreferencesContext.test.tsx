@@ -1,10 +1,7 @@
 import { act, cleanup, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import {
-  BrowserPreferencesProvider,
-  useBrowserPreferences,
-} from './BrowserPreferencesContext';
+import { BrowserPreferencesProvider, useBrowserPreferences } from './BrowserPreferencesContext';
 
 function Consumer() {
   const value = useBrowserPreferences();
@@ -52,7 +49,11 @@ describe('BrowserPreferencesProvider', () => {
 
   it('follows system changes only in system mode', async () => {
     const changeSystem = installMatchMedia(false);
-    render(<BrowserPreferencesProvider><Consumer /></BrowserPreferencesProvider>);
+    render(
+      <BrowserPreferencesProvider>
+        <Consumer />
+      </BrowserPreferencesProvider>,
+    );
     expect(screen.getByLabelText('effective')).toHaveTextContent('light');
     act(() => changeSystem(true));
     expect(screen.getByLabelText('effective')).toHaveTextContent('dark');
@@ -63,7 +64,11 @@ describe('BrowserPreferencesProvider', () => {
 
   it('turns a quick toggle into the explicit opposite theme', async () => {
     installMatchMedia(true);
-    render(<BrowserPreferencesProvider><Consumer /></BrowserPreferencesProvider>);
+    render(
+      <BrowserPreferencesProvider>
+        <Consumer />
+      </BrowserPreferencesProvider>,
+    );
     await userEvent.click(screen.getByRole('button', { name: '快捷切换' }));
     expect(screen.getByLabelText('mode')).toHaveTextContent('light');
     expect(document.documentElement).toHaveAttribute('data-theme', 'light');
@@ -71,7 +76,11 @@ describe('BrowserPreferencesProvider', () => {
 
   it('applies reduced motion to the document root', async () => {
     installMatchMedia(false);
-    render(<BrowserPreferencesProvider><Consumer /></BrowserPreferencesProvider>);
+    render(
+      <BrowserPreferencesProvider>
+        <Consumer />
+      </BrowserPreferencesProvider>,
+    );
     await userEvent.click(screen.getByRole('button', { name: '缩减动画' }));
     expect(document.documentElement).toHaveClass('reduce-motion');
   });

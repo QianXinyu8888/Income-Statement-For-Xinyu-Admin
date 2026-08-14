@@ -87,9 +87,7 @@ export function TransactionList({
   );
   const hasMobileDetails = mobileDetailFields.length > 0;
   const wideMobileDetail =
-    mobileDetailFields.length % 2 === 1
-      ? mobileDetailFields[mobileDetailFields.length - 1]
-      : null;
+    mobileDetailFields.length % 2 === 1 ? mobileDetailFields[mobileDetailFields.length - 1] : null;
   const mobileDetailClass = (field: TransactionFieldId) =>
     [
       'mobile-row__detail',

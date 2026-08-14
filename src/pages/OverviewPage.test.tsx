@@ -1,5 +1,5 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { cleanup, fireEvent, render, screen } from '@testing-library/react';
+import { cleanup, render, screen } from '@testing-library/react';
 
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { apiClient } from '../api/client';
@@ -91,4 +91,3 @@ describe('OverviewPage', () => {
     expect(await screen.findByText('invalid')).toBeInTheDocument();
   });
 });
-

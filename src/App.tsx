@@ -28,13 +28,7 @@ export default function App() {
   return (
     <Routes>
       <Route
-        element={
-          <AppShell
-            user={session.data.user}
-            theme={effectiveTheme}
-            onTheme={toggleTheme}
-          />
-        }
+        element={<AppShell user={session.data.user} theme={effectiveTheme} onTheme={toggleTheme} />}
       >
         <Route
           path="/transactions"

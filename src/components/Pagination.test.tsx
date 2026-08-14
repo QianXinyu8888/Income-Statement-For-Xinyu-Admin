@@ -41,14 +41,3 @@ describe('Pagination Component', () => {
     expect(onPageChange).toHaveBeenCalledWith(3);
   });
 });
-
-
-
-
-
-
-
-
-
-
-
