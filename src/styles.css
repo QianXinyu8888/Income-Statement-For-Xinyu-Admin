@@ -599,18 +599,10 @@ tbody tr.is-selected {
 .state--error strong {
   color: var(--loss);
 }
-.spinner {
-  width: 18px;
-  height: 18px;
-  border: 2px solid var(--border);
-  border-top-color: var(--text);
-  border-radius: 50%;
-  animation: spin 0.7s linear infinite;
-}
-@keyframes spin {
-  to {
-    transform: rotate(360deg);
-  }
+.loading-gif {
+  width: 32px;
+  height: 32px;
+  object-fit: contain;
 }
 
 .pagination-wrap {

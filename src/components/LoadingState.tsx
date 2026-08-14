@@ -1,7 +1,7 @@
 export function LoadingState({ label = '正在加载' }: { label?: string }) {
   return (
     <div className="state" role="status">
-      <span className="spinner" />
+      <img className="loading-gif" src="/loading.gif" alt="加载中" />
       {label}
     </div>
   );
