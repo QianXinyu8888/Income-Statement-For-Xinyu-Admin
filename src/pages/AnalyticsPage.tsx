@@ -103,7 +103,13 @@ export default function AnalyticsPage() {
           value={analysisMonth}
           currentMonth={thisMonth}
           onChange={setAnalysisMonth}
-          onReset={() => setAnalysisMonth(thisMonth)}
+          onReset={() => {
+            if (analysisMonth === thisMonth) {
+              void summary.refetch();
+              return;
+            }
+            setAnalysisMonth(thisMonth);
+          }}
         />
       </header>
       {summary.isLoading ? (

@@ -1,5 +1,5 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { cleanup, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { MemoryRouter } from 'react-router-dom';
 import { afterAll, afterEach, beforeAll, describe, expect, it, vi } from 'vitest';
@@ -157,23 +157,53 @@ describe('AnalyticsPage drilldown', () => {
     const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
     const first = renderPage();
 
-    const month = screen.getByLabelText('分析月份');
-    expect(screen.getByText('分析月份', { selector: 'label' })).toBeVisible();
-    expect(month).toHaveValue('2026-08');
+    const monthTrigger = screen.getByRole('button', {
+      name: '选择分析月份，当前为 2026 年 8 月',
+    });
     await waitFor(() => {
       expect(summarySpy).toHaveBeenCalledWith('2026-08-01', '2026-08-31');
       expect(summarySpy).toHaveBeenCalledWith();
     });
 
-    fireEvent.change(month, { target: { value: '2026-02' } });
+    await user.click(monthTrigger);
+    await user.click(screen.getByRole('button', { name: '选择 2026 年 2 月' }));
     await waitFor(() => expect(summarySpy).toHaveBeenCalledWith('2026-02-01', '2026-02-28'));
     expect(summarySpy.mock.calls.filter((args) => args.length === 0)).toHaveLength(1);
     first.unmount();
 
     renderPage();
-    expect(screen.getByLabelText('分析月份')).toHaveValue('2026-02');
-    await user.click(screen.getByRole('button', { name: '重置为本月' }));
-    expect(screen.getByLabelText('分析月份')).toHaveValue('2026-08');
+    const rememberedMonth = screen.getByRole('button', {
+      name: '选择分析月份，当前为 2026 年 2 月',
+    });
+    await user.click(rememberedMonth);
+    await user.click(screen.getByRole('button', { name: '回到本月' }));
+    expect(
+      screen.getByRole('button', { name: '选择分析月份，当前为 2026 年 8 月' }),
+    ).toBeVisible();
     await waitFor(() => expect(summarySpy).toHaveBeenCalledWith('2026-08-01', '2026-08-31'));
+  });
+
+  it('refetches when returning to the current month while it is already selected', async () => {
+    vi.useFakeTimers({ shouldAdvanceTime: true });
+    vi.setSystemTime(new Date(2026, 7, 13, 12));
+    const summarySpy = mockSummaries();
+    const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
+    renderPage();
+
+    await waitFor(() =>
+      expect(summarySpy).toHaveBeenCalledWith('2026-08-01', '2026-08-31'),
+    );
+    const countCurrentMonthCalls = () =>
+      summarySpy.mock.calls.filter(
+        ([from, to]) => from === '2026-08-01' && to === '2026-08-31',
+      ).length;
+    const callsBeforeReset = countCurrentMonthCalls();
+
+    await user.click(
+      screen.getByRole('button', { name: '选择分析月份，当前为 2026 年 8 月' }),
+    );
+    await user.click(screen.getByRole('button', { name: '回到本月' }));
+
+    await waitFor(() => expect(countCurrentMonthCalls()).toBe(callsBeforeReset + 1));
   });
 });
