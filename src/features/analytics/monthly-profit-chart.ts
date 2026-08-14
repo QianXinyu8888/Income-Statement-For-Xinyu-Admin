@@ -27,7 +27,9 @@ export function formatCompactCny(value: number) {
   if (absolute >= 10_000) {
     return `${sign}¥${compactNumber(absolute / 10_000)} 万`;
   }
-  return `${sign}¥${new Intl.NumberFormat('zh-CN', { maximumFractionDigits: 0 }).format(absolute)}`;
+  return `${sign}¥${new Intl.NumberFormat('zh-CN', {
+    maximumFractionDigits: absolute > 0 && absolute < 1 ? 2 : 0,
+  }).format(absolute)}`;
 }
 
 export function getProfitDomain(values: number[]): [number, number] {
@@ -64,12 +66,10 @@ export function buildMonthlyProfitData(
   monthly: MonthlyItem[],
   currentMonth = currentMonthKey(),
 ): MonthlyProfitDatum[] {
-  const valid = monthly
-    .filter(
-      (item): item is MonthlyItem & { profit: number } =>
-        item.profit !== null && Number.isFinite(item.profit),
-    )
-    .sort((left, right) => right.month.localeCompare(left.month));
+  const valid = monthly.filter(
+    (item): item is MonthlyItem & { profit: number } =>
+      item.profit !== null && Number.isFinite(item.profit),
+  );
   const highestPositive = Math.max(0, ...valid.map((item) => item.profit));
 
   return valid.map((item) => {

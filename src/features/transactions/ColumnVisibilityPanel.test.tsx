@@ -44,7 +44,10 @@ describe('ColumnVisibilityPanel', () => {
     expect(screen.getByRole('dialog', { name: '显示字段' })).toHaveClass(
       'column-visibility__panel',
     );
-    expect(screen.getByRole('checkbox', { name: '商品名称' })).toBeDisabled();
+    expect(
+      screen.getByRole('checkbox', { name: '商品名称', description: '不可隐藏' }),
+    ).toBeDisabled();
+    expect(screen.getByText('不可隐藏')).toBeVisible();
     expect(screen.getByRole('checkbox', { name: '交易状态' })).toHaveFocus();
     await user.click(screen.getByRole('checkbox', { name: '备注' }));
     expect(screen.getByRole('checkbox', { name: '备注' })).not.toBeChecked();

@@ -12,9 +12,10 @@ describe('monthly profit chart helpers', () => {
     expect(formatCompactCny(12_400)).toBe('¥1.2 万');
     expect(formatCompactCny(-340_000_000)).toBe('-¥3.4 亿');
     expect(formatCompactCny(0)).toBe('¥0');
+    expect(formatCompactCny(-0.4)).toBe('-¥0.4');
   });
 
-  it('sorts newest month first and creates compact year-month labels', () => {
+  it('preserves the API month order and creates compact year-month labels', () => {
     const result = buildMonthlyProfitData(
       [
         { month: '2025-12', revenue: 1, profit: 1200, count: 1 },
@@ -34,9 +35,9 @@ describe('monthly profit chart helpers', () => {
         isCurrentMonth,
       })),
     ).toEqual([
-      { month: '2026-08', yearLabel: '26年', monthLabel: '8月', isCurrentMonth: true },
-      { month: '2026-07', yearLabel: '26年', monthLabel: '7月', isCurrentMonth: false },
       { month: '2025-12', yearLabel: '25年', monthLabel: '12月', isCurrentMonth: false },
+      { month: '2026-07', yearLabel: '26年', monthLabel: '7月', isCurrentMonth: false },
+      { month: '2026-08', yearLabel: '26年', monthLabel: '8月', isCurrentMonth: true },
     ]);
   });
 
@@ -48,9 +49,9 @@ describe('monthly profit chart helpers', () => {
     ]);
 
     expect(result.map(({ sign, isHighestPositive }) => ({ sign, isHighestPositive }))).toEqual([
-      { sign: 'positive', isHighestPositive: true },
-      { sign: 'negative', isHighestPositive: false },
       { sign: 'positive', isHighestPositive: false },
+      { sign: 'negative', isHighestPositive: false },
+      { sign: 'positive', isHighestPositive: true },
     ]);
   });
 

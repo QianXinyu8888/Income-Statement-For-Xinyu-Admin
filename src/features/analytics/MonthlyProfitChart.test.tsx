@@ -1,5 +1,5 @@
 import { cleanup, render, screen } from '@testing-library/react';
-import { afterAll, afterEach, beforeAll, describe, expect, it, vi } from 'vitest';
+import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 import { MonthlyProfitChart } from './MonthlyProfitChart';
 
 const monthly = Array.from({ length: 10 }, (_, index) => ({
@@ -35,8 +35,16 @@ describe('MonthlyProfitChart', () => {
     );
   });
 
+  beforeEach(() => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date(2026, 7, 13, 12));
+  });
+
   afterAll(() => vi.unstubAllGlobals());
-  afterEach(cleanup);
+  afterEach(() => {
+    cleanup();
+    vi.useRealTimers();
+  });
 
   it('keeps a wide series inside a local scroller', () => {
     render(<MonthlyProfitChart monthly={monthly} />);

@@ -88,6 +88,10 @@ export default function AnalyticsPage() {
     queryKey: ['summary', from, to],
     queryFn: () => apiClient.summary(from, to),
   });
+  const trend = useQuery({
+    queryKey: ['summary', 'trend'],
+    queryFn: () => apiClient.summary(),
+  });
   return (
     <section className="page">
       <header className="page-header">
@@ -121,7 +125,13 @@ export default function AnalyticsPage() {
                 <span>按月对比</span>
               </div>
             </header>
-            <MonthlyProfitChart monthly={summary.data!.monthly} />
+            {trend.isLoading ? (
+              <LoadingState label="正在加载月度趋势" />
+            ) : trend.isError ? (
+              <ErrorState message={trend.error.message} onRetry={() => trend.refetch()} />
+            ) : (
+              <MonthlyProfitChart monthly={trend.data!.monthly} />
+            )}
           </section>
           <section className="panel analytics-stat-card">
             <StatCardTitle>利润区间</StatCardTitle>

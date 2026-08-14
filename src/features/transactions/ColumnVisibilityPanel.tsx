@@ -100,9 +100,16 @@ export function ColumnVisibilityPanel({ visibleFields, onFieldVisible, onReset }
                   type="checkbox"
                   checked={field === 'title' || visibleFields.includes(field)}
                   disabled={field === 'title'}
+                  aria-label={field === 'title' ? FIELD_LABELS[field] : undefined}
+                  aria-describedby={field === 'title' ? `${panelId}-title-lock` : undefined}
                   onChange={(event) => onFieldVisible(field, event.target.checked)}
                 />
                 <span>{FIELD_LABELS[field]}</span>
+                {field === 'title' && (
+                  <span id={`${panelId}-title-lock`} className="column-visibility__lock-hint">
+                    不可隐藏
+                  </span>
+                )}
               </label>
             ))}
           </div>
