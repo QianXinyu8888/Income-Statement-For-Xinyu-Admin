@@ -89,6 +89,45 @@ function currentMonthKey() {
   return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
 }
 
+function parseMonthKey(value: string) {
+  const match = /^(\d{4})-(0[1-9]|1[0-2])$/.exec(value);
+  if (!match) return null;
+  const year = Number(match[1]);
+  const month = Number(match[2]);
+  return year > 0 ? year * 12 + month - 1 : null;
+}
+
+function monthKeyFromIndex(index: number) {
+  const year = Math.floor(index / 12);
+  const month = (index % 12) + 1;
+  return `${year}-${String(month).padStart(2, '0')}`;
+}
+
+export function completeMonthlyProfitMonths(
+  monthly: MonthlyItem[],
+  currentMonth = currentMonthKey(),
+): MonthlyItem[] {
+  const currentIndex = parseMonthKey(currentMonth);
+  if (currentIndex === null) return [];
+
+  const byMonth = new Map<string, MonthlyItem>();
+  let earliestIndex = currentIndex;
+
+  for (const item of monthly) {
+    const index = parseMonthKey(item.month);
+    if (index === null || index > currentIndex || byMonth.has(item.month)) continue;
+    byMonth.set(item.month, item);
+    earliestIndex = Math.min(earliestIndex, index);
+  }
+
+  const result: MonthlyItem[] = [];
+  for (let index = currentIndex; index >= earliestIndex; index -= 1) {
+    const month = monthKeyFromIndex(index);
+    result.push(byMonth.get(month) ?? { month, revenue: 0, profit: 0, count: 0 });
+  }
+  return result;
+}
+
 export function buildMonthlyProfitData(
   monthly: MonthlyItem[],
   currentMonth = currentMonthKey(),

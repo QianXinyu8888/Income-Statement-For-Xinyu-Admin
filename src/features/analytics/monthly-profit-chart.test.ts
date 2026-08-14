@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import {
   buildMonthlyProfitData,
+  completeMonthlyProfitMonths,
   formatCompactCny,
   getBarLabelY,
   getProfitDomain,
@@ -8,6 +9,50 @@ import {
 } from './monthly-profit-chart';
 
 describe('monthly profit chart helpers', () => {
+  it('fills missing months backwards from the current month and excludes future data', () => {
+    const result = completeMonthlyProfitMonths(
+      [
+        { month: '2025-12', revenue: 800, profit: 300, count: 1 },
+        { month: '2026-02', revenue: 1000, profit: 500, count: 2 },
+        { month: '2026-04', revenue: 2000, profit: 900, count: 3 },
+        { month: '2026-05', revenue: 3000, profit: 1200, count: 4 },
+      ],
+      '2026-04',
+    );
+
+    expect(result.map(({ month, profit, count }) => ({ month, profit, count }))).toEqual([
+      { month: '2026-04', profit: 900, count: 3 },
+      { month: '2026-03', profit: 0, count: 0 },
+      { month: '2026-02', profit: 500, count: 2 },
+      { month: '2026-01', profit: 0, count: 0 },
+      { month: '2025-12', profit: 300, count: 1 },
+    ]);
+  });
+
+  it('returns the current month with zero profit when no valid history exists', () => {
+    expect(completeMonthlyProfitMonths([], '2026-08')).toEqual([
+      { month: '2026-08', revenue: 0, profit: 0, count: 0 },
+    ]);
+    expect(
+      completeMonthlyProfitMonths(
+        [{ month: 'invalid', revenue: 100, profit: 50, count: 1 }],
+        '2026-08',
+      ),
+    ).toEqual([{ month: '2026-08', revenue: 0, profit: 0, count: 0 }]);
+  });
+
+  it('preserves an existing unavailable profit instead of inventing zero', () => {
+    expect(
+      completeMonthlyProfitMonths(
+        [{ month: '2026-07', revenue: null, profit: null, count: 1 }],
+        '2026-08',
+      ),
+    ).toEqual([
+      { month: '2026-08', revenue: 0, profit: 0, count: 0 },
+      { month: '2026-07', revenue: null, profit: null, count: 1 },
+    ]);
+  });
+
   it('formats bounded compact CNY labels', () => {
     expect(formatCompactCny(9600)).toBe('¥9,600');
     expect(formatCompactCny(12_400)).toBe('¥1.2 万');
