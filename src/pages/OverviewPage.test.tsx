@@ -1,7 +1,7 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { cleanup, render, screen } from '@testing-library/react';
 
-import { afterEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { apiClient } from '../api/client';
 import type { AnalyticsSummary } from '../domain/analytics';
 import OverviewPage from './OverviewPage';
@@ -9,6 +9,12 @@ import OverviewPage from './OverviewPage';
 afterEach(() => {
   cleanup();
   vi.restoreAllMocks();
+  vi.useRealTimers();
+});
+
+beforeEach(() => {
+  vi.useFakeTimers({ shouldAdvanceTime: true });
+  vi.setSystemTime(new Date(2026, 7, 13, 12));
 });
 
 const summary: AnalyticsSummary = {
@@ -62,18 +68,22 @@ describe('OverviewPage', () => {
       ...summary,
       monthly: [{ month: '2026-07', revenue: 500, profit: -210, count: 1 }],
     });
-    const { container } = renderPage();
+    renderPage();
 
     expect(await screen.findByText('2026.07')).toBeInTheDocument();
     expect(screen.getByText('-¥210.00')).toBeInTheDocument();
     expect(screen.getByRole('img', { name: '2026-07 利润：-¥210.00' })).toBeInTheDocument();
-    expect(container.querySelector('.simple-chart__plot')).toHaveAttribute(
+    expect(
+      screen
+        .getByRole('img', { name: '2026-07 利润：-¥210.00' })
+        .querySelector('.simple-chart__plot'),
+    ).toHaveAttribute(
       'data-direction',
       'negative',
     );
   });
 
-  it('sorts monthly trend in chronological order (oldest to newest)', async () => {
+  it('shows the current month first and fills missing months with zero profit', async () => {
     vi.spyOn(apiClient, 'summary').mockResolvedValue({
       ...summary,
       monthly: [
@@ -84,8 +94,12 @@ describe('OverviewPage', () => {
     renderPage();
 
     const monthLabels = await screen.findAllByText(/2026\./);
-    expect(monthLabels[0]).toHaveTextContent('2026.06');
-    expect(monthLabels[1]).toHaveTextContent('2026.08');
+    expect(monthLabels.map((label) => label.textContent)).toEqual([
+      '2026.08',
+      '2026.07',
+      '2026.06',
+    ]);
+    expect(screen.getByRole('img', { name: '2026-07 利润：¥0.00' })).toBeInTheDocument();
   });
 
   it('handles invalid month formats safely without crashing', async () => {
@@ -95,6 +109,7 @@ describe('OverviewPage', () => {
     });
     renderPage();
 
-    expect(await screen.findByText('invalid')).toBeInTheDocument();
+    expect(await screen.findByText('2026.08')).toBeInTheDocument();
+    expect(screen.queryByText('invalid')).not.toBeInTheDocument();
   });
 });

@@ -2,6 +2,7 @@ import { useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { apiClient } from '../api/client';
 import { ErrorState, LoadingState } from '../components/LoadingState';
+import { completeMonthlyProfitMonths } from '../features/analytics/monthly-profit-chart';
 
 const money = new Intl.NumberFormat('zh-CN', {
   style: 'currency',
@@ -26,8 +27,7 @@ export default function OverviewPage() {
   // 确保 Hook 无条件在组件顶部按恒定顺序触发 (遵循 Rules of Hooks)
   const monthly = useMemo(() => {
     const list = summary.data?.monthly;
-    if (!list || !Array.isArray(list)) return [];
-    return [...list].sort((a, b) => String(a.month ?? '').localeCompare(String(b.month ?? '')));
+    return completeMonthlyProfitMonths(Array.isArray(list) ? list : []);
   }, [summary.data?.monthly]);
 
   if (summary.isLoading) return <LoadingState label="正在计算经营数据" />;

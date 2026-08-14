@@ -6,6 +6,7 @@ export type ProfitSign = 'positive' | 'negative' | 'zero';
 
 export type MonthlyProfitDatum = MonthlyItem & {
   profit: number;
+  hasProfit: boolean;
   yearLabel: string;
   monthLabel: string;
   tooltipMonth: string;
@@ -132,26 +133,27 @@ export function buildMonthlyProfitData(
   monthly: MonthlyItem[],
   currentMonth = currentMonthKey(),
 ): MonthlyProfitDatum[] {
-  const valid = monthly.filter(
-    (item): item is MonthlyItem & { profit: number } =>
-      item.profit !== null && Number.isFinite(item.profit),
-  );
-  const highestPositive = Math.max(0, ...valid.map((item) => item.profit));
+  const completed = completeMonthlyProfitMonths(monthly, currentMonth);
+  const validProfits = completed
+    .map((item) => item.profit)
+    .filter((profit): profit is number => profit !== null && Number.isFinite(profit));
+  const highestPositive = Math.max(0, ...validProfits);
 
-  return valid.map((item) => {
+  return completed.map((item) => {
     const [year, rawMonth] = item.month.split('-');
     const month = Number(rawMonth);
-
-    const compactProfit = formatCompactCny(item.profit);
+    const hasProfit = item.profit !== null && Number.isFinite(item.profit);
+    const profit = hasProfit ? item.profit! : 0;
     return {
       ...item,
-      profit: item.profit,
+      profit,
+      hasProfit,
       yearLabel: `${year.slice(-2)}年`,
       monthLabel: `${month}月`,
       tooltipMonth: `${year} 年 ${month} 月`,
-      compactProfit,
-      sign: item.profit > 0 ? 'positive' : item.profit < 0 ? 'negative' : 'zero',
-      isHighestPositive: item.profit > 0 && item.profit === highestPositive,
+      compactProfit: hasProfit ? formatCompactCny(profit) : '—',
+      sign: profit > 0 ? 'positive' : profit < 0 ? 'negative' : 'zero',
+      isHighestPositive: hasProfit && profit > 0 && profit === highestPositive,
       isCurrentMonth: item.month === currentMonth,
     };
   });

@@ -61,14 +61,11 @@ describe('monthly profit chart helpers', () => {
     expect(formatCompactCny(-0.4)).toBe('-¥0.4');
   });
 
-  it('preserves the API month order and creates compact year-month labels', () => {
+  it('orders chart data from the current month backwards and fills gaps', () => {
     const result = buildMonthlyProfitData(
       [
-        { month: '2025-12', revenue: 1, profit: 1200, count: 1 },
-        { month: '2026-07', revenue: 1, profit: -300, count: 1 },
+        { month: '2026-06', revenue: 1, profit: 1200, count: 1 },
         { month: '2026-08', revenue: 1, profit: 800, count: 1 },
-        { month: '2026-02', revenue: 1, profit: Number.NaN, count: 1 },
-        { month: '2026-03', revenue: 1, profit: null, count: 1 },
       ],
       '2026-08',
     );
@@ -81,23 +78,45 @@ describe('monthly profit chart helpers', () => {
         isCurrentMonth,
       })),
     ).toEqual([
-      { month: '2025-12', yearLabel: '25年', monthLabel: '12月', isCurrentMonth: false },
-      { month: '2026-07', yearLabel: '26年', monthLabel: '7月', isCurrentMonth: false },
       { month: '2026-08', yearLabel: '26年', monthLabel: '8月', isCurrentMonth: true },
+      { month: '2026-07', yearLabel: '26年', monthLabel: '7月', isCurrentMonth: false },
+      { month: '2026-06', yearLabel: '26年', monthLabel: '6月', isCurrentMonth: false },
     ]);
   });
 
   it('identifies the highest positive month without changing sign colors', () => {
-    const result = buildMonthlyProfitData([
-      { month: '2026-01', revenue: 1, profit: 200, count: 1 },
-      { month: '2026-02', revenue: 1, profit: -500, count: 1 },
-      { month: '2026-03', revenue: 1, profit: 800, count: 1 },
-    ]);
+    const result = buildMonthlyProfitData(
+      [
+        { month: '2026-01', revenue: 1, profit: 200, count: 1 },
+        { month: '2026-02', revenue: 1, profit: -500, count: 1 },
+        { month: '2026-03', revenue: 1, profit: 800, count: 1 },
+      ],
+      '2026-03',
+    );
 
     expect(result.map(({ sign, isHighestPositive }) => ({ sign, isHighestPositive }))).toEqual([
-      { sign: 'positive', isHighestPositive: false },
-      { sign: 'negative', isHighestPositive: false },
       { sign: 'positive', isHighestPositive: true },
+      { sign: 'negative', isHighestPositive: false },
+      { sign: 'positive', isHighestPositive: false },
+    ]);
+  });
+
+  it('keeps an unavailable profit month in place without labelling it as zero', () => {
+    const result = buildMonthlyProfitData(
+      [{ month: '2026-07', revenue: null, profit: null, count: 1 }],
+      '2026-08',
+    );
+
+    expect(
+      result.map(({ month, profit, compactProfit, hasProfit }) => ({
+        month,
+        profit,
+        compactProfit,
+        hasProfit,
+      })),
+    ).toEqual([
+      { month: '2026-08', profit: 0, compactProfit: '¥0', hasProfit: true },
+      { month: '2026-07', profit: 0, compactProfit: '—', hasProfit: false },
     ]);
   });
 

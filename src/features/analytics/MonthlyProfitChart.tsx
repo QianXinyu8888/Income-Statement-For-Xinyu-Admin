@@ -30,17 +30,26 @@ const fullMoney = new Intl.NumberFormat('zh-CN', {
 });
 
 function ProfitTooltip({ item }: { item: MonthlyProfitDatum }) {
-  const status = item.sign === 'positive' ? '盈利' : item.sign === 'negative' ? '亏损' : '持平';
+  const status = !item.hasProfit
+    ? '暂无'
+    : item.sign === 'positive'
+      ? '盈利'
+      : item.sign === 'negative'
+        ? '亏损'
+        : '持平';
+  const valueClass = !item.hasProfit
+    ? undefined
+    : item.sign === 'negative'
+      ? 'is-loss'
+      : 'is-profit';
 
   return (
     <div className="monthly-profit-tooltip">
       <div className="monthly-profit-tooltip__heading">
         <span>{item.tooltipMonth}</span>
-        <em className={item.sign === 'negative' ? 'is-loss' : 'is-profit'}>{status}</em>
+        <em className={valueClass}>{status}</em>
       </div>
-      <strong className={item.sign === 'negative' ? 'is-loss' : 'is-profit'}>
-        {fullMoney.format(item.profit)}
-      </strong>
+      <strong className={valueClass}>{item.hasProfit ? fullMoney.format(item.profit) : '—'}</strong>
     </div>
   );
 }
