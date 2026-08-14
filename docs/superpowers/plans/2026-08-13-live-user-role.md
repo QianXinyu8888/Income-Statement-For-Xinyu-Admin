@@ -20,6 +20,7 @@
 ### 任务 1：让 session 接口返回飞书最新角色
 
 **文件：**
+
 - 创建：`functions/api/v1/auth/[[path]].test.ts`
 - 修改：`functions/api/v1/auth/[[path]].ts`
 
@@ -57,6 +58,7 @@ return user
 ### 任务 2：设置页强制同步并删除安全提示
 
 **文件：**
+
 - 修改：`src/pages/SettingsPage.test.tsx`
 - 修改：`src/pages/SettingsPage.tsx`
 
@@ -96,6 +98,7 @@ const session = useQuery({
 ### 任务 3：整体回归验证
 
 **文件：**
+
 - 验证上述全部变更，不修改无关文件。
 
 - [x] **步骤 1：运行完整质量检查**

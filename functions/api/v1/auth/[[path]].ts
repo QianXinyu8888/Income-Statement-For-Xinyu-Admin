@@ -23,14 +23,9 @@ function fieldText(value: unknown, fallback = ''): string {
   return String(scalar ?? fallback).trim() || fallback;
 }
 
-function activeUserRecord(
-  users: Awaited<ReturnType<typeof listUsers>>,
-  username: string,
-) {
+function activeUserRecord(users: Awaited<ReturnType<typeof listUsers>>, username: string) {
   return users.find(({ fields = {} }) => {
-    return (
-      fieldText(fields['用户名']) === username && fieldText(fields['状态'], '正常') !== '禁用'
-    );
+    return fieldText(fields['用户名']) === username && fieldText(fields['状态'], '正常') !== '禁用';
   });
 }
 
@@ -68,11 +63,9 @@ export const onRequest: PagesFunction = async ({ request, env, params }) => {
     }
     if (path === 'session' && request.method === 'GET') {
       const sessionUser = await requireUser(request, config);
-      if (!sessionUser)
-        return errorResponse(request, 401, 'UNAUTHENTICATED', '请重新登录');
+      if (!sessionUser) return errorResponse(request, 401, 'UNAUTHENTICATED', '请重新登录');
       const matched = activeUserRecord(await listUsers(config), sessionUser.username);
-      if (!matched)
-        return errorResponse(request, 401, 'ACCOUNT_UNAVAILABLE', '账号不存在或已禁用');
+      if (!matched) return errorResponse(request, 401, 'ACCOUNT_UNAVAILABLE', '账号不存在或已禁用');
       return jsonResponse(request, {
         user: { username: sessionUser.username, role: userRole(matched.fields) },
       });

@@ -91,7 +91,6 @@ export default function SettingsPage() {
           </dd>
         </div>
       </dl>
-
     </section>
   );
 }

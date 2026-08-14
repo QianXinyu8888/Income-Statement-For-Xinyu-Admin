@@ -60,9 +60,7 @@ describe('auth session role refresh', () => {
   });
 
   it('defaults an empty role to 用户', async () => {
-    mocks.listUsers.mockResolvedValue([
-      { fields: { 用户名: 'xinyu', 状态: '正常', 角色: '  ' } },
-    ]);
+    mocks.listUsers.mockResolvedValue([{ fields: { 用户名: 'xinyu', 状态: '正常', 角色: '  ' } }]);
 
     const response = await requestSession();
     const payload = (await response.json()) as {
