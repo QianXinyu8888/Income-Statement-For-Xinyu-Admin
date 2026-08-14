@@ -54,6 +54,16 @@ describe('SettingsPage', () => {
     expect(session).toHaveBeenCalledOnce();
   });
 
+  it('shows the shared loading gif while account permissions synchronize', () => {
+    vi.spyOn(apiClient, 'session').mockReturnValue(new Promise(() => {}));
+    vi.spyOn(apiClient, 'health').mockResolvedValue({ connected: true, checkedAt: '2026-08-13' });
+
+    renderPage();
+
+    expect(screen.getByRole('presentation')).toHaveAttribute('src', '/loading.gif');
+    expect(screen.queryByText('同步中')).not.toBeInTheDocument();
+  });
+
   it('does not present a cached role as current when synchronization fails', async () => {
     const client = new QueryClient({
       defaultOptions: { queries: { retry: false, staleTime: Infinity } },

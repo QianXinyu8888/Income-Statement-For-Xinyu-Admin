@@ -34,11 +34,13 @@ export default function SettingsPage() {
           <dt>账号权限</dt>
           <dd>
             <strong>
-              {session.isFetching
-                ? '同步中'
-                : session.isError
-                  ? '同步失败'
-                  : (session.data?.user.role ?? '用户')}
+              {session.isFetching ? (
+                <img className="loading-gif" src="/loading.gif" alt="" />
+              ) : session.isError ? (
+                '同步失败'
+              ) : (
+                (session.data?.user.role ?? '用户')
+              )}
             </strong>
           </dd>
         </div>
