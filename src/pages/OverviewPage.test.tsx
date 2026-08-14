@@ -50,6 +50,13 @@ describe('OverviewPage', () => {
     expect(screen.getByText('月度利润')).toBeInTheDocument();
   });
 
+  it('isolates the monthly chart layout from generic chart styles', async () => {
+    vi.spyOn(apiClient, 'summary').mockResolvedValue(summary);
+    renderPage();
+
+    const heading = await screen.findByRole('heading', { name: '月度利润' });
+    expect(heading.closest('section')).toHaveClass('overview-monthly-chart');
+  });
   it('marks negative profit bars and provides accessible img roles', async () => {
     vi.spyOn(apiClient, 'summary').mockResolvedValue({
       ...summary,

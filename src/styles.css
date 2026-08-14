@@ -2917,6 +2917,17 @@ tbody tr:nth-child(n + 5),
   max-width: calc(100% - 16px);
   pointer-events: none;
 }
+.monthly-profit-tooltip__heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+}
+.monthly-profit-tooltip__heading em {
+  font-size: 10px;
+  font-style: normal;
+  font-weight: 700;
+}
 .monthly-profit-tooltip span {
   color: var(--muted);
   font-size: 11px;
@@ -2939,6 +2950,102 @@ tbody tr:nth-child(n + 5),
   }
   .monthly-profit-chart__legend {
     justify-content: flex-start;
+  }
+}
+
+/* 概览月度利润：独立作用域，避免通用图表规则破坏日期与金额布局。 */
+.overview-monthly-chart {
+  overflow: hidden;
+}
+.overview-monthly-chart .simple-chart-wrapper {
+  width: 100%;
+  min-width: 0;
+  padding: 12px 0 6px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  overscroll-behavior-inline: contain;
+  scrollbar-width: thin;
+}
+.overview-monthly-chart .simple-chart {
+  display: flex;
+  align-items: stretch;
+  gap: 12px;
+  width: max-content;
+  min-width: 100%;
+  height: 254px;
+  min-height: 254px;
+  max-height: none;
+  padding: 16px 8px 4px;
+  overflow: visible;
+  box-sizing: border-box;
+}
+.overview-monthly-chart .simple-chart__item {
+  display: grid;
+  grid-template-rows: 184px 42px;
+  gap: 8px;
+  flex: 0 0 104px;
+  width: 104px;
+  min-width: 104px;
+  height: 234px;
+  justify-items: stretch;
+  box-sizing: border-box;
+}
+.overview-monthly-chart .simple-chart__plot {
+  display: grid;
+  grid-template-rows: 1fr 1fr;
+  width: 100%;
+  height: 184px;
+  margin: 0;
+}
+.overview-monthly-chart .simple-chart__info {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 3px;
+  width: 100%;
+  min-width: 0;
+  height: 42px;
+  text-align: center;
+  box-sizing: border-box;
+}
+.overview-monthly-chart .simple-chart__month,
+.overview-monthly-chart .simple-chart__amount {
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  overflow: hidden;
+  line-height: 1.3;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+.overview-monthly-chart .simple-chart__month {
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 500;
+}
+.overview-monthly-chart .simple-chart__amount {
+  color: var(--text);
+  font-size: 12px;
+  font-weight: 650;
+  font-variant-numeric: tabular-nums;
+}
+
+@media (max-width: 720px) {
+  .overview-monthly-chart .simple-chart {
+    height: 238px;
+    min-height: 238px;
+    padding-top: 12px;
+  }
+  .overview-monthly-chart .simple-chart__item {
+    grid-template-rows: 172px 42px;
+    flex-basis: 96px;
+    width: 96px;
+    min-width: 96px;
+    height: 222px;
+  }
+  .overview-monthly-chart .simple-chart__plot {
+    height: 172px;
   }
 }
 

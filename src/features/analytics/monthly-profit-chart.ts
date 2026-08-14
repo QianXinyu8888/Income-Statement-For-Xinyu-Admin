@@ -57,6 +57,33 @@ export function getBarLabelY({
   return negative ? Math.max(y, otherEnd) + 16 : Math.min(y, otherEnd) - 10;
 }
 
+export function getTooltipPosition({
+  barX,
+  barY,
+  barWidth,
+  barHeight,
+  canvasLeft,
+  canvasTop,
+  chartWidth,
+}: {
+  barX: number;
+  barY: number;
+  barWidth: number;
+  barHeight: number;
+  canvasLeft: number;
+  canvasTop: number;
+  chartWidth: number;
+}) {
+  const tooltipHalfWidth = Math.min(112, chartWidth / 2);
+  const rawLeft = canvasLeft + barX + barWidth / 2;
+  const visualBarTop = Math.min(barY, barY + barHeight);
+
+  return {
+    left: Math.min(chartWidth - tooltipHalfWidth, Math.max(tooltipHalfWidth, rawLeft)),
+    top: Math.max(76, canvasTop + visualBarTop - 10),
+  };
+}
+
 function currentMonthKey() {
   const now = new Date();
   return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;

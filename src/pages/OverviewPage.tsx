@@ -1,6 +1,5 @@
 import { useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
-
 import { apiClient } from '../api/client';
 import { ErrorState, LoadingState } from '../components/LoadingState';
 
@@ -70,7 +69,7 @@ export default function OverviewPage() {
           有 {data.incompleteCount} 条已售出记录字段不完整，未参与部分金额统计。
         </div>
       )}
-      <section className="panel">
+      <section className="panel overview-monthly-chart">
         <header className="panel-header-row">
           <h2 id="overview-monthly-profit-title">月度利润</h2>
           <span>最近 {monthly.length} 个月</span>

@@ -4,6 +4,7 @@ import {
   formatCompactCny,
   getBarLabelY,
   getProfitDomain,
+  getTooltipPosition,
 } from './monthly-profit-chart';
 
 describe('monthly profit chart helpers', () => {
@@ -64,5 +65,31 @@ describe('monthly profit chart helpers', () => {
 
   it('places a negative label below a bar with signed height', () => {
     expect(getBarLabelY({ y: 250, height: -65, negative: true })).toBe(266);
+  });
+
+  it('anchors tooltips above bars and clamps them inside the visible chart', () => {
+    expect(
+      getTooltipPosition({
+        barX: 4,
+        barY: 180,
+        barWidth: 34,
+        barHeight: -70,
+        canvasLeft: 0,
+        canvasTop: 40,
+        chartWidth: 335,
+      }),
+    ).toEqual({ left: 112, top: 140 });
+
+    expect(
+      getTooltipPosition({
+        barX: 500,
+        barY: 100,
+        barWidth: 34,
+        barHeight: 80,
+        canvasLeft: -230,
+        canvasTop: 40,
+        chartWidth: 335,
+      }),
+    ).toEqual({ left: 223, top: 130 });
   });
 });

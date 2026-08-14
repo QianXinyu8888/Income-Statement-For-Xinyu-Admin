@@ -1,4 +1,4 @@
-import { cleanup, render, screen } from '@testing-library/react';
+import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 import { MonthlyProfitChart } from './MonthlyProfitChart';
 
@@ -97,5 +97,21 @@ describe('MonthlyProfitChart', () => {
     expect(Number(negativeLabel.getAttribute('y'))).toBeGreaterThan(
       Number(positiveLabel.getAttribute('y')),
     );
+  });
+
+  it('shows the selected month details while its bar is hovered', () => {
+    const { container } = render(<MonthlyProfitChart monthly={monthly} />);
+
+    const bar = container.querySelectorAll('.recharts-bar-rectangle')[2];
+    expect(bar).toBeInTheDocument();
+    fireEvent.mouseEnter(bar);
+
+    const tooltipHost = screen.getByTestId('monthly-profit-tooltip-host');
+    expect(tooltipHost).toHaveTextContent('2026 年 3 月');
+    expect(tooltipHost).toHaveTextContent('盈利');
+    expect(tooltipHost).toHaveTextContent('¥3,000.00');
+
+    fireEvent.mouseLeave(screen.getByTestId('monthly-profit-scroll'));
+    expect(tooltipHost).toBeEmptyDOMElement();
   });
 });
