@@ -1,10 +1,11 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { cleanup, render, screen } from '@testing-library/react';
+import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { MemoryRouter } from 'react-router-dom';
 import { afterAll, afterEach, beforeAll, describe, expect, it, vi } from 'vitest';
 import { apiClient } from '../api/client';
 import type { AnalyticsSummary } from '../domain/analytics';
+import { BrowserPreferencesProvider } from '../preferences/BrowserPreferencesContext';
 import AnalyticsPage from './AnalyticsPage';
 
 const summary: AnalyticsSummary = {
@@ -46,9 +47,11 @@ function renderPage() {
   const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
   return render(
     <QueryClientProvider client={client}>
-      <MemoryRouter>
-        <AnalyticsPage />
-      </MemoryRouter>
+      <BrowserPreferencesProvider>
+        <MemoryRouter>
+          <AnalyticsPage />
+        </MemoryRouter>
+      </BrowserPreferencesProvider>
     </QueryClientProvider>,
   );
 }
@@ -68,6 +71,8 @@ describe('AnalyticsPage drilldown', () => {
   afterEach(() => {
     cleanup();
     vi.restoreAllMocks();
+    vi.useRealTimers();
+    localStorage.clear();
   });
 
   it('expands product links, collapses them, and disables empty groups', async () => {
@@ -119,5 +124,28 @@ describe('AnalyticsPage drilldown', () => {
     expect(screen.getByTestId('monthly-profit-scroll')).toBeInTheDocument();
     expect(screen.queryByText('占比')).not.toBeInTheDocument();
     expect(screen.queryByText('成交金额')).not.toBeInTheDocument();
+  });
+
+  it('queries the current month by default, remembers another month and resets to this month', async () => {
+    vi.useFakeTimers({ shouldAdvanceTime: true });
+    vi.setSystemTime(new Date(2026, 7, 13, 12));
+    const summarySpy = vi.spyOn(apiClient, 'summary').mockResolvedValue(summary);
+    const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
+    const first = renderPage();
+
+    const month = screen.getByLabelText('分析月份');
+    expect(screen.getByText('分析月份', { selector: 'label' })).toBeVisible();
+    expect(month).toHaveValue('2026-08');
+    expect(summarySpy).toHaveBeenCalledWith('2026-08-01', '2026-08-31');
+
+    fireEvent.change(month, { target: { value: '2026-02' } });
+    expect(summarySpy).toHaveBeenLastCalledWith('2026-02-01', '2026-02-28');
+    first.unmount();
+
+    renderPage();
+    expect(screen.getByLabelText('分析月份')).toHaveValue('2026-02');
+    await user.click(screen.getByRole('button', { name: '重置为本月' }));
+    expect(screen.getByLabelText('分析月份')).toHaveValue('2026-08');
+    expect(summarySpy).toHaveBeenLastCalledWith('2026-08-01', '2026-08-31');
   });
 });

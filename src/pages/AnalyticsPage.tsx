@@ -5,7 +5,11 @@ import { Link } from 'react-router-dom';
 import { apiClient } from '../api/client';
 import { ErrorState, LoadingState } from '../components/LoadingState';
 import type { AnalyticsOrderIndexItem } from '../domain/analytics';
+import { AnalysisMonthControl } from '../features/analytics/AnalysisMonthControl';
 import { MonthlyProfitChart } from '../features/analytics/MonthlyProfitChart';
+import { analysisMonthBounds } from '../features/analytics/analysis-month';
+import { useBrowserPreferences } from '../preferences/BrowserPreferencesContext';
+import { localMonth } from '../preferences/browser-preferences';
 
 const money = new Intl.NumberFormat('zh-CN', {
   style: 'currency',
@@ -73,12 +77,16 @@ function StatCardTitle({ children }: { children: string }) {
 }
 
 export default function AnalyticsPage() {
-  const [from, setFrom] = useState('');
-  const [to, setTo] = useState('');
+  const {
+    preferences: { analysisMonth },
+    setAnalysisMonth,
+  } = useBrowserPreferences();
+  const thisMonth = localMonth();
+  const { from, to } = analysisMonthBounds(analysisMonth);
   const [expanded, setExpanded] = useState<string | null>(null);
   const summary = useQuery({
     queryKey: ['summary', from, to],
-    queryFn: () => apiClient.summary(from || undefined, to || undefined),
+    queryFn: () => apiClient.summary(from, to),
   });
   return (
     <section className="page">
@@ -87,21 +95,12 @@ export default function AnalyticsPage() {
           <h1>利润分析</h1>
           <p>看清利润来自哪里，以及哪些交易需要关注</p>
         </div>
-        <div className="date-range">
-          <input
-            aria-label="开始日期"
-            type="date"
-            value={from}
-            onChange={(event) => setFrom(event.target.value)}
-          />
-          <span>至</span>
-          <input
-            aria-label="结束日期"
-            type="date"
-            value={to}
-            onChange={(event) => setTo(event.target.value)}
-          />
-        </div>
+        <AnalysisMonthControl
+          value={analysisMonth}
+          currentMonth={thisMonth}
+          onChange={setAnalysisMonth}
+          onReset={() => setAnalysisMonth(thisMonth)}
+        />
       </header>
       {summary.isLoading ? (
         <LoadingState />

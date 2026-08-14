@@ -1434,6 +1434,36 @@ select.pagination-select option {
   gap: 8px;
   color: var(--muted);
 }
+.analysis-month-control {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  max-width: 100%;
+}
+.analysis-month-control input,
+.analysis-month-control button {
+  min-width: 0;
+  max-width: 100%;
+  min-height: 44px;
+}
+.analysis-month-control label {
+  color: var(--muted);
+  white-space: nowrap;
+}
+.analysis-month-control input {
+  height: 44px;
+  background: var(--surface);
+  border: 1px solid var(--border-strong);
+  border-radius: 9px;
+  padding: 0 12px;
+}
+.analysis-month-control button {
+  border: 1px solid var(--border-strong);
+  border-radius: 9px;
+  background: var(--surface);
+  padding: 0 12px;
+  white-space: nowrap;
+}
 .stat-list {
   margin-top: 14px;
 }
@@ -2775,11 +2805,27 @@ tbody tr:nth-child(n + 5),
   .page-header:has(.date-range) {
     flex-wrap: wrap;
   }
+  .page-header:has(.analysis-month-control) {
+    flex-wrap: wrap;
+  }
   .date-range input {
     min-width: 0;
     width: 100%;
     height: 44px;
     font-size: 14px;
+  }
+  .analysis-month-control {
+    width: 100%;
+    flex-wrap: wrap;
+    margin-top: 8px;
+  }
+  .analysis-month-control input,
+  .analysis-month-control button {
+    flex: 1 1 100%;
+    width: 100%;
+  }
+  .analysis-month-control label {
+    flex-basis: 100%;
   }
   .settings-list {
     padding-inline: 16px;
