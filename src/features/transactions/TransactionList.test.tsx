@@ -1,7 +1,8 @@
-import { fireEvent, render, screen } from '@testing-library/react';
-import { describe, expect, it, vi } from 'vitest';
+import { cleanup, fireEvent, render, screen } from '@testing-library/react';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import { TransactionList } from './TransactionList';
 import type { Transaction } from '../../domain/transaction';
+import { ALL_TRANSACTION_FIELDS } from '../../preferences/browser-preferences';
 
 const record: Transaction = {
   id: '1',
@@ -20,11 +21,14 @@ const record: Transaction = {
 };
 
 describe('TransactionList', () => {
+  afterEach(cleanup);
+
   it('shows essential mapped information in both responsive views', () => {
     render(
       <TransactionList
         records={[record]}
         selected={new Set()}
+        visibleFields={[...ALL_TRANSACTION_FIELDS]}
         onToggle={vi.fn()}
         onOpen={vi.fn()}
       />,
@@ -51,6 +55,7 @@ describe('TransactionList', () => {
           },
         ]}
         selected={new Set()}
+        visibleFields={[...ALL_TRANSACTION_FIELDS]}
         onToggle={vi.fn()}
         onOpen={vi.fn()}
       />,
@@ -65,6 +70,7 @@ describe('TransactionList', () => {
       <TransactionList
         records={[record]}
         selected={new Set()}
+        visibleFields={[...ALL_TRANSACTION_FIELDS]}
         onToggle={vi.fn()}
         onOpen={vi.fn()}
       />,
@@ -96,6 +102,7 @@ describe('TransactionList', () => {
       <TransactionList
         records={[record]}
         selected={new Set()}
+        visibleFields={[...ALL_TRANSACTION_FIELDS]}
         onToggle={vi.fn()}
         onOpen={vi.fn()}
       />,
@@ -124,6 +131,7 @@ describe('TransactionList', () => {
       <TransactionList
         records={[record, { ...record, id: '2', title: '另一件产品' }]}
         selected={new Set()}
+        visibleFields={[...ALL_TRANSACTION_FIELDS]}
         focusedId="1"
         onToggle={vi.fn()}
         onOpen={vi.fn()}
@@ -145,6 +153,7 @@ describe('TransactionList', () => {
       <TransactionList
         records={[record]}
         selected={new Set()}
+        visibleFields={[...ALL_TRANSACTION_FIELDS]}
         onToggle={vi.fn()}
         onOpen={onOpen}
       />,
@@ -176,6 +185,7 @@ describe('TransactionList', () => {
       <TransactionList
         records={[record]}
         selected={new Set()}
+        visibleFields={[...ALL_TRANSACTION_FIELDS]}
         onToggle={vi.fn()}
         onOpen={vi.fn()}
       />,
@@ -196,6 +206,7 @@ describe('TransactionList', () => {
       <TransactionList
         records={[record]}
         selected={new Set()}
+        visibleFields={[...ALL_TRANSACTION_FIELDS]}
         onToggle={vi.fn()}
         onOpen={onOpen}
       />,
@@ -218,5 +229,92 @@ describe('TransactionList', () => {
       fireEvent.click(button);
       expect(onOpen).toHaveBeenNthCalledWith(index + 1, record, editableFields[index]);
     });
+  });
+
+  it('uses the same visibility preferences in desktop and mobile layouts', () => {
+    const { container } = render(
+      <TransactionList
+        records={[record]}
+        selected={new Set()}
+        visibleFields={['title', 'profit']}
+        onToggle={vi.fn()}
+        onOpen={vi.fn()}
+      />,
+    );
+
+    expect(screen.getByRole('columnheader', { name: '商品名称' })).toBeInTheDocument();
+    expect(screen.getByRole('columnheader', { name: '利润' })).toBeInTheDocument();
+    expect(screen.queryByRole('columnheader', { name: '备注' })).not.toBeInTheDocument();
+    expect(container.querySelector('.mobile-list')).toHaveTextContent('利润+¥1,082.00');
+    expect(container.querySelector('.mobile-list')).not.toHaveTextContent('备注顺丰到付');
+  });
+
+  it('always shows the title even when the caller omits it', () => {
+    const { container } = render(
+      <TransactionList
+        records={[record]}
+        selected={new Set()}
+        visibleFields={[]}
+        onToggle={vi.fn()}
+        onOpen={vi.fn()}
+      />,
+    );
+
+    expect(screen.getByRole('columnheader', { name: '商品名称' })).toBeInTheDocument();
+    expect(container.querySelector('.mobile-list')).toHaveTextContent('iPhone 15 Pro');
+    expect(container.querySelector('.mobile-row')).toHaveClass('mobile-row--compact');
+    expect(container.querySelector('.mobile-row__details')).not.toBeInTheDocument();
+  });
+
+  it('lets a single mobile detail span the full row', () => {
+    const { container } = render(
+      <TransactionList
+        records={[record]}
+        selected={new Set()}
+        visibleFields={['title', 'profit']}
+        onToggle={vi.fn()}
+        onOpen={vi.fn()}
+      />,
+    );
+
+    const details = container.querySelectorAll('.mobile-row__details > div');
+    expect(details).toHaveLength(1);
+    expect(details[0]).toHaveClass('mobile-row__detail', 'mobile-row__detail--wide');
+  });
+
+  it('lets only the last detail span the full row when the visible count is odd', () => {
+    const { container } = render(
+      <TransactionList
+        records={[record]}
+        selected={new Set()}
+        visibleFields={['title', 'purchaseDate', 'soldDate', 'profit']}
+        onToggle={vi.fn()}
+        onOpen={vi.fn()}
+      />,
+    );
+
+    const details = container.querySelectorAll('.mobile-row__details > div');
+    expect(details).toHaveLength(3);
+    expect(details[0]).toHaveClass('mobile-row__detail');
+    expect(details[0]).not.toHaveClass('mobile-row__detail--wide');
+    expect(details[1]).not.toHaveClass('mobile-row__detail--wide');
+    expect(details[2]).toHaveClass('mobile-row__detail', 'mobile-row__detail--wide');
+  });
+
+  it('keeps a final note in the second column when the detail count is even', () => {
+    const { container } = render(
+      <TransactionList
+        records={[record]}
+        selected={new Set()}
+        visibleFields={['title', 'profit', 'note']}
+        onToggle={vi.fn()}
+        onOpen={vi.fn()}
+      />,
+    );
+
+    const details = container.querySelectorAll('.mobile-row__details > div');
+    expect(details).toHaveLength(2);
+    expect(details[1]).toHaveClass('mobile-row__detail', 'mobile-row__note');
+    expect(details[1]).not.toHaveClass('mobile-row__detail--wide');
   });
 });

@@ -106,4 +106,3 @@ describe('queryTransactions', () => {
     expect(result.items.map(({ id }) => id)).toEqual(['record-3', 'record-1', 'record-2']);
   });
 });
-

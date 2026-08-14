@@ -1,6 +1,6 @@
-import { useEffect, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { apiClient } from '../api/client';
+import { useBrowserPreferences } from '../preferences/BrowserPreferencesContext';
 
 export default function SettingsPage() {
   const session = useQuery({
@@ -10,14 +10,10 @@ export default function SettingsPage() {
     refetchOnMount: 'always',
   });
   const health = useQuery({ queryKey: ['health'], queryFn: apiClient.health, retry: false });
-  const [reduceMotion, setReduceMotion] = useState<boolean>(() => {
-    return localStorage.getItem('reduce-motion') === 'true';
-  });
-
-  useEffect(() => {
-    localStorage.setItem('reduce-motion', String(reduceMotion));
-    document.documentElement.classList.toggle('reduce-motion', reduceMotion);
-  }, [reduceMotion]);
+  const {
+    preferences: { themeMode },
+    setThemeMode,
+  } = useBrowserPreferences();
 
   return (
     <section className="page page--narrow">
@@ -64,26 +60,34 @@ export default function SettingsPage() {
 
       <header className="page-header" style={{ marginTop: '24px' }}>
         <div>
-          <h2>界面与动画偏好</h2>
-          <p>个性化显示与界面交互支持</p>
+          <h2>界面偏好</h2>
+          <p>个性化主题显示</p>
         </div>
       </header>
-      <dl className="settings-list" role="group" aria-label="界面与动画偏好">
+      <dl className="settings-list" role="group" aria-label="界面偏好">
         <div>
-          <dt>
-            <label htmlFor="reduce-motion-toggle" style={{ cursor: 'pointer' }}>
-              缩减界面动画 (Reduced Motion)
-            </label>
-          </dt>
+          <dt>主题模式</dt>
           <dd>
-            <input
-              id="reduce-motion-toggle"
-              name="reduceMotion"
-              type="checkbox"
-              checked={reduceMotion}
-              onChange={(e) => setReduceMotion(e.target.checked)}
-              style={{ width: '18px', height: '18px', cursor: 'pointer' }}
-            />
+            <fieldset className="theme-segmented" role="radiogroup" aria-label="主题模式">
+              {(
+                [
+                  ['system', '跟随系统'],
+                  ['light', '浅色'],
+                  ['dark', '深色'],
+                ] as const
+              ).map(([value, label]) => (
+                <label key={value}>
+                  <input
+                    type="radio"
+                    name="themeMode"
+                    value={value}
+                    checked={themeMode === value}
+                    onChange={() => setThemeMode(value)}
+                  />
+                  <span>{label}</span>
+                </label>
+              ))}
+            </fieldset>
           </dd>
         </div>
       </dl>

@@ -1,5 +1,6 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { cleanup, render, screen } from '@testing-library/react';
+
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { apiClient } from '../api/client';
 import type { AnalyticsSummary } from '../domain/analytics';
@@ -49,17 +50,44 @@ describe('OverviewPage', () => {
     expect(screen.getByText('月度利润')).toBeInTheDocument();
   });
 
-  it('marks negative profit bars to extend below the zero baseline', async () => {
+  it('marks negative profit bars and provides accessible img roles', async () => {
     vi.spyOn(apiClient, 'summary').mockResolvedValue({
       ...summary,
       monthly: [{ month: '2026-07', revenue: 500, profit: -210, count: 1 }],
     });
     const { container } = renderPage();
 
-    expect(await screen.findByText('-¥210.00')).toBeInTheDocument();
+    expect(await screen.findByText('2026.07')).toBeInTheDocument();
+    expect(screen.getByText('-¥210.00')).toBeInTheDocument();
+    expect(screen.getByRole('img', { name: '2026-07 利润：-¥210.00' })).toBeInTheDocument();
     expect(container.querySelector('.simple-chart__plot')).toHaveAttribute(
       'data-direction',
       'negative',
     );
+  });
+
+  it('sorts monthly trend in chronological order (oldest to newest)', async () => {
+    vi.spyOn(apiClient, 'summary').mockResolvedValue({
+      ...summary,
+      monthly: [
+        { month: '2026-08', revenue: 1000, profit: 500, count: 2 },
+        { month: '2026-06', revenue: 800, profit: 300, count: 1 },
+      ],
+    });
+    renderPage();
+
+    const monthLabels = await screen.findAllByText(/2026\./);
+    expect(monthLabels[0]).toHaveTextContent('2026.06');
+    expect(monthLabels[1]).toHaveTextContent('2026.08');
+  });
+
+  it('handles invalid month formats safely without crashing', async () => {
+    vi.spyOn(apiClient, 'summary').mockResolvedValue({
+      ...summary,
+      monthly: [{ month: 'invalid', revenue: 500, profit: 100, count: 1 }],
+    });
+    renderPage();
+
+    expect(await screen.findByText('invalid')).toBeInTheDocument();
   });
 });

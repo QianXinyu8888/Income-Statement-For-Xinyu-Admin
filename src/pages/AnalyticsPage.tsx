@@ -2,10 +2,14 @@ import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { ChevronDown, ChevronRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import { Bar, BarChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
 import { apiClient } from '../api/client';
 import { ErrorState, LoadingState } from '../components/LoadingState';
 import type { AnalyticsOrderIndexItem } from '../domain/analytics';
+import { AnalysisMonthControl } from '../features/analytics/AnalysisMonthControl';
+import { MonthlyProfitChart } from '../features/analytics/MonthlyProfitChart';
+import { analysisMonthBounds } from '../features/analytics/analysis-month';
+import { useBrowserPreferences } from '../preferences/BrowserPreferencesContext';
+import { localMonth } from '../preferences/browser-preferences';
 
 const money = new Intl.NumberFormat('zh-CN', {
   style: 'currency',
@@ -73,12 +77,20 @@ function StatCardTitle({ children }: { children: string }) {
 }
 
 export default function AnalyticsPage() {
-  const [from, setFrom] = useState('');
-  const [to, setTo] = useState('');
+  const {
+    preferences: { analysisMonth },
+    setAnalysisMonth,
+  } = useBrowserPreferences();
+  const thisMonth = localMonth();
+  const { from, to } = analysisMonthBounds(analysisMonth);
   const [expanded, setExpanded] = useState<string | null>(null);
   const summary = useQuery({
     queryKey: ['summary', from, to],
-    queryFn: () => apiClient.summary(from || undefined, to || undefined),
+    queryFn: () => apiClient.summary(from, to),
+  });
+  const trend = useQuery({
+    queryKey: ['summary', 'trend'],
+    queryFn: () => apiClient.summary(),
   });
   return (
     <section className="page">
@@ -87,21 +99,12 @@ export default function AnalyticsPage() {
           <h1>利润分析</h1>
           <p>看清利润来自哪里，以及哪些交易需要关注</p>
         </div>
-        <div className="date-range">
-          <input
-            aria-label="开始日期"
-            type="date"
-            value={from}
-            onChange={(event) => setFrom(event.target.value)}
-          />
-          <span>至</span>
-          <input
-            aria-label="结束日期"
-            type="date"
-            value={to}
-            onChange={(event) => setTo(event.target.value)}
-          />
-        </div>
+        <AnalysisMonthControl
+          value={analysisMonth}
+          currentMonth={thisMonth}
+          onChange={setAnalysisMonth}
+          onReset={() => setAnalysisMonth(thisMonth)}
+        />
       </header>
       {summary.isLoading ? (
         <LoadingState />
@@ -115,24 +118,19 @@ export default function AnalyticsPage() {
               条已售出记录字段不完整，图表和金额只使用飞书中的真实值。
             </div>
           )}
-          <section className="panel panel--wide">
+          <section className="panel panel--wide monthly-profit-panel">
             <header>
-              <h2>月度趋势</h2>
-            </header>
-            {summary.data!.monthly.some((item) => item.profit !== null) ? (
-              <div className="chart" role="img" aria-label="月度利润趋势图">
-                <ResponsiveContainer width="100%" height="100%">
-                  <BarChart data={summary.data!.monthly.filter((item) => item.profit !== null)}>
-                    <CartesianGrid stroke="var(--border)" vertical={false} />
-                    <XAxis dataKey="month" tickLine={false} axisLine={false} />
-                    <YAxis tickLine={false} axisLine={false} />
-                    <Tooltip />
-                    <Bar dataKey="profit" name="利润" fill="var(--accent)" radius={[4, 4, 0, 0]} />
-                  </BarChart>
-                </ResponsiveContainer>
+              <div className="monthly-profit-panel__title">
+                <h2>月度利润</h2>
+                <span>按月对比</span>
               </div>
+            </header>
+            {trend.isLoading ? (
+              <LoadingState label="正在加载月度趋势" />
+            ) : trend.isError ? (
+              <ErrorState message={trend.error.message} onRetry={() => trend.refetch()} />
             ) : (
-              <div className="empty-inline">暂无可用利润数据</div>
+              <MonthlyProfitChart monthly={trend.data!.monthly} />
             )}
           </section>
           <section className="panel analytics-stat-card">

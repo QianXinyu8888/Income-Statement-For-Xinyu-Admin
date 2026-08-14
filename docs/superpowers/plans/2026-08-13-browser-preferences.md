@@ -56,6 +56,7 @@ git diff -- src/pages/AnalyticsPage.tsx src/pages/AnalyticsPage.test.tsx src/pag
 ## 任务 1：建立有版本的浏览器偏好存储
 
 **文件：**
+
 - 创建：`src/preferences/browser-preferences.ts`
 - 创建：`src/preferences/browser-preferences.test.ts`
 
@@ -118,10 +119,7 @@ describe('browser preferences storage', () => {
         reduceMotion: false,
       }),
     );
-    expect(readPreferences(storage, august).visibleTransactionFields).toEqual([
-      'title',
-      'profit',
-    ]);
+    expect(readPreferences(storage, august).visibleTransactionFields).toEqual(['title', 'profit']);
   });
 
   it.each(['{bad json', JSON.stringify({ version: 99 })])(
@@ -301,6 +299,7 @@ git commit -m "feat: 添加浏览器偏好存储层"
 ## 任务 2：接入全局 Provider 与三态主题
 
 **文件：**
+
 - 创建：`src/preferences/BrowserPreferencesContext.tsx`
 - 创建：`src/preferences/BrowserPreferencesContext.test.tsx`
 - 修改：`src/main.tsx`
@@ -314,10 +313,7 @@ git commit -m "feat: 添加浏览器偏好存储层"
 import { act, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import {
-  BrowserPreferencesProvider,
-  useBrowserPreferences,
-} from './BrowserPreferencesContext';
+import { BrowserPreferencesProvider, useBrowserPreferences } from './BrowserPreferencesContext';
 
 function Consumer() {
   const value = useBrowserPreferences();
@@ -364,7 +360,11 @@ describe('BrowserPreferencesProvider', () => {
 
   it('follows system changes only in system mode', async () => {
     const changeSystem = installMatchMedia(false);
-    render(<BrowserPreferencesProvider><Consumer /></BrowserPreferencesProvider>);
+    render(
+      <BrowserPreferencesProvider>
+        <Consumer />
+      </BrowserPreferencesProvider>,
+    );
     expect(screen.getByLabelText('effective')).toHaveTextContent('light');
     act(() => changeSystem(true));
     expect(screen.getByLabelText('effective')).toHaveTextContent('dark');
@@ -375,7 +375,11 @@ describe('BrowserPreferencesProvider', () => {
 
   it('turns a quick toggle into the explicit opposite theme', async () => {
     installMatchMedia(true);
-    render(<BrowserPreferencesProvider><Consumer /></BrowserPreferencesProvider>);
+    render(
+      <BrowserPreferencesProvider>
+        <Consumer />
+      </BrowserPreferencesProvider>,
+    );
     await userEvent.click(screen.getByRole('button', { name: '快捷切换' }));
     expect(screen.getByLabelText('mode')).toHaveTextContent('light');
     expect(document.documentElement).toHaveAttribute('data-theme', 'light');
@@ -383,7 +387,11 @@ describe('BrowserPreferencesProvider', () => {
 
   it('applies reduced motion to the document root', async () => {
     installMatchMedia(false);
-    render(<BrowserPreferencesProvider><Consumer /></BrowserPreferencesProvider>);
+    render(
+      <BrowserPreferencesProvider>
+        <Consumer />
+      </BrowserPreferencesProvider>,
+    );
     await userEvent.click(screen.getByRole('button', { name: '缩减动画' }));
     expect(document.documentElement).toHaveClass('reduce-motion');
   });
@@ -460,11 +468,7 @@ const getSystemTheme = (): 'light' | 'dark' =>
 ```tsx
 const { effectiveTheme, toggleTheme } = useBrowserPreferences();
 
-<AppShell
-  user={session.data.user}
-  theme={effectiveTheme}
-  onTheme={toggleTheme}
-/>
+<AppShell user={session.data.user} theme={effectiveTheme} onTheme={toggleTheme} />;
 ```
 
 - [ ] **步骤 5：运行 Provider、AppShell 与类型检查**
@@ -488,6 +492,7 @@ git commit -m "feat: 接入全局浏览器偏好"
 ## 任务 3：在设置页增加主题模式并迁移缩减动画
 
 **文件：**
+
 - 修改：`src/pages/SettingsPage.tsx`
 - 修改：`src/pages/SettingsPage.test.tsx`
 - 修改：`src/styles.css`
@@ -546,11 +551,13 @@ const {
   <dt>主题模式</dt>
   <dd>
     <fieldset className="theme-segmented" aria-label="主题模式">
-      {([
-        ['system', '跟随系统'],
-        ['light', '浅色'],
-        ['dark', '深色'],
-      ] as const).map(([value, label]) => (
+      {(
+        [
+          ['system', '跟随系统'],
+          ['light', '浅色'],
+          ['dark', '深色'],
+        ] as const
+      ).map(([value, label]) => (
         <label key={value}>
           <input
             type="radio"
@@ -594,6 +601,7 @@ git commit -m "feat: 设置页支持跟随系统主题"
 ## 任务 4：增加交易列按钮并同步桌面与手机字段
 
 **文件：**
+
 - 创建：`src/features/transactions/ColumnVisibilityPanel.tsx`
 - 创建：`src/features/transactions/ColumnVisibilityPanel.test.tsx`
 - 修改：`src/pages/TransactionsPage.tsx`
@@ -608,9 +616,7 @@ git commit -m "feat: 设置页支持跟随系统主题"
 
 ```tsx
 function Harness() {
-  const [visible, setVisible] = useState<TransactionFieldId[]>([
-    ...ALL_TRANSACTION_FIELDS,
-  ]);
+  const [visible, setVisible] = useState<TransactionFieldId[]>([...ALL_TRANSACTION_FIELDS]);
   return (
     <ColumnVisibilityPanel
       visibleFields={visible}
@@ -669,8 +675,7 @@ npx vitest run src/features/transactions/ColumnVisibilityPanel.test.tsx
   aria-controls={panelId}
   onClick={() => setOpen((value) => !value)}
 >
-  <Columns3 size={16} aria-hidden="true" />
-  列
+  <Columns3 size={16} aria-hidden="true" />列
 </button>
 ```
 
@@ -773,6 +778,7 @@ git commit -m "feat: 交易列表支持字段显示偏好"
 ## 任务 5：增加分析年月选择与重置
 
 **文件：**
+
 - 创建：`src/features/analytics/analysis-month.ts`
 - 创建：`src/features/analytics/analysis-month.test.ts`
 - 创建：`src/features/analytics/AnalysisMonthControl.tsx`
@@ -942,6 +948,7 @@ git commit -m "feat: 利润分析支持按月选择"
 ## 任务 6：完整回归与网页端视觉验收
 
 **文件：**
+
 - 验证：所有本计划涉及的源文件与测试
 - 仅在发现真实问题时修改对应文件，并为问题补充回归测试
 

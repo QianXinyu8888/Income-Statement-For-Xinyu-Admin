@@ -1,13 +1,14 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { cleanup, render, screen } from '@testing-library/react';
+import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { MemoryRouter } from 'react-router-dom';
 import { afterAll, afterEach, beforeAll, describe, expect, it, vi } from 'vitest';
 import { apiClient } from '../api/client';
 import type { AnalyticsSummary } from '../domain/analytics';
+import { BrowserPreferencesProvider } from '../preferences/BrowserPreferencesContext';
 import AnalyticsPage from './AnalyticsPage';
 
-const summary: AnalyticsSummary = {
+const filteredSummary: AnalyticsSummary = {
   revenue: 1000,
   totalCost: 400,
   shipping: 10,
@@ -17,7 +18,7 @@ const summary: AnalyticsSummary = {
   returnCount: 1,
   returnLoss: 45,
   incompleteCount: 0,
-  monthly: [{ month: '2026-08', revenue: 1000, profit: 600, count: 1 }],
+  monthly: [{ month: '2026-08', revenue: 500, profit: -100, count: 1 }],
   brackets: [
     {
       name: '高收益',
@@ -39,13 +40,29 @@ const summary: AnalyticsSummary = {
   returnItems: [{ id: 'returned', title: '退货产品' }],
 };
 
+const trendSummary: AnalyticsSummary = {
+  ...filteredSummary,
+  monthly: [
+    { month: '2026-07', revenue: 1000, profit: 600, count: 1 },
+    { month: '2026-08', revenue: 500, profit: -100, count: 1 },
+  ],
+};
+
+function mockSummaries() {
+  return vi
+    .spyOn(apiClient, 'summary')
+    .mockImplementation((from, to) => Promise.resolve(from || to ? filteredSummary : trendSummary));
+}
+
 function renderPage() {
   const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
   return render(
     <QueryClientProvider client={client}>
-      <MemoryRouter>
-        <AnalyticsPage />
-      </MemoryRouter>
+      <BrowserPreferencesProvider>
+        <MemoryRouter>
+          <AnalyticsPage />
+        </MemoryRouter>
+      </BrowserPreferencesProvider>
     </QueryClientProvider>,
   );
 }
@@ -55,7 +72,18 @@ describe('AnalyticsPage drilldown', () => {
     vi.stubGlobal(
       'ResizeObserver',
       class {
-        observe() {}
+        constructor(private readonly callback: ResizeObserverCallback) {}
+        observe(target: Element) {
+          this.callback(
+            [
+              {
+                target,
+                contentRect: { width: 620, height: 330 },
+              } as ResizeObserverEntry,
+            ],
+            this,
+          );
+        }
         unobserve() {}
         disconnect() {}
       },
@@ -65,10 +93,12 @@ describe('AnalyticsPage drilldown', () => {
   afterEach(() => {
     cleanup();
     vi.restoreAllMocks();
+    vi.useRealTimers();
+    localStorage.clear();
   });
 
   it('expands product links, collapses them, and disables empty groups', async () => {
-    vi.spyOn(apiClient, 'summary').mockResolvedValue(summary);
+    mockSummaries();
     const user = userEvent.setup();
     const { container } = renderPage();
 
@@ -95,7 +125,7 @@ describe('AnalyticsPage drilldown', () => {
   });
 
   it('uses a fallback label for untitled products in status groups', async () => {
-    vi.spyOn(apiClient, 'summary').mockResolvedValue(summary);
+    mockSummaries();
     const user = userEvent.setup();
     renderPage();
 
@@ -106,12 +136,44 @@ describe('AnalyticsPage drilldown', () => {
     );
   });
 
-  it('labels the profit-only chart and does not expose invented aggregate columns', async () => {
-    vi.spyOn(apiClient, 'summary').mockResolvedValue(summary);
+  it('renders the unfiltered multi-month trend without inventing aggregate columns', async () => {
+    mockSummaries();
     renderPage();
 
-    expect(await screen.findByRole('img', { name: '月度利润趋势图' })).toBeInTheDocument();
+    expect(await screen.findByRole('heading', { name: '月度利润' })).toBeInTheDocument();
+    expect(screen.getByText('按月对比')).toBeInTheDocument();
+    expect(screen.getByRole('img', { name: '月度利润趋势图' })).toBeInTheDocument();
+    expect(screen.getByTestId('monthly-profit-scroll')).toBeInTheDocument();
+    expect(screen.getByText('7月')).toBeInTheDocument();
+    expect(screen.getByText('8月')).toBeInTheDocument();
     expect(screen.queryByText('占比')).not.toBeInTheDocument();
     expect(screen.queryByText('成交金额')).not.toBeInTheDocument();
+  });
+
+  it('queries the current month by default, remembers another month and resets to this month', async () => {
+    vi.useFakeTimers({ shouldAdvanceTime: true });
+    vi.setSystemTime(new Date(2026, 7, 13, 12));
+    const summarySpy = mockSummaries();
+    const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
+    const first = renderPage();
+
+    const month = screen.getByLabelText('分析月份');
+    expect(screen.getByText('分析月份', { selector: 'label' })).toBeVisible();
+    expect(month).toHaveValue('2026-08');
+    await waitFor(() => {
+      expect(summarySpy).toHaveBeenCalledWith('2026-08-01', '2026-08-31');
+      expect(summarySpy).toHaveBeenCalledWith();
+    });
+
+    fireEvent.change(month, { target: { value: '2026-02' } });
+    await waitFor(() => expect(summarySpy).toHaveBeenCalledWith('2026-02-01', '2026-02-28'));
+    expect(summarySpy.mock.calls.filter((args) => args.length === 0)).toHaveLength(1);
+    first.unmount();
+
+    renderPage();
+    expect(screen.getByLabelText('分析月份')).toHaveValue('2026-02');
+    await user.click(screen.getByRole('button', { name: '重置为本月' }));
+    expect(screen.getByLabelText('分析月份')).toHaveValue('2026-08');
+    await waitFor(() => expect(summarySpy).toHaveBeenCalledWith('2026-08-01', '2026-08-31'));
   });
 });
