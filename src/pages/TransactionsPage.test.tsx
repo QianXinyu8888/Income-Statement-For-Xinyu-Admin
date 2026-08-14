@@ -208,6 +208,20 @@ describe('TransactionsPage focused navigation', () => {
     );
   });
 
+  it('marks the transaction page for stable mobile animation rules', () => {
+    vi.spyOn(apiClient, 'transactions').mockResolvedValue({
+      items: [target],
+      total: 1,
+      page: 1,
+      pageSize: 20,
+      warnings: [],
+    });
+
+    const { container } = renderPage('/transactions');
+
+    expect(container.querySelector('section.page')).toHaveClass('page--transactions');
+  });
+
   it('gives batch status actions explicit accessible names', async () => {
     vi.spyOn(apiClient, 'transactions').mockResolvedValue({
       items: [target],

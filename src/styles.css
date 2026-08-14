@@ -3041,7 +3041,7 @@ html.reduce-motion *::after {
 }
 
 @media (max-width: 680px) {
-  .page:has(.column-visibility__panel) {
+  .page--transactions {
     animation: none;
   }
   .column-visibility__trigger {

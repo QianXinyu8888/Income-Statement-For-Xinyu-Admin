@@ -21,6 +21,7 @@ describe('SettingsPage', () => {
   afterEach(() => {
     cleanup();
     vi.restoreAllMocks();
+    vi.unstubAllGlobals();
     localStorage.clear();
     delete document.documentElement.dataset.theme;
     document.documentElement.classList.remove('reduce-motion');
@@ -39,20 +40,43 @@ describe('SettingsPage', () => {
     expect(await screen.findByText('正常')).toHaveClass('connected');
   });
 
-  it('chooses system, light or dark theme and keeps reduced motion in browser preferences', async () => {
+  it('switches system → dark → light → system and keeps reduced motion in browser preferences', async () => {
     vi.spyOn(apiClient, 'session').mockResolvedValue({
       user: { username: 'xinyu', role: '管理员' },
     });
     vi.spyOn(apiClient, 'health').mockResolvedValue({ connected: true, checkedAt: '2026-08-13' });
+    const addEventListener = vi.fn();
+    const removeEventListener = vi.fn();
+    vi.stubGlobal(
+      'matchMedia',
+      vi.fn(() => ({
+        matches: true,
+        media: '(prefers-color-scheme: dark)',
+        onchange: null,
+        addEventListener,
+        removeEventListener,
+        addListener: vi.fn(),
+        removeListener: vi.fn(),
+        dispatchEvent: vi.fn(),
+      })),
+    );
     const user = userEvent.setup();
-    renderPage();
+    const rendered = renderPage();
 
     const theme = await screen.findByRole('radiogroup', { name: '主题模式' });
     expect(within(theme).getByRole('radio', { name: '跟随系统' })).toBeChecked();
     await user.click(within(theme).getByRole('radio', { name: '深色' }));
     expect(document.documentElement).toHaveAttribute('data-theme', 'dark');
+    await user.click(within(theme).getByRole('radio', { name: '浅色' }));
+    expect(document.documentElement).toHaveAttribute('data-theme', 'light');
+    await user.click(within(theme).getByRole('radio', { name: '跟随系统' }));
+    expect(document.documentElement).toHaveAttribute('data-theme', 'dark');
 
     await user.click(screen.getByRole('checkbox', { name: /缩减界面动画/ }));
     expect(document.documentElement).toHaveClass('reduce-motion');
+
+    rendered.unmount();
+    expect(addEventListener).toHaveBeenCalledWith('change', expect.any(Function));
+    expect(removeEventListener).toHaveBeenCalledWith('change', expect.any(Function));
   });
 });

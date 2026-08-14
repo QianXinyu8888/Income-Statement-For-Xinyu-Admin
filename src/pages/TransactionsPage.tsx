@@ -190,7 +190,7 @@ export default function TransactionsPage() {
     }
   };
   return (
-    <section className="page">
+    <section className="page page--transactions">
       <header className="page-header">
         <div>
           <div className="page-title-row">
