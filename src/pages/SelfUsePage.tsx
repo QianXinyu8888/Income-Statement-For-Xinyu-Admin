@@ -16,8 +16,6 @@ import {
 } from '../domain/self-use';
 import type { Transaction, TransactionInput } from '../domain/transaction';
 
-type StatusFilter = '全部' | SelfUseStatus;
-
 const sortOptions: Array<{ label: string; sort: SelfUseSort; order: 'asc' | 'desc' }> = [
   { label: '最新购入', sort: 'purchaseDate', order: 'desc' },
   { label: '持有最久', sort: 'holdingDays', order: 'desc' },
@@ -45,7 +43,6 @@ async function fetchStatusRecords(status: SelfUseStatus, search: string) {
 export default function SelfUsePage() {
   const queryClient = useQueryClient();
   const [search, setSearch] = useState('');
-  const [statusFilter, setStatusFilter] = useState<StatusFilter>('全部');
   const [sortIndex, setSortIndex] = useState(0);
   const [selling, setSelling] = useState<Transaction | null>(null);
   const [editing, setEditing] = useState<Transaction | null>(null);
@@ -72,15 +69,12 @@ export default function SelfUsePage() {
     [dismissedIds, result.data],
   );
 
-  const records = useMemo(
-    () =>
-      getSelfUseRecords(
-        activeRecords,
-        sortOption.sort,
-        sortOption.order,
-        statusFilter === '全部' ? undefined : statusFilter,
-      ),
-    [activeRecords, sortOption.order, sortOption.sort, statusFilter],
+  const recordsByStatus = useMemo(
+    () => ({
+      自用中: getSelfUseRecords(activeRecords, sortOption.sort, sortOption.order, '自用中'),
+      在售中: getSelfUseRecords(activeRecords, sortOption.sort, sortOption.order, '在售中'),
+    }),
+    [activeRecords, sortOption.order, sortOption.sort],
   );
 
   const refresh = async () => {
@@ -126,15 +120,6 @@ export default function SelfUsePage() {
     },
   });
 
-  const counts = useMemo(
-    () => ({
-      全部: activeRecords.length,
-      自用中: activeRecords.filter((record) => record.status === '自用中').length,
-      在售中: activeRecords.filter((record) => record.status === '在售中').length,
-    }),
-    [activeRecords],
-  );
-
   const openDrawer = (record: Transaction | null) => {
     setEditing(record);
     setDrawerOpen(true);
@@ -149,7 +134,11 @@ export default function SelfUsePage() {
       <header className="page-header self-use-page-header">
         <div>
           <h1>自用/在售中</h1>
-          <p>{result.data ? `${counts.全部} 件物品 · 管理使用与出售状态` : '管理使用与出售状态'}</p>
+          <p>
+            {result.data
+              ? `${activeRecords.length} 件物品 · 管理使用与出售状态`
+              : '管理使用与出售状态'}
+          </p>
         </div>
         <button className="button button--primary" onClick={() => openDrawer(null)}>
           <Plus size={16} />
@@ -158,19 +147,6 @@ export default function SelfUsePage() {
       </header>
       <div className="self-use-window">
         <div className="self-use-toolbar">
-          <div className="self-use-segmented" role="group" aria-label="自用状态筛选">
-            {(['全部', ...SELF_USE_STATUSES] as StatusFilter[]).map((status) => (
-              <button
-                key={status}
-                type="button"
-                aria-pressed={statusFilter === status}
-                onClick={() => setStatusFilter(status)}
-              >
-                {status} {counts[status]}
-              </button>
-            ))}
-          </div>
-          <div className="toolbar-spacer" />
           <div className="search-box self-use-search">
             <Search size={16} />
             <input
@@ -201,22 +177,40 @@ export default function SelfUsePage() {
           <LoadingState label="正在加载自用物品" />
         ) : result.isError ? (
           <ErrorState message={result.error.message} onRetry={() => result.refetch()} />
-        ) : records.length === 0 ? (
+        ) : activeRecords.length === 0 ? (
           <div className="empty-state">
             <strong>没有自用或在售物品</strong>
-            <span>添加一笔交易，或调整筛选条件。</span>
+            <span>添加一笔交易，或调整搜索条件。</span>
             <button className="button button--primary" onClick={() => openDrawer(null)}>
               添加
             </button>
           </div>
         ) : (
-          <SelfUseList
-            records={records}
-            listingId={markListed.isPending ? markListed.variables.id : null}
-            onMarkListed={(record) => markListed.mutate(record)}
-            onSell={setSelling}
-            onOpen={openDrawer}
-          />
+          <div className="self-use-sections">
+            {SELF_USE_STATUSES.map((status) => {
+              const records = recordsByStatus[status];
+              const headingId = `self-use-section-${status}`;
+              return (
+                <section key={status} className="self-use-section" aria-labelledby={headingId}>
+                  <header className="self-use-section-header">
+                    <h2 id={headingId}>{status}</h2>
+                    <span>{records.length} 件</span>
+                  </header>
+                  {records.length === 0 ? (
+                    <p className="self-use-section-empty">暂无{status}物品</p>
+                  ) : (
+                    <SelfUseList
+                      records={records}
+                      listingId={markListed.isPending ? markListed.variables.id : null}
+                      onMarkListed={(record) => markListed.mutate(record)}
+                      onSell={setSelling}
+                      onOpen={openDrawer}
+                    />
+                  )}
+                </section>
+              );
+            })}
+          </div>
         )}
       </div>
       <SaleConfirmDialog

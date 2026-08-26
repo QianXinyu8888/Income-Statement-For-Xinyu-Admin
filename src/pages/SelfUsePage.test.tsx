@@ -1,5 +1,5 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { cleanup, render, screen, waitFor } from '@testing-library/react';
+import { cleanup, render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { apiClient, type TransactionPage } from '../api/client';
@@ -81,6 +81,20 @@ describe('SelfUsePage', () => {
     expect(apiClient.transactions).toHaveBeenCalledWith(
       expect.objectContaining({ status: '在售中', pageSize: 100 }),
     );
+  });
+
+  it('renders personal-use and listed records in separate sections', async () => {
+    mockActiveRecords();
+    renderPage();
+
+    const personalSection = await screen.findByRole('region', { name: '自用中' });
+    const listedSection = screen.getByRole('region', { name: '在售中' });
+
+    expect(within(personalSection).getAllByText('耳机')).toHaveLength(2);
+    expect(within(personalSection).queryByText('键盘')).not.toBeInTheDocument();
+    expect(within(listedSection).getAllByText('键盘')).toHaveLength(2);
+    expect(within(listedSection).queryByText('耳机')).not.toBeInTheDocument();
+    expect(screen.queryByRole('group', { name: '自用状态筛选' })).not.toBeInTheDocument();
   });
 
   it('loads every page for an active status before sorting the workspace', async () => {

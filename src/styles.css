@@ -3583,6 +3583,40 @@ tbody tr:nth-child(n + 5),
   border-bottom: 1px solid var(--border);
   background: color-mix(in srgb, var(--surface), var(--bg) 26%);
 }
+
+.self-use-sections {
+  display: grid;
+  gap: 32px;
+}
+
+.self-use-section {
+  min-width: 0;
+}
+
+.self-use-section-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.self-use-section-header h2 {
+  margin: 0;
+  font-size: 15px;
+  letter-spacing: -0.01em;
+}
+
+.self-use-section-header span {
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.self-use-section-empty {
+  margin: 0;
+  padding: 20px 0;
+  color: var(--muted);
+  font-size: 14px;
+}
 .self-use-segmented {
   display: inline-flex;
   overflow: hidden;
