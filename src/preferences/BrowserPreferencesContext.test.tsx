@@ -48,6 +48,16 @@ describe('BrowserPreferencesProvider', () => {
 
   it('follows system changes only in system mode', async () => {
     const changeSystem = installMatchMedia(false);
+    localStorage.setItem(
+      PREFERENCES_STORAGE_KEY,
+      JSON.stringify({
+        version: 1,
+        themeMode: 'system',
+        visibleTransactionFields: ['title'],
+        analysisMonth: '2026-08',
+        language: 'zh',
+      }),
+    );
     render(
       <BrowserPreferencesProvider>
         <Consumer />
@@ -69,8 +79,8 @@ describe('BrowserPreferencesProvider', () => {
       </BrowserPreferencesProvider>,
     );
     await userEvent.click(screen.getByRole('button', { name: '快捷切换' }));
-    expect(screen.getByLabelText('mode')).toHaveTextContent('light');
-    expect(document.documentElement).toHaveAttribute('data-theme', 'light');
+    expect(screen.getByLabelText('mode')).toHaveTextContent('dark');
+    expect(document.documentElement).toHaveAttribute('data-theme', 'dark');
   });
 
   it('ignores a stored manual reduced-motion value', () => {

@@ -16,12 +16,14 @@ export const ALL_TRANSACTION_FIELDS = [
 
 export type TransactionFieldId = (typeof ALL_TRANSACTION_FIELDS)[number];
 export type ThemeMode = 'system' | 'light' | 'dark';
+export type Language = 'zh' | 'en';
 
 export interface BrowserPreferencesV1 {
   version: 1;
   themeMode: ThemeMode;
   visibleTransactionFields: TransactionFieldId[];
   analysisMonth: string;
+  language: Language;
 }
 
 type PreferenceStorage = Pick<Storage, 'getItem' | 'setItem'>;
@@ -39,10 +41,17 @@ export function isValidMonth(value: unknown): value is string {
 function defaults(now: Date): BrowserPreferencesV1 {
   return {
     version: 1,
-    themeMode: 'system',
+    themeMode: 'light',
     visibleTransactionFields: [...ALL_TRANSACTION_FIELDS],
     analysisMonth: localMonth(now),
+    language: detectBrowserLanguage(),
   };
+}
+
+/** 跟随浏览器语言：zh* → 中文，其余 → English */
+export function detectBrowserLanguage(): Language {
+  const languages = typeof navigator !== 'undefined' ? navigator.languages : [];
+  return languages.some((code) => code.toLowerCase().startsWith('zh')) ? 'zh' : 'en';
 }
 
 export function readPreferences(
@@ -56,7 +65,7 @@ export function readPreferences(
       const legacyTheme = storage.getItem('theme');
       return {
         ...fallback,
-        themeMode: legacyTheme === 'light' || legacyTheme === 'dark' ? legacyTheme : 'system',
+        themeMode: legacyTheme === 'dark' ? 'dark' : 'light',
       };
     }
     const parsed = JSON.parse(raw) as Record<string, unknown>;
@@ -75,6 +84,7 @@ export function readPreferences(
       analysisMonth: isValidMonth(parsed.analysisMonth)
         ? parsed.analysisMonth
         : fallback.analysisMonth,
+      language: parsed.language === 'en' ? 'en' : 'zh',
     };
   } catch {
     return fallback;

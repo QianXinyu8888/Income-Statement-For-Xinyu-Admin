@@ -3,14 +3,20 @@ import { cleanup, render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { apiClient } from '../api/client';
+import { LanguageProvider } from '../i18n';
 import { BrowserPreferencesProvider } from '../preferences/BrowserPreferencesContext';
+import { PREFERENCES_STORAGE_KEY } from '../preferences/browser-preferences';
 import SettingsPage from './SettingsPage';
 
 function renderPage(client = new QueryClient({ defaultOptions: { queries: { retry: false } } })) {
+  // jsdom 默认 en-US，固定为中文以便断言中文文案
+  vi.stubGlobal('navigator', { languages: ['zh-CN', 'zh'] });
   return render(
     <QueryClientProvider client={client}>
       <BrowserPreferencesProvider>
-        <SettingsPage />
+        <LanguageProvider>
+          <SettingsPage />
+        </LanguageProvider>
       </BrowserPreferencesProvider>
     </QueryClientProvider>,
   );
@@ -34,6 +40,7 @@ describe('SettingsPage', () => {
 
     const metadata = await screen.findByRole('group', { name: '账号与服务状态' });
     expect(metadata.tagName).toBe('DL');
+    expect(within(metadata).getByText('数据库连接状态')).toBeInTheDocument();
     expect(await screen.findByText('xinyu')).toBeInTheDocument();
     expect(await screen.findByText('正常')).toHaveClass('connected');
   });
@@ -111,6 +118,16 @@ describe('SettingsPage', () => {
       })),
     );
     const user = userEvent.setup();
+    localStorage.setItem(
+      PREFERENCES_STORAGE_KEY,
+      JSON.stringify({
+        version: 1,
+        themeMode: 'system',
+        visibleTransactionFields: ['title'],
+        analysisMonth: '2026-08',
+        language: 'zh',
+      }),
+    );
     const rendered = renderPage();
 
     expect(await screen.findByRole('group', { name: '界面偏好' })).toBeInTheDocument();
@@ -132,5 +149,26 @@ describe('SettingsPage', () => {
     rendered.unmount();
     expect(addEventListener).toHaveBeenCalledWith('change', expect.any(Function));
     expect(removeEventListener).toHaveBeenCalledWith('change', expect.any(Function));
+  });
+
+  it('switches language and persists the choice', async () => {
+    vi.spyOn(apiClient, 'session').mockResolvedValue({
+      user: { username: 'xinyu', role: '管理员' },
+    });
+    vi.spyOn(apiClient, 'health').mockResolvedValue({ connected: true, checkedAt: '2026-08-13' });
+    const user = userEvent.setup();
+    renderPage();
+
+    expect(await screen.findByRole('heading', { name: '设置' })).toBeInTheDocument();
+    const language = await screen.findByRole('radiogroup', { name: '语言' });
+    await user.click(within(language).getByRole('radio', { name: 'English' }));
+
+    expect(await screen.findByRole('heading', { name: 'Settings' })).toBeInTheDocument();
+    expect(screen.getByRole('group', { name: 'Account & service status' })).toBeInTheDocument();
+    expect(JSON.parse(localStorage.getItem('xinyu-admin.preferences') ?? '{}').language).toBe('en');
+
+    const languageAfter = await screen.findByRole('radiogroup', { name: 'Language' });
+    await user.click(within(languageAfter).getByRole('radio', { name: '简体中文' }));
+    expect(await screen.findByRole('heading', { name: '设置' })).toBeInTheDocument();
   });
 });

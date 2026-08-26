@@ -2,6 +2,7 @@ import { createContext, useCallback, useContext, useEffect, useMemo, useState } 
 import {
   ALL_TRANSACTION_FIELDS,
   type BrowserPreferencesV1,
+  type Language,
   isValidMonth,
   readPreferences,
   type ThemeMode,
@@ -11,6 +12,8 @@ import {
 
 interface BrowserPreferencesContextValue {
   preferences: BrowserPreferencesV1;
+  language: Language;
+  setLanguage: (language: Language) => void;
   effectiveTheme: 'light' | 'dark';
   setThemeMode: (mode: ThemeMode) => void;
   toggleTheme: () => void;
@@ -71,6 +74,8 @@ export function BrowserPreferencesProvider({ children }: { children: React.React
   const value = useMemo<BrowserPreferencesContextValue>(
     () => ({
       preferences,
+      language: preferences.language,
+      setLanguage: (language) => updatePreferences((current) => ({ ...current, language })),
       effectiveTheme,
       setThemeMode: (themeMode) => updatePreferences((current) => ({ ...current, themeMode })),
       toggleTheme: () =>

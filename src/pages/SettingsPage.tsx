@@ -1,5 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { apiClient } from '../api/client';
+import { useLanguage } from '../i18n';
 import { useBrowserPreferences } from '../preferences/BrowserPreferencesContext';
 
 export default function SettingsPage() {
@@ -10,6 +11,7 @@ export default function SettingsPage() {
     refetchOnMount: 'always',
   });
   const health = useQuery({ queryKey: ['health'], queryFn: apiClient.health, retry: false });
+  const { language, setLanguage, t } = useLanguage();
   const {
     preferences: { themeMode },
     setThemeMode,
@@ -19,41 +21,45 @@ export default function SettingsPage() {
     <section className="page page--narrow">
       <header className="page-header">
         <div>
-          <h1>设置</h1>
-          <p>账号与服务状态</p>
+          <h1>{t('settings.title')}</h1>
+          <p>{t('settings.subtitle')}</p>
         </div>
       </header>
-      <dl className="settings-list" role="group" aria-label="账号与服务状态">
+      <dl className="settings-list" role="group" aria-label={t('settings.accountGroupLabel')}>
         <div>
-          <dt>当前账号</dt>
+          <dt>{t('settings.currentAccount')}</dt>
           <dd>
             <strong>{session.data?.user.username ?? '—'}</strong>
           </dd>
         </div>
         <div>
-          <dt>账号权限</dt>
+          <dt>{t('settings.accountRole')}</dt>
           <dd>
             <strong>
               {session.isFetching ? (
                 <img className="loading-gif" src="/loading.gif" alt="" />
               ) : session.isError ? (
-                '同步失败'
+                t('settings.syncFailed')
               ) : (
-                (session.data?.user.role ?? '用户')
+                (session.data?.user.role ?? t('settings.roleUser'))
               )}
             </strong>
           </dd>
         </div>
         <div>
-          <dt>飞书连接</dt>
+          <dt>{t('settings.feishuConnection')}</dt>
           <dd>
             <strong className={health.data?.connected ? 'connected' : 'disconnected'}>
-              {health.isLoading ? '检查中' : health.data?.connected ? '正常' : '异常'}
+              {health.isLoading
+                ? t('settings.checking')
+                : health.data?.connected
+                  ? t('settings.connected')
+                  : t('settings.disconnected')}
             </strong>
           </dd>
         </div>
         <div>
-          <dt>版本</dt>
+          <dt>{t('settings.version')}</dt>
           <dd>
             <strong>2.0.0</strong>
           </dd>
@@ -62,20 +68,20 @@ export default function SettingsPage() {
 
       <header className="page-header" style={{ marginTop: '24px' }}>
         <div>
-          <h2>界面偏好</h2>
-          <p>个性化主题显示</p>
+          <h2>{t('settings.preferencesTitle')}</h2>
+          <p>{t('settings.preferencesSubtitle')}</p>
         </div>
       </header>
-      <dl className="settings-list" role="group" aria-label="界面偏好">
+      <dl className="settings-list" role="group" aria-label={t('settings.preferencesGroupLabel')}>
         <div>
-          <dt>主题模式</dt>
+          <dt>{t('settings.themeMode')}</dt>
           <dd>
-            <fieldset className="theme-segmented" role="radiogroup" aria-label="主题模式">
+            <fieldset className="theme-segmented" role="radiogroup" aria-label={t('settings.themeMode')}>
               {(
                 [
-                  ['light', '浅色'],
-                  ['dark', '深色'],
-                  ['system', '跟随系统'],
+                  ['light', t('settings.themeLight')],
+                  ['dark', t('settings.themeDark')],
+                  ['system', t('settings.themeSystem')],
                 ] as const
               ).map(([value, label]) => (
                 <label key={value}>
@@ -85,6 +91,30 @@ export default function SettingsPage() {
                     value={value}
                     checked={themeMode === value}
                     onChange={() => setThemeMode(value)}
+                  />
+                  <span>{label}</span>
+                </label>
+              ))}
+            </fieldset>
+          </dd>
+        </div>
+        <div>
+          <dt>{t('settings.language')}</dt>
+          <dd>
+            <fieldset className="theme-segmented" role="radiogroup" aria-label={t('settings.language')}>
+              {(
+                [
+                  ['zh', '简体中文'],
+                  ['en', 'English'],
+                ] as const
+              ).map(([value, label]) => (
+                <label key={value}>
+                  <input
+                    type="radio"
+                    name="language"
+                    value={value}
+                    checked={language === value}
+                    onChange={() => setLanguage(value)}
                   />
                   <span>{label}</span>
                 </label>

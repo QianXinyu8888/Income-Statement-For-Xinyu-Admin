@@ -2,7 +2,7 @@
 
 > **面向 AI 代理的工作者：** 必需子技能：使用 superpowers:subagent-driven-development（推荐）或 superpowers:executing-plans 逐任务实现此计划。步骤使用复选框（`- [ ]`）语法来跟踪进度。
 
-**目标：** 让交易页默认按飞书“闲鱼交易明细”网格视图的“排序”字段升序展示，并确保空排序值稳定置后。
+**目标：** 让交易页默认按飞书“交易明细”网格视图的“排序”字段升序展示，并确保空排序值稳定置后。
 
 **架构：** `queryTransactions` 对 `sortOrder` 增加明确的空值置后规则，其他字段继续使用现有比较逻辑。`TransactionsPage` 的初始化与重置查询统一改为 `sortOrder + asc`；接口 schema 和客户端查询类型已支持该字段，不增加飞书请求。
 

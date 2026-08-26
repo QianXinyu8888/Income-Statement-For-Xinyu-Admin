@@ -62,7 +62,7 @@ it('renders exactly four primary destinations and triggers theme toggle', async 
 
 ```tsx
 <aside className="sidebar" aria-label="主导航">
-  <div className="brand" aria-label="闲鱼损益">X</div>
+  <div className="brand" aria-label="损益">X</div>
   <nav className="sidebar-nav">{desktopLinks}</nav>
   <div className="sidebar-footer">{themeAndAccount}</div>
 </aside>

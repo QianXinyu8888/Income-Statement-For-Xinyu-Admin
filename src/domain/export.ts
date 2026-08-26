@@ -58,7 +58,7 @@ export function downloadCsv(records: Transaction[], filename: string) {
 export async function downloadExcel(records: Transaction[], filename: string) {
   const ExcelJS = await import('exceljs');
   const workbook = new ExcelJS.Workbook();
-  const sheet = workbook.addWorksheet('闲鱼交易明细');
+  const sheet = workbook.addWorksheet('交易明细');
   sheet.columns = HEADERS.map((header, index) => ({
     header,
     key: String(index),

@@ -112,8 +112,7 @@ button:disabled {
   align-items: stretch;
   z-index: 20;
 }
-.brand,
-.login-mark {
+.brand {
   width: 32px;
   height: 32px;
   display: grid;
@@ -167,41 +166,6 @@ button:disabled {
   border-radius: 0 3px 3px 0;
   background: var(--text);
   animation: nav-indicator 180ms ease-out;
-}
-.sidebar-account {
-  margin: auto 12px 16px;
-  padding: 10px;
-  border-top: 1px solid var(--border);
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  min-width: 0;
-}
-.sidebar-avatar {
-  width: 30px;
-  height: 30px;
-  border-radius: 50%;
-  display: grid;
-  place-items: center;
-  background: var(--surface-2);
-  color: var(--muted);
-}
-.sidebar-account > span:last-child {
-  min-width: 0;
-  display: grid;
-}
-.sidebar-account strong,
-.sidebar-account small {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-.sidebar-account strong {
-  font-size: 12px;
-}
-.sidebar-account small {
-  color: var(--muted);
-  font-size: 11px;
 }
 @keyframes nav-indicator {
   from {
@@ -475,7 +439,7 @@ tbody tr.is-selected {
   border: 0;
   background: transparent;
   padding: 0;
-  font-weight: 600;
+  font-weight: 200;
   display: grid;
   text-align: left;
 }
@@ -1028,7 +992,7 @@ select.pagination-select option {
   font-size: 13px;
   font-weight: 700;
   border: 1px solid var(--border);
-  border-radius: 6px;
+  border-radius: 8px;
   background-color: var(--surface-2);
   color: var(--accent);
   outline: none;
@@ -1180,6 +1144,50 @@ select.pagination-select option {
   padding: 9px 10px;
   color: var(--text);
 }
+.login-input.is-active,
+.login-password-field.is-active {
+  animation: login-breathe 1800ms ease-in-out infinite;
+}
+.login-password-field.is-pulsing {
+  animation: login-password-pulse 180ms ease-out;
+}
+.login-input.is-completed,
+.login-password-field.is-completed {
+  animation: login-input-complete 260ms var(--ease-out-smooth);
+}
+.login-panel label {
+  font-size: 13px;
+}
+.login-panel input {
+  min-height: 44px;
+  padding: 11px 13px;
+  font-size: 15px;
+  transition:
+    border-color 150ms ease,
+    box-shadow 150ms ease;
+}
+.login-panel .login-input:focus {
+  border-color: #2563eb;
+  background: color-mix(in srgb, #2563eb, var(--surface) 97%);
+  box-shadow: 0 0 0 3px color-mix(in srgb, #2563eb, transparent 82%);
+}
+.login-input.is-completed {
+  border-color: color-mix(in srgb, var(--profit), var(--border-strong) 45%);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--profit), transparent 91%);
+}
+.login-input.is-completed:focus {
+  border-color: #2563eb;
+  background: color-mix(in srgb, #2563eb, var(--surface) 97%);
+  box-shadow: 0 0 0 3px color-mix(in srgb, #2563eb, transparent 82%);
+}
+.login-panel input:user-valid:not(:focus) {
+  border-color: color-mix(in srgb, var(--profit), var(--border-strong) 55%);
+}
+.login-panel .button {
+  min-height: 46px;
+  font-size: 15px;
+}
+
 .form-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -1278,26 +1286,208 @@ select.pagination-select option {
   display: grid;
   place-items: center;
   padding: 20px;
+  background: var(--bg);
+}
+.login-language {
+  display: inline-flex;
+  align-items: center;
+  font-size: 13px;
+}
+.login-actions {
+  position: absolute;
+  top: 18px;
+  right: 20px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+.login-language-select {
+  min-width: 0;
+  border: 1px solid var(--border);
+  background: transparent;
+  padding: 7px 2px 7px 2px;
+  border-radius: 8px;
+  color: var(--text);
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 500;
+  font-family: inherit;
+  outline: none;
+}
+.login-language-select:hover,
+.login-language-select:focus-visible {
+  border-color: var(--border-strong);
+  background: transparent;
+}
+.login-actions .topbar-theme {
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: transparent;
+}
+.login-actions .topbar-theme:hover {
+  background: transparent;
 }
 .login-panel {
-  width: min(360px, 100%);
+  width: 100%;
+  max-width: 420px;
   background: var(--surface);
   border: 1px solid var(--border);
-  border-radius: 9px;
-  padding: 30px;
+  border-radius: 8px;
+  padding: 40px;
   display: grid;
-  gap: 15px;
+  gap: 16px;
+  animation: login-enter 220ms ease-out both;
 }
-.login-panel .login-mark {
-  margin-bottom: 4px;
+.login-panel > label {
+  margin-bottom: -8px;
+}
+.login-password-field {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+.login-password-field input {
+  width: 100%;
+  padding-right: 88px;
+}
+.login-password-toggle {
+  position: absolute;
+  right: 10px;
+  border: 0;
+  display: grid;
+  place-items: center;
+  padding: 5px;
+  background: transparent;
+  color: var(--accent);
+  line-height: 1;
+  transition:
+    color 140ms ease,
+    transform 140ms ease,
+    opacity 140ms ease;
+}
+.login-password-toggle.is-visible {
+  transform: scale(1.08);
+}
+.login-password-toggle:hover {
+  color: var(--accent-hover);
+}
+.login-panel.has-error {
+  animation: login-error-shake 280ms ease-out;
+}
+.form-error {
+  animation: login-error-fade-in 180ms ease-out both;
+}
+@keyframes login-error-fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(-3px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes login-error-shake {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  35% {
+    transform: translateX(-4px);
+  }
+  70% {
+    transform: translateX(4px);
+  }
+}
+@keyframes login-breathe {
+  0%,
+  100% {
+    box-shadow: 0 0 0 1px color-mix(in srgb, #2563eb, transparent 72%);
+  }
+  50% {
+    box-shadow: 0 0 0 4px color-mix(in srgb, #2563eb, transparent 82%);
+  }
+}
+@keyframes login-password-pulse {
+  50% {
+    transform: scale(1.012);
+  }
+}
+@keyframes login-input-complete {
+  0% {
+    transform: translateY(0);
+  }
+  45% {
+    transform: translateY(-3px);
+  }
+  100% {
+    transform: translateY(0);
+  }
+}
+@keyframes login-enter {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
 }
 .login-panel h1 {
   margin: 0;
-  font-size: 22px;
+  font-size: 28px;
+  font-weight: 600;
+  line-height: 1.25;
+  letter-spacing: -0.01em;
+  text-align: center;
+  color: var(--text);
 }
 .login-panel p {
-  margin: -8px 0 8px;
+  margin: -6px 0 6px;
+  font-size: 15px;
+  text-align: center;
   color: var(--muted);
+}
+.button--login-primary {
+  background: #1a7f37;
+  border-color: rgba(31, 35, 40, 0.15);
+  color: #ffffff;
+  font-weight: 500;
+  transition:
+    background-color 120ms ease,
+    border-color 120ms ease;
+}
+.button--login-primary:hover:not(:disabled) {
+  background: #1f883d;
+  border-color: rgba(31, 35, 40, 0.15);
+}
+.button--login-primary:active:not(:disabled) {
+  background: #116329;
+  border-color: rgba(31, 35, 40, 0.15);
+}
+.button--login-primary:disabled {
+  background: #95d3a9;
+  border-color: rgba(31, 35, 40, 0.15);
+  color: rgba(255, 255, 255, 0.9);
+  cursor: not-allowed;
+  opacity: 1;
+}
+[data-theme='dark'] .button--login-primary {
+  background: #238636;
+  border-color: rgba(240, 246, 252, 0.1);
+}
+[data-theme='dark'] .button--login-primary:hover:not(:disabled) {
+  background: #2ea043;
+  border-color: rgba(240, 246, 252, 0.1);
+}
+[data-theme='dark'] .button--login-primary:active:not(:disabled) {
+  background: #1a7f37;
+  border-color: rgba(240, 246, 252, 0.1);
+}
+[data-theme='dark'] .button--login-primary:disabled {
+  background: rgba(46, 160, 67, 0.4);
+  border-color: rgba(240, 246, 252, 0.1);
 }
 .metric-grid {
   display: grid;
@@ -1773,14 +1963,26 @@ select.pagination-select option {
     height: calc(62px + env(safe-area-inset-bottom));
     padding-bottom: env(safe-area-inset-bottom);
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
+    grid-template-columns: repeat(5, 1fr);
     background: var(--surface);
     border-top: 1px solid var(--border);
   }
-  .bottom-nav a {
+  .bottom-nav a,
+  .bottom-nav-logout {
     flex-direction: column;
     gap: 3px;
     font-size: 11px;
+  }
+  .bottom-nav-logout {
+    border: 0;
+    background: none;
+    color: var(--muted);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    padding: 0;
+    font-family: inherit;
   }
   .bottom-nav a.active {
     color: var(--text);
@@ -1967,6 +2169,7 @@ select.pagination-select option {
   *::before,
   *::after {
     animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
   }
 }
@@ -2066,11 +2269,91 @@ select.pagination-select option {
 .topbar-theme:hover {
   border-color: var(--border);
 }
+.topbar-lang {
+  position: relative;
+  display: flex;
+  align-items: center;
+  margin-left: -4px;
+}
 .topbar-user {
   margin-left: 4px;
   padding-left: 12px;
   border-left: 1px solid var(--border);
+  position: relative;
+}
+.topbar-user-button {
+  border: 0;
+  background: none;
+  padding: 4px 6px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  color: var(--text);
+  font-family: inherit;
   font-size: 13px;
+}
+.topbar-user-button:hover {
+  background: var(--surface-2);
+}
+.topbar-avatar {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: var(--surface-2);
+  color: var(--muted);
+}
+.topbar-username {
+  font-weight: 600;
+}
+.user-menu-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 44;
+}
+.user-menu {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  z-index: 45;
+  min-width: 168px;
+  padding: 6px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--surface);
+  box-shadow: 0 8px 24px rgb(0 0 0 / 0.12);
+}
+.user-menu-item {
+  border: 0;
+  background: none;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 10px;
+  border-radius: 7px;
+  cursor: pointer;
+  color: var(--danger, #d1242f);
+  font-family: inherit;
+  font-size: 13px;
+}
+.user-menu-item:hover {
+  background: var(--surface-2);
+}
+.user-menu-item.is-active {
+  color: var(--text);
+  font-weight: 600;
+}
+.user-menu-check {
+  margin-left: auto;
+  color: var(--accent);
+  font-weight: 700;
+}
+.lang-menu .user-menu-item {
+  color: var(--text);
 }
 .toolbar {
   min-height: 64px;
@@ -2380,44 +2663,7 @@ tbody tr:nth-child(n + 5),
     transform: none;
   }
 }
-.login-page {
-  background: var(--bg);
-}
-.login-panel {
-  width: min(400px, 100%);
-  border-radius: 12px;
-  padding: 38px;
-  gap: 16px;
-  box-shadow: 0 1px 3px rgba(16, 24, 40, 0.035);
-  animation: login-enter 260ms ease-out both;
-}
-@keyframes login-enter {
-  from {
-    opacity: 0;
-    transform: translateY(8px);
-  }
-  to {
-    opacity: 1;
-    transform: none;
-  }
-}
-.login-panel .login-mark {
-  margin-bottom: 6px;
-}
-.login-panel h1 {
-  font-size: 28px;
-  font-weight: 700;
-  letter-spacing: -0.035em;
-  text-align: center;
-}
-.login-panel p {
-  margin: -8px 0 10px;
-  text-align: center;
-  font-size: 14px;
-}
-.login-panel .login-mark {
-  justify-self: center;
-}
+
 .metric-grid {
   border-radius: 12px;
 }
@@ -2573,14 +2819,6 @@ tbody tr:nth-child(n + 5),
     flex-direction: column;
     gap: 2px;
   }
-  .sidebar-account {
-    width: 48px;
-    justify-content: center;
-    padding: 10px 0;
-  }
-  .sidebar-account > span:last-child {
-    display: none;
-  }
   .workspace {
     margin-left: 76px;
     width: calc(100% - 76px);
@@ -2609,8 +2847,10 @@ tbody tr:nth-child(n + 5),
   }
   .bottom-nav {
     height: calc(68px + env(safe-area-inset-bottom));
+    grid-template-columns: repeat(5, 1fr);
   }
-  .bottom-nav a {
+  .bottom-nav a,
+  .bottom-nav-logout {
     gap: 4px;
     font-size: 12px;
     font-weight: 500;
@@ -2800,17 +3040,17 @@ tbody tr:nth-child(n + 5),
   }
   .login-page {
     align-items: start;
-    padding-top: 16vh;
+    padding-top: 12vh;
   }
   .login-panel {
     width: 100%;
-    max-width: 400px;
-    padding: 28px 22px;
+    max-width: 380px;
+    padding: 30px 24px;
   }
   .login-panel input,
   .login-panel .button {
     min-height: 46px;
-    font-size: 14px;
+    font-size: 15px;
   }
   .metric-grid {
     grid-template-columns: 1fr 1fr;
