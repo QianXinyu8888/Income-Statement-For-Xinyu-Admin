@@ -8,6 +8,7 @@ import LoginPage from './pages/LoginPage';
 import { useBrowserPreferences } from './preferences/BrowserPreferencesContext';
 
 const TransactionsPage = lazy(() => import('./pages/TransactionsPage'));
+const SelfUsePage = lazy(() => import('./pages/SelfUsePage'));
 const OverviewPage = lazy(() => import('./pages/OverviewPage'));
 const AnalyticsPage = lazy(() => import('./pages/AnalyticsPage'));
 const SettingsPage = lazy(() => import('./pages/SettingsPage'));
@@ -35,6 +36,14 @@ export default function App() {
           element={
             <Suspense fallback={<LoadingState />}>
               <TransactionsPage />
+            </Suspense>
+          }
+        />
+        <Route
+          path="/self-use"
+          element={
+            <Suspense fallback={<LoadingState />}>
+              <SelfUsePage />
             </Suspense>
           }
         />

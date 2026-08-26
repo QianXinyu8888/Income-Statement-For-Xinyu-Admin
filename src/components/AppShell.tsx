@@ -1,4 +1,4 @@
-import { BarChart3, Globe, List, LogOut, Moon, Settings, Sun, UserRound, WalletCards } from 'lucide-react';
+import { BarChart3, Globe, List, LogOut, Monitor, Moon, Settings, Sun, UserRound, WalletCards } from 'lucide-react';
 import { NavLink, Outlet, useNavigate } from 'react-router-dom';
 import { apiClient, type User } from '../api/client';
 import { useQueryClient } from '@tanstack/react-query';
@@ -8,6 +8,7 @@ import type { TranslationKey } from '../i18n/translations';
 
 const navigation: { to: string; labelKey: TranslationKey; icon: typeof List }[] = [
   { to: '/transactions', labelKey: 'nav.transactions', icon: List },
+  { to: '/self-use', labelKey: 'nav.selfUse', icon: Monitor },
   { to: '/overview', labelKey: 'nav.overview', icon: WalletCards },
   { to: '/analytics', labelKey: 'nav.analytics', icon: BarChart3 },
   { to: '/settings', labelKey: 'nav.settings', icon: Settings },

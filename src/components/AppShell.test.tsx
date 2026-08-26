@@ -40,6 +40,12 @@ function renderShell(onTheme = vi.fn()) {
 }
 
 describe('AppShell', () => {
+  it('keeps self-use reachable from both desktop and mobile navigation', () => {
+    renderShell();
+
+    expect(screen.getAllByRole('link', { name: '自用中' })).toHaveLength(2);
+  });
+
   it('keeps four destinations in both desktop and mobile navigation', () => {
     renderShell();
     expect(screen.getAllByRole('link', { name: '交易' })).toHaveLength(2);
