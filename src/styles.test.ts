@@ -51,7 +51,7 @@ describe('overview monthly chart styles', () => {
 });
 
 describe('mobile navigation styles', () => {
-  it('keeps all five destinations plus logout in one row', () => {
+  it('keeps all six destinations plus logout in one row', () => {
     const mobileRules = Array.from(document.styleSheets).flatMap((sheet) =>
       Array.from(sheet.cssRules)
         .filter((rule): rule is CSSMediaRule => rule instanceof CSSMediaRule)
@@ -67,7 +67,7 @@ describe('mobile navigation styles', () => {
       mobileRules.some(
         (rule) =>
           rule.selectorText === '.bottom-nav' &&
-          rule.style.getPropertyValue('grid-template-columns') === 'repeat(6, 1fr)',
+          rule.style.getPropertyValue('grid-template-columns') === 'repeat(7, 1fr)',
       ),
     ).toBe(true);
   });

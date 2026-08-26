@@ -37,6 +37,32 @@ describe('App routes', () => {
       </QueryClientProvider>,
     );
 
-    expect(await screen.findByRole('heading', { name: '自用/在售中' })).toBeInTheDocument();
+    expect(await screen.findByRole('heading', { name: '自用中' })).toBeInTheDocument();
+  });
+
+  it('renders the listed workspace at /listed', async () => {
+    window.history.replaceState({}, '', '/listed');
+    vi.spyOn(apiClient, 'session').mockResolvedValue({ user: { username: 'xinyu', role: '用户' } });
+    vi.spyOn(apiClient, 'transactions').mockResolvedValue({
+      items: [],
+      total: 0,
+      page: 1,
+      pageSize: 100,
+      warnings: [],
+    });
+    const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+    render(
+      <QueryClientProvider client={client}>
+        <BrowserPreferencesProvider>
+          <LanguageProvider>
+            <BrowserRouter>
+              <App />
+            </BrowserRouter>
+          </LanguageProvider>
+        </BrowserPreferencesProvider>
+      </QueryClientProvider>,
+    );
+
+    expect(await screen.findByRole('heading', { name: '在售中' })).toBeInTheDocument();
   });
 });

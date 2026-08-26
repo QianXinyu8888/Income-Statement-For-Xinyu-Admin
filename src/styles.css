@@ -1963,7 +1963,7 @@ select.pagination-select option {
     height: calc(62px + env(safe-area-inset-bottom));
     padding-bottom: env(safe-area-inset-bottom);
     display: grid;
-    grid-template-columns: repeat(6, 1fr);
+    grid-template-columns: repeat(7, 1fr);
     background: var(--surface);
     border-top: 1px solid var(--border);
   }
@@ -2847,7 +2847,7 @@ tbody tr:nth-child(n + 5),
   }
   .bottom-nav {
     height: calc(68px + env(safe-area-inset-bottom));
-    grid-template-columns: repeat(6, 1fr);
+    grid-template-columns: repeat(7, 1fr);
   }
   .bottom-nav a,
   .bottom-nav-logout {
@@ -3584,39 +3584,6 @@ tbody tr:nth-child(n + 5),
   background: color-mix(in srgb, var(--surface), var(--bg) 26%);
 }
 
-.self-use-sections {
-  display: grid;
-  gap: 32px;
-}
-
-.self-use-section {
-  min-width: 0;
-}
-
-.self-use-section-header {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin-bottom: 10px;
-}
-
-.self-use-section-header h2 {
-  margin: 0;
-  font-size: 15px;
-  letter-spacing: -0.01em;
-}
-
-.self-use-section-header span {
-  color: var(--muted);
-  font-size: 13px;
-}
-
-.self-use-section-empty {
-  margin: 0;
-  padding: 20px 0;
-  color: var(--muted);
-  font-size: 14px;
-}
 .self-use-segmented {
   display: inline-flex;
   overflow: hidden;

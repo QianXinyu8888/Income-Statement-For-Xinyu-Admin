@@ -1,5 +1,5 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { cleanup, render, screen, waitFor, within } from '@testing-library/react';
+import { cleanup, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { apiClient, type TransactionPage } from '../api/client';
@@ -67,34 +67,28 @@ function mockActiveRecords() {
 }
 
 describe('SelfUsePage', () => {
-  it('loads both active statuses and excludes sold records', async () => {
+  it('loads only self-use records and excludes other statuses', async () => {
     mockActiveRecords();
     renderPage();
 
     expect(await screen.findAllByText('耳机')).toHaveLength(2);
-    expect(screen.getAllByText('键盘')).toHaveLength(2);
+    expect(screen.queryByText('键盘')).not.toBeInTheDocument();
     expect(screen.queryByText('显示器')).not.toBeInTheDocument();
-    expect(screen.getByText('2 件物品 · 管理使用与出售状态')).toBeInTheDocument();
+    expect(screen.getByText('1 件物品 · 管理自用状态')).toBeInTheDocument();
     expect(apiClient.transactions).toHaveBeenCalledWith(
       expect.objectContaining({ status: '自用中', pageSize: 100 }),
     );
-    expect(apiClient.transactions).toHaveBeenCalledWith(
-      expect.objectContaining({ status: '在售中', pageSize: 100 }),
+    expect(apiClient.transactions).not.toHaveBeenCalledWith(
+      expect.objectContaining({ status: '在售中' }),
     );
   });
 
-  it('renders personal-use and listed records in separate sections', async () => {
+  it('does not render a separate listed section', async () => {
     mockActiveRecords();
     renderPage();
 
-    const personalSection = await screen.findByRole('region', { name: '自用中' });
-    const listedSection = screen.getByRole('region', { name: '在售中' });
-
-    expect(within(personalSection).getAllByText('耳机')).toHaveLength(2);
-    expect(within(personalSection).queryByText('键盘')).not.toBeInTheDocument();
-    expect(within(listedSection).getAllByText('键盘')).toHaveLength(2);
-    expect(within(listedSection).queryByText('耳机')).not.toBeInTheDocument();
-    expect(screen.queryByRole('group', { name: '自用状态筛选' })).not.toBeInTheDocument();
+    expect(await screen.findAllByText('耳机')).toHaveLength(2);
+    expect(screen.queryByRole('region', { name: '在售中' })).not.toBeInTheDocument();
   });
 
   it('loads every page for an active status before sorting the workspace', async () => {

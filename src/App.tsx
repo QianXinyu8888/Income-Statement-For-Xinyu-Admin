@@ -48,6 +48,14 @@ export default function App() {
           }
         />
         <Route
+          path="/listed"
+          element={
+            <Suspense fallback={<LoadingState />}>
+              <SelfUsePage status="在售中" />
+            </Suspense>
+          }
+        />
+        <Route
           path="/overview"
           element={
             <Suspense fallback={<LoadingState />}>

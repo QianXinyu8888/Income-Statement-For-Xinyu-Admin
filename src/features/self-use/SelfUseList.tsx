@@ -16,12 +16,14 @@ export function SelfUseList({
   onMarkListed,
   onSell,
   onOpen,
+  showListedAction = true,
 }: {
   records: Transaction[];
   listingId: string | null;
   onMarkListed: (record: Transaction) => void;
   onSell: (record: Transaction) => void;
   onOpen: (record: Transaction) => void;
+  showListedAction?: boolean;
 }) {
   const title = (record: Transaction) => record.title ?? '未命名物品';
   return (
@@ -59,16 +61,18 @@ export function SelfUseList({
                   </td>
                   <td>
                     <div className="self-use-actions">
-                      <label className="self-use-check">
-                        <input
-                          type="checkbox"
-                          aria-label={`标记 ${title(record)} 在售中`}
-                          checked={isListed}
-                          onChange={() => onMarkListed(record)}
-                          disabled={pending || isListed}
-                        />
-                        <span>在售中</span>
-                      </label>
+                      {showListedAction && (
+                        <label className="self-use-check">
+                          <input
+                            type="checkbox"
+                            aria-label={`标记 ${title(record)} 在售中`}
+                            checked={isListed}
+                            onChange={() => onMarkListed(record)}
+                            disabled={pending || isListed}
+                          />
+                          <span>在售中</span>
+                        </label>
+                      )}
                       <label className="self-use-check">
                         <input
                           type="checkbox"
@@ -113,16 +117,18 @@ export function SelfUseList({
                   {record.status}
                 </span>
                 <div className="self-use-actions">
-                  <label className="self-use-check">
-                    <input
-                      type="checkbox"
-                      aria-label={`标记 ${title(record)} 在售中`}
-                      checked={isListed}
-                      onChange={() => onMarkListed(record)}
-                      disabled={pending || isListed}
-                    />
-                    <span>在售中</span>
-                  </label>
+                  {showListedAction && (
+                    <label className="self-use-check">
+                      <input
+                        type="checkbox"
+                        aria-label={`标记 ${title(record)} 在售中`}
+                        checked={isListed}
+                        onChange={() => onMarkListed(record)}
+                        disabled={pending || isListed}
+                      />
+                      <span>在售中</span>
+                    </label>
+                  )}
                   <label className="self-use-check">
                     <input
                       type="checkbox"

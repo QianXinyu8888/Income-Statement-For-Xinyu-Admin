@@ -40,10 +40,11 @@ function renderShell(onTheme = vi.fn()) {
 }
 
 describe('AppShell', () => {
-  it('keeps self-use reachable from both desktop and mobile navigation', () => {
+  it('keeps self-use and listed workspaces reachable from both desktop and mobile navigation', () => {
     renderShell();
 
-    expect(screen.getAllByRole('link', { name: '自用/在售中' })).toHaveLength(2);
+    expect(screen.getAllByRole('link', { name: '自用中' })).toHaveLength(2);
+    expect(screen.getAllByRole('link', { name: '在售中' })).toHaveLength(2);
   });
 
   it('keeps four destinations in both desktop and mobile navigation', () => {
@@ -74,7 +75,11 @@ describe('AppShell', () => {
               <Routes>
                 <Route
                   element={
-                    <AppShell user={{ username: 'xinyu', role: '用户' }} theme="light" onTheme={vi.fn()} />
+                    <AppShell
+                      user={{ username: 'xinyu', role: '用户' }}
+                      theme="light"
+                      onTheme={vi.fn()}
+                    />
                   }
                 >
                   <Route path="/transactions" element={<div>交易内容</div>} />
@@ -104,7 +109,11 @@ describe('AppShell', () => {
               <Routes>
                 <Route
                   element={
-                    <AppShell user={{ username: 'xinyu', role: '用户' }} theme="light" onTheme={vi.fn()} />
+                    <AppShell
+                      user={{ username: 'xinyu', role: '用户' }}
+                      theme="light"
+                      onTheme={vi.fn()}
+                    />
                   }
                 >
                   <Route path="/transactions" element={<div>交易内容</div>} />
@@ -120,13 +129,13 @@ describe('AppShell', () => {
     const menu = screen.getByRole('menu', { name: '界面语言' });
     expect(within(menu).getByRole('menuitem', { name: 'English' })).toBeInTheDocument();
     await userEvent.click(within(menu).getByRole('menuitem', { name: 'English' }));
-    expect(
-      within(topbar).getByRole('button', { name: 'Language' }),
-    ).toBeInTheDocument();
+    expect(within(topbar).getByRole('button', { name: 'Language' })).toBeInTheDocument();
     // 切回中文，避免影响后续测试（localStorage 持久化）
     await userEvent.click(within(topbar).getByRole('button', { name: 'Language' }));
     await userEvent.click(
-      within(screen.getByRole('menu', { name: 'Language' })).getByRole('menuitem', { name: '简体中文' }),
+      within(screen.getByRole('menu', { name: 'Language' })).getByRole('menuitem', {
+        name: '简体中文',
+      }),
     );
   });
 
@@ -144,7 +153,11 @@ describe('AppShell', () => {
               <Routes>
                 <Route
                   element={
-                    <AppShell user={{ username: 'xinyu', role: '用户' }} theme="light" onTheme={vi.fn()} />
+                    <AppShell
+                      user={{ username: 'xinyu', role: '用户' }}
+                      theme="light"
+                      onTheme={vi.fn()}
+                    />
                   }
                 >
                   <Route path="/transactions" element={<div>交易内容</div>} />
