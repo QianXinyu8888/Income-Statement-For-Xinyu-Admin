@@ -148,7 +148,7 @@ export default function SelfUsePage() {
     <section className="page page--self-use">
       <header className="page-header self-use-page-header">
         <div>
-          <h1>自用中</h1>
+          <h1>自用/在售中</h1>
           <p>{result.data ? `${counts.全部} 件物品 · 管理使用与出售状态` : '管理使用与出售状态'}</p>
         </div>
         <button className="button button--primary" onClick={() => openDrawer(null)}>

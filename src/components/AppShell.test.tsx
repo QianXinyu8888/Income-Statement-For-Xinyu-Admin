@@ -43,7 +43,7 @@ describe('AppShell', () => {
   it('keeps self-use reachable from both desktop and mobile navigation', () => {
     renderShell();
 
-    expect(screen.getAllByRole('link', { name: '自用中' })).toHaveLength(2);
+    expect(screen.getAllByRole('link', { name: '自用/在售中' })).toHaveLength(2);
   });
 
   it('keeps four destinations in both desktop and mobile navigation', () => {

@@ -37,6 +37,6 @@ describe('App routes', () => {
       </QueryClientProvider>,
     );
 
-    expect(await screen.findByRole('heading', { name: '自用中' })).toBeInTheDocument();
+    expect(await screen.findByRole('heading', { name: '自用/在售中' })).toBeInTheDocument();
   });
 });
