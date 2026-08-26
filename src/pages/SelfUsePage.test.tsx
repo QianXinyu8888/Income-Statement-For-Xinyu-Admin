@@ -27,11 +27,29 @@ const personal: Transaction = {
   note: null,
 };
 
-const listed: Transaction = { ...personal, id: 'listed', title: '键盘', status: '在售中', holdingDays: 120 };
+const listed: Transaction = {
+  ...personal,
+  id: 'listed',
+  title: '键盘',
+  status: '在售中',
+  holdingDays: 120,
+};
 const sold: Transaction = { ...personal, id: 'sold', title: '显示器', status: '已售出' };
 
-const personalPage: TransactionPage = { items: [personal, sold], total: 2, page: 1, pageSize: 100, warnings: [] };
-const listedPage: TransactionPage = { items: [listed], total: 1, page: 1, pageSize: 100, warnings: [] };
+const personalPage: TransactionPage = {
+  items: [personal, sold],
+  total: 2,
+  page: 1,
+  pageSize: 100,
+  warnings: [],
+};
+const listedPage: TransactionPage = {
+  items: [listed],
+  total: 1,
+  page: 1,
+  pageSize: 100,
+  warnings: [],
+};
 
 function renderPage() {
   const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
@@ -65,6 +83,24 @@ describe('SelfUsePage', () => {
     );
   });
 
+  it('loads every page for an active status before sorting the workspace', async () => {
+    vi.spyOn(apiClient, 'transactions').mockImplementation((query) => {
+      if (query.status === '自用中' && query.page === 1)
+        return Promise.resolve({ ...personalPage, total: 101, page: 1, pageSize: 100 });
+      if (query.status === '自用中' && query.page === 2)
+        return Promise.resolve({ items: [], total: 101, page: 2, pageSize: 100, warnings: [] });
+      return Promise.resolve(listedPage);
+    });
+    renderPage();
+
+    await screen.findAllByText('耳机');
+    await waitFor(() =>
+      expect(apiClient.transactions).toHaveBeenCalledWith(
+        expect.objectContaining({ status: '自用中', page: 2, pageSize: 100 }),
+      ),
+    );
+  });
+
   it('marks an item as listed through the existing status API', async () => {
     const user = userEvent.setup();
     mockActiveRecords();
@@ -76,6 +112,30 @@ describe('SelfUsePage', () => {
     await user.click((await screen.findAllByRole('checkbox', { name: '标记 耳机 在售中' }))[0]);
 
     await waitFor(() => expect(markListed).toHaveBeenCalledWith([personal.id], '在售中'));
+  });
+
+  it('shows an error instead of a success notice when listing returns a failed item', async () => {
+    const user = userEvent.setup();
+    mockActiveRecords();
+    vi.spyOn(apiClient, 'batchStatus').mockResolvedValue({
+      results: [{ id: personal.id, success: false, message: '飞书暂不可用' }],
+    });
+    renderPage();
+
+    await user.click((await screen.findAllByRole('checkbox', { name: '标记 耳机 在售中' }))[0]);
+
+    expect(await screen.findByRole('status')).toHaveTextContent('飞书暂不可用');
+  });
+
+  it('shows a network error when marking an item as listed rejects', async () => {
+    const user = userEvent.setup();
+    mockActiveRecords();
+    vi.spyOn(apiClient, 'batchStatus').mockRejectedValue(new Error('网络异常'));
+    renderPage();
+
+    await user.click((await screen.findAllByRole('checkbox', { name: '标记 耳机 在售中' }))[0]);
+
+    expect(await screen.findByRole('status')).toHaveTextContent('网络异常');
   });
 
   it('removes a record after sale confirmation succeeds', async () => {

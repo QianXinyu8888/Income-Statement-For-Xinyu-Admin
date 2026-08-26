@@ -43,7 +43,9 @@ describe('self-use workspace helpers', () => {
   });
 
   it('can narrow active records to one status', () => {
-    expect(getSelfUseRecords([personal, listed], 'purchaseDate', 'desc', '在售中')).toEqual([listed]);
+    expect(getSelfUseRecords([personal, listed], 'purchaseDate', 'desc', '在售中')).toEqual([
+      listed,
+    ]);
   });
 
   it('preserves non-sale fields when creating a sold update', () => {

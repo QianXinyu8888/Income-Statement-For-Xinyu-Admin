@@ -24,6 +24,24 @@ const sortOptions: Array<{ label: string; sort: SelfUseSort; order: 'asc' | 'des
   { label: '成本最高', sort: 'totalCost', order: 'desc' },
 ];
 
+async function fetchStatusRecords(status: SelfUseStatus, search: string) {
+  const items: Transaction[] = [];
+  let page = 1;
+  while (true) {
+    const response = await apiClient.transactions({
+      page,
+      pageSize: 100,
+      status,
+      q: search || undefined,
+      sort: 'sourceOrder',
+      order: 'asc',
+    });
+    items.push(...response.items);
+    if (page * response.pageSize >= response.total) return items;
+    page += 1;
+  }
+}
+
 export default function SelfUsePage() {
   const queryClient = useQueryClient();
   const [search, setSearch] = useState('');
@@ -40,18 +58,9 @@ export default function SelfUsePage() {
     queryKey: ['self-use-records', search],
     queryFn: async () => {
       const pages = await Promise.all(
-        SELF_USE_STATUSES.map((status) =>
-          apiClient.transactions({
-            page: 1,
-            pageSize: 100,
-            status,
-            q: search || undefined,
-            sort: 'sourceOrder',
-            order: 'asc',
-          }),
-        ),
+        SELF_USE_STATUSES.map((status) => fetchStatusRecords(status, search)),
       );
-      return pages.flatMap((page) => page.items);
+      return pages.flat();
     },
   });
 
@@ -83,10 +92,18 @@ export default function SelfUsePage() {
   };
 
   const markListed = useMutation({
-    mutationFn: (record: Transaction) => apiClient.batchStatus([record.id], '在售中'),
+    mutationFn: async (record: Transaction) => {
+      const response = await apiClient.batchStatus([record.id], '在售中');
+      const failed = response.results.find((item) => !item.success);
+      if (failed) throw new Error(failed.message ?? '状态更新失败');
+      return response;
+    },
     onSuccess: async () => {
       await refresh();
       setNotice('已标记为在售中');
+    },
+    onError: (error) => {
+      setNotice(error instanceof Error ? error.message : '状态更新失败');
     },
   });
   const sell = useMutation({
@@ -169,11 +186,17 @@ export default function SelfUsePage() {
             onChange={(event) => setSortIndex(Number(event.target.value))}
           >
             {sortOptions.map((option, index) => (
-              <option key={option.label} value={index}>{option.label}</option>
+              <option key={option.label} value={index}>
+                {option.label}
+              </option>
             ))}
           </select>
         </div>
-        {notice && <div className="data-note" role="status">{notice}</div>}
+        {notice && (
+          <div className="data-note" role="status">
+            {notice}
+          </div>
+        )}
         {result.isLoading ? (
           <LoadingState label="正在加载自用物品" />
         ) : result.isError ? (
@@ -182,7 +205,9 @@ export default function SelfUsePage() {
           <div className="empty-state">
             <strong>没有自用或在售物品</strong>
             <span>添加一笔交易，或调整筛选条件。</span>
-            <button className="button button--primary" onClick={() => openDrawer(null)}>添加</button>
+            <button className="button button--primary" onClick={() => openDrawer(null)}>
+              添加
+            </button>
           </div>
         ) : (
           <SelfUseList

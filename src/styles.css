@@ -1963,7 +1963,7 @@ select.pagination-select option {
     height: calc(62px + env(safe-area-inset-bottom));
     padding-bottom: env(safe-area-inset-bottom);
     display: grid;
-    grid-template-columns: repeat(5, 1fr);
+    grid-template-columns: repeat(6, 1fr);
     background: var(--surface);
     border-top: 1px solid var(--border);
   }
@@ -2847,7 +2847,7 @@ tbody tr:nth-child(n + 5),
   }
   .bottom-nav {
     height: calc(68px + env(safe-area-inset-bottom));
-    grid-template-columns: repeat(5, 1fr);
+    grid-template-columns: repeat(6, 1fr);
   }
   .bottom-nav a,
   .bottom-nav-logout {

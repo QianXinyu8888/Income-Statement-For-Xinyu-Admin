@@ -27,7 +27,13 @@ describe('SaleConfirmDialog', () => {
     const user = userEvent.setup();
     const onConfirm = vi.fn().mockResolvedValue(undefined);
     render(
-      <SaleConfirmDialog record={record} open saving={false} onClose={vi.fn()} onConfirm={onConfirm} />,
+      <SaleConfirmDialog
+        record={record}
+        open
+        saving={false}
+        onClose={vi.fn()}
+        onConfirm={onConfirm}
+      />,
     );
 
     expect(screen.getByText('今天是你自用 AirPods Pro 的第 126 天')).toBeInTheDocument();
@@ -54,7 +60,13 @@ describe('SaleConfirmDialog', () => {
     const user = userEvent.setup();
     const onConfirm = vi.fn().mockRejectedValue(new Error('网络异常'));
     render(
-      <SaleConfirmDialog record={record} open saving={false} onClose={vi.fn()} onConfirm={onConfirm} />,
+      <SaleConfirmDialog
+        record={record}
+        open
+        saving={false}
+        onClose={vi.fn()}
+        onConfirm={onConfirm}
+      />,
     );
 
     await user.type(screen.getByRole('spinbutton', { name: '售价' }), '1450');

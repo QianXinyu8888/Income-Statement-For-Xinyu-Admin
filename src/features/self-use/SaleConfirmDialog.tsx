@@ -51,7 +51,8 @@ export function SaleConfirmDialog({
 
   useEffect(() => {
     if (!open) return;
-    const previousFocus = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+    const previousFocus =
+      document.activeElement instanceof HTMLElement ? document.activeElement : null;
     const previousOverflow = document.body.style.overflow;
     document.body.style.overflow = 'hidden';
     const focusTimer = window.setTimeout(() => priceRef.current?.focus(), 0);
@@ -133,7 +134,9 @@ export function SaleConfirmDialog({
         <form onSubmit={submit}>
           <div className="sale-dialog__content">
             <h2 id="sale-dialog-title">确认售出</h2>
-            <p>今天是你自用 {record.title ?? '该物品'} 的第 {record.holdingDays ?? '—'} 天</p>
+            <p>
+              今天是你自用 {record.title ?? '该物品'} 的第 {record.holdingDays ?? '—'} 天
+            </p>
             <label>
               售价 <em>*</em>
               <span className="sale-dialog__money-input">
@@ -183,7 +186,12 @@ export function SaleConfirmDialog({
             )}
           </div>
           <footer>
-            <button type="button" className="button button--secondary" onClick={onClose} disabled={saving}>
+            <button
+              type="button"
+              className="button button--secondary"
+              onClick={onClose}
+              disabled={saving}
+            >
               取消
             </button>
             <button className="button sale-dialog__confirm" disabled={saving}>

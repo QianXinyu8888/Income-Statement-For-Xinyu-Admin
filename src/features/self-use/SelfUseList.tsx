@@ -51,7 +51,9 @@ export function SelfUseList({
                   <td>{displayMoney(record.totalCost)}</td>
                   <td>{record.holdingDays === null ? '—' : `${record.holdingDays} 天`}</td>
                   <td>
-                    <span className={`self-use-status self-use-status--${isListed ? 'listed' : 'personal'}`}>
+                    <span
+                      className={`self-use-status self-use-status--${isListed ? 'listed' : 'personal'}`}
+                    >
                       {record.status}
                     </span>
                   </td>
@@ -95,11 +97,19 @@ export function SelfUseList({
                 {title(record)}
               </button>
               <dl>
-                <div><dt>成本</dt><dd>{displayMoney(record.totalCost)}</dd></div>
-                <div><dt>持有</dt><dd>{record.holdingDays === null ? '—' : `${record.holdingDays} 天`}</dd></div>
+                <div>
+                  <dt>成本</dt>
+                  <dd>{displayMoney(record.totalCost)}</dd>
+                </div>
+                <div>
+                  <dt>持有</dt>
+                  <dd>{record.holdingDays === null ? '—' : `${record.holdingDays} 天`}</dd>
+                </div>
               </dl>
               <div className="self-use-mobile-footer">
-                <span className={`self-use-status self-use-status--${isListed ? 'listed' : 'personal'}`}>
+                <span
+                  className={`self-use-status self-use-status--${isListed ? 'listed' : 'personal'}`}
+                >
                   {record.status}
                 </span>
                 <div className="self-use-actions">

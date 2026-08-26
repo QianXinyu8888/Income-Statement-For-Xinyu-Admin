@@ -49,3 +49,26 @@ describe('overview monthly chart styles', () => {
     ).toBe(true);
   });
 });
+
+describe('mobile navigation styles', () => {
+  it('keeps all five destinations plus logout in one row', () => {
+    const mobileRules = Array.from(document.styleSheets).flatMap((sheet) =>
+      Array.from(sheet.cssRules)
+        .filter((rule): rule is CSSMediaRule => rule instanceof CSSMediaRule)
+        .filter((rule) => rule.conditionText.includes('max-width: 680px'))
+        .flatMap((rule) =>
+          Array.from(rule.cssRules).filter(
+            (nested): nested is CSSStyleRule => 'selectorText' in nested,
+          ),
+        ),
+    );
+
+    expect(
+      mobileRules.some(
+        (rule) =>
+          rule.selectorText === '.bottom-nav' &&
+          rule.style.getPropertyValue('grid-template-columns') === 'repeat(6, 1fr)',
+      ),
+    ).toBe(true);
+  });
+});
