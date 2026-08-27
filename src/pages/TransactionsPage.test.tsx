@@ -1,5 +1,6 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { act, cleanup, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { MemoryRouter, useLocation } from 'react-router-dom';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { apiClient, type TransactionPage } from '../api/client';
@@ -169,7 +170,6 @@ describe('TransactionsPage focused navigation', () => {
       ),
     );
 
-    fireEvent.click(screen.getByRole('button', { name: /筛选/ }));
     fireEvent.click(screen.getByRole('button', { name: '重置筛选' }));
     await waitFor(() =>
       expect(apiClient.transactions).toHaveBeenLastCalledWith({
@@ -206,6 +206,26 @@ describe('TransactionsPage focused navigation', () => {
         }),
       ),
     );
+  });
+
+  it('opens a mobile filter sheet without hiding the current filter controls from the page', async () => {
+    vi.spyOn(apiClient, 'transactions').mockResolvedValue({
+      items: [target],
+      total: 1,
+      page: 1,
+      pageSize: 20,
+      warnings: [],
+    });
+    const user = userEvent.setup();
+    renderPage('/transactions');
+
+    await user.click(screen.getByRole('button', { name: '打开筛选条件' }));
+
+    const sheet = screen.getByRole('region', { name: '筛选交易' });
+    expect(within(sheet).getByRole('combobox', { name: '状态' })).toBeInTheDocument();
+    expect(within(sheet).getByLabelText('开始日期')).toBeInTheDocument();
+    await user.click(within(sheet).getByRole('button', { name: '关闭筛选条件' }));
+    expect(screen.queryByRole('region', { name: '筛选交易' })).not.toBeInTheDocument();
   });
 
   it('marks the transaction page for stable mobile animation rules', () => {

@@ -117,7 +117,7 @@ export default function AnalyticsPage() {
       ) : summary.isError ? (
         <ErrorState message={summary.error.message} onRetry={() => summary.refetch()} />
       ) : (
-        <div className="analytics-grid">
+        <div className="analytics-grid analytics-mobile-dashboard">
           {summary.data!.incompleteCount > 0 && (
             <div className="data-note panel--wide" role="status">
               有 {summary.data!.incompleteCount}{' '}

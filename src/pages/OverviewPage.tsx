@@ -53,7 +53,10 @@ export default function OverviewPage() {
       </header>
       <div className="metric-grid">
         {metrics.map(({ key, label, value }) => (
-          <article key={key} className={`metric metric--${key}`}>
+          <article
+            key={key}
+            className={`metric metric--${key}${key === 'profit' ? ' overview-profit-hero' : ''}`}
+          >
             <span>{label}</span>
             <strong>{value}</strong>
           </article>

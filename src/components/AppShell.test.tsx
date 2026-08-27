@@ -40,19 +40,21 @@ function renderShell(onTheme = vi.fn()) {
 }
 
 describe('AppShell', () => {
-  it('keeps self-use and listed workspaces reachable from both desktop and mobile navigation', () => {
+  it('replaces the mobile bottom navigation with a closed sidebar by default', () => {
     renderShell();
 
-    expect(screen.getAllByRole('link', { name: '自用中' })).toHaveLength(2);
-    expect(screen.getAllByRole('link', { name: '在售中' })).toHaveLength(2);
+    expect(screen.queryByRole('navigation', { name: '移动端主导航' })).not.toBeInTheDocument();
+    expect(screen.queryByRole('dialog', { name: '主导航' })).not.toBeInTheDocument();
   });
 
-  it('places the listed workspace before the self-use workspace in both navigation menus', () => {
+  it('opens the mobile sidebar with every desktop workspace and logout action', async () => {
     renderShell();
+    const user = userEvent.setup();
 
-    const sidebar = screen.getByRole('complementary', { name: '主导航' });
-    const bottomNav = screen.getByRole('navigation', { name: '移动端主导航' });
-    expect(within(sidebar).getAllByRole('link').map((link) => link.textContent)).toEqual([
+    await user.click(screen.getByRole('button', { name: '打开导航菜单' }));
+
+    const menu = screen.getByRole('dialog', { name: '主导航' });
+    expect(within(menu).getAllByRole('link').map((link) => link.textContent)).toEqual([
       '交易',
       '在售中',
       '自用中',
@@ -60,63 +62,24 @@ describe('AppShell', () => {
       '分析',
       '设置',
     ]);
-    expect(within(bottomNav).getAllByRole('link').map((link) => link.textContent)).toEqual([
-      '交易',
-      '在售中',
-      '自用中',
-      '概览',
-      '分析',
-      '设置',
-    ]);
+    expect(within(menu).getByRole('button', { name: '退出登录' })).toBeInTheDocument();
   });
 
-  it('keeps four destinations in both desktop and mobile navigation', () => {
+  it('closes the mobile sidebar after navigation', async () => {
     renderShell();
-    expect(screen.getAllByRole('link', { name: '交易' })).toHaveLength(2);
-    expect(screen.getAllByRole('link', { name: '概览' })).toHaveLength(2);
-    expect(screen.getAllByRole('link', { name: '分析' })).toHaveLength(2);
-    expect(screen.getAllByRole('link', { name: '设置' })).toHaveLength(2);
+    const user = userEvent.setup();
+
+    await user.click(screen.getByRole('button', { name: '打开导航菜单' }));
+    await user.click(within(screen.getByRole('dialog', { name: '主导航' })).getByRole('link', { name: '概览' }));
+
+    expect(screen.queryByRole('dialog', { name: '主导航' })).not.toBeInTheDocument();
   });
 
   it('places the desktop theme action in the top utility bar', async () => {
     const { onTheme } = renderShell();
-    const topbar = screen.getByRole('banner');
+    const topbar = document.querySelector<HTMLElement>('.topbar')!;
     await userEvent.click(within(topbar).getByRole('button', { name: '切换到深色模式' }));
     expect(onTheme).toHaveBeenCalledOnce();
-  });
-
-  it('renders a logout action in the mobile bottom navigation', async () => {
-    const client = new QueryClient({
-      defaultOptions: { queries: { retry: false } },
-    });
-    vi.stubGlobal('navigator', { languages: ['zh-CN', 'zh'] });
-    render(
-      <QueryClientProvider client={client}>
-        <BrowserPreferencesProvider>
-          <LanguageProvider>
-            <MemoryRouter initialEntries={['/transactions']}>
-              <Routes>
-                <Route
-                  element={
-                    <AppShell
-                      user={{ username: 'xinyu', role: '用户' }}
-                      theme="light"
-                      onTheme={vi.fn()}
-                    />
-                  }
-                >
-                  <Route path="/transactions" element={<div>交易内容</div>} />
-                </Route>
-              </Routes>
-            </MemoryRouter>
-          </LanguageProvider>
-        </BrowserPreferencesProvider>
-      </QueryClientProvider>,
-    );
-    const bottomNav = screen.getByRole('navigation', { name: '移动端主导航' });
-    const logoutButton = within(bottomNav).getByRole('button', { name: '退出登录' });
-    expect(logoutButton).toBeInTheDocument();
-    expect(logoutButton.querySelector('svg')).toBeTruthy();
   });
 
   it('switches language from the topbar language menu', async () => {
@@ -147,7 +110,7 @@ describe('AppShell', () => {
         </BrowserPreferencesProvider>
       </QueryClientProvider>,
     );
-    const topbar = screen.getByRole('banner');
+    const topbar = document.querySelector<HTMLElement>('.topbar')!;
     await userEvent.click(within(topbar).getByRole('button', { name: '界面语言' }));
     const menu = screen.getByRole('menu', { name: '界面语言' });
     expect(within(menu).getByRole('menuitem', { name: 'English' })).toBeInTheDocument();
@@ -191,7 +154,7 @@ describe('AppShell', () => {
         </BrowserPreferencesProvider>
       </QueryClientProvider>,
     );
-    const topbar = screen.getByRole('banner');
+    const topbar = document.querySelector<HTMLElement>('.topbar')!;
     await userEvent.click(within(topbar).getByRole('button', { name: '当前账号 xinyu' }));
     const menu = screen.getByRole('menu', { name: '账号菜单' });
     const logoutItem = within(menu).getByRole('menuitem', { name: '退出登录' });

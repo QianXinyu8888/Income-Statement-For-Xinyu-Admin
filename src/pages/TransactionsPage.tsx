@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Download, Plus, RotateCcw, Search } from 'lucide-react';
+import { Download, Plus, RotateCcw, Search, SlidersHorizontal, X } from 'lucide-react';
 
 import { useSearchParams } from 'react-router-dom';
 import { apiClient, type TransactionQuery } from '../api/client';
@@ -53,6 +53,7 @@ export default function TransactionsPage() {
   const [deleteIntent, setDeleteIntent] = useState<DeleteIntent | null>(null);
   const [exporting, setExporting] = useState(false);
   const [focusedId, setFocusedId] = useState<string | null>(null);
+  const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
 
   const hasActiveFilters = Boolean(search || query.status || query.from || query.to || query.q);
 
@@ -230,44 +231,57 @@ export default function TransactionsPage() {
             搜索
           </button>
         </div>
-        <select
-          id="tx-status-filter"
-          name="statusFilter"
-          aria-label="状态"
-          value={query.status ?? ''}
-          onChange={(event) =>
-            setQuery((current) => ({
-              ...current,
-              page: 1,
-              status: (event.target.value || undefined) as TransactionStatus | undefined,
-            }))
-          }
-        >
-          <option value="">全部状态</option>
-          {TRANSACTION_STATUSES.map((status) => (
-            <option key={status}>{status}</option>
-          ))}
-        </select>
-        <input
-          id="tx-from-date-filter"
-          name="fromDateFilter"
-          aria-label="开始日期"
-          type="date"
-          value={query.from ?? ''}
-          onChange={(event) =>
-            setQuery((current) => ({ ...current, page: 1, from: event.target.value || undefined }))
-          }
-        />
-
+        <div className="desktop-filter-controls">
+          <select
+            id="tx-status-filter"
+            name="statusFilter"
+            aria-label="状态"
+            value={query.status ?? ''}
+            onChange={(event) =>
+              setQuery((current) => ({
+                ...current,
+                page: 1,
+                status: (event.target.value || undefined) as TransactionStatus | undefined,
+              }))
+            }
+          >
+            <option value="">全部状态</option>
+            {TRANSACTION_STATUSES.map((status) => (
+              <option key={status}>{status}</option>
+            ))}
+          </select>
+          <input
+            id="tx-from-date-filter"
+            name="fromDateFilter"
+            aria-label="开始日期"
+            type="date"
+            value={query.from ?? ''}
+            onChange={(event) =>
+              setQuery((current) => ({
+                ...current,
+                page: 1,
+                from: event.target.value || undefined,
+              }))
+            }
+          />
+          <button
+            className="button button--secondary reset-button"
+            onClick={handleResetFilters}
+            disabled={!hasActiveFilters}
+            aria-label="重置筛选"
+            title="重置所有搜索和筛选条件"
+          >
+            <RotateCcw size={14} />
+            重置筛选
+          </button>
+        </div>
         <button
-          className="button button--secondary reset-button"
-          onClick={handleResetFilters}
-          disabled={!hasActiveFilters}
-          aria-label="重置筛选"
-          title="重置所有搜索和筛选条件"
+          type="button"
+          className="icon-button mobile-filter-trigger"
+          aria-label="打开筛选条件"
+          onClick={() => setMobileFiltersOpen(true)}
         >
-          <RotateCcw size={14} />
-          重置筛选
+          <SlidersHorizontal size={18} />
         </button>
         <div className="toolbar-spacer" />
         <ColumnVisibilityPanel
@@ -285,6 +299,72 @@ export default function TransactionsPage() {
           <span className="sr-only">导出 Excel</span>
         </button>
       </div>
+      {mobileFiltersOpen && (
+        <section className="mobile-filter-sheet" role="region" aria-label="筛选交易">
+          <header>
+            <h2>筛选交易</h2>
+            <button
+              type="button"
+              className="icon-button"
+              aria-label="关闭筛选条件"
+              onClick={() => setMobileFiltersOpen(false)}
+            >
+              <X size={18} />
+            </button>
+          </header>
+          <label>
+            状态
+            <select
+              aria-label="状态"
+              value={query.status ?? ''}
+              onChange={(event) =>
+                setQuery((current) => ({
+                  ...current,
+                  page: 1,
+                  status: (event.target.value || undefined) as TransactionStatus | undefined,
+                }))
+              }
+            >
+              <option value="">全部状态</option>
+              {TRANSACTION_STATUSES.map((status) => (
+                <option key={status}>{status}</option>
+              ))}
+            </select>
+          </label>
+          <label>
+            开始日期
+            <input
+              aria-label="开始日期"
+              type="date"
+              value={query.from ?? ''}
+              onChange={(event) =>
+                setQuery((current) => ({
+                  ...current,
+                  page: 1,
+                  from: event.target.value || undefined,
+                }))
+              }
+            />
+          </label>
+          <footer>
+            <button
+              type="button"
+              className="button button--secondary"
+              onClick={handleResetFilters}
+              disabled={!hasActiveFilters}
+            >
+              重置
+            </button>
+            <button
+              type="button"
+              className="button button--primary"
+              onClick={() => setMobileFiltersOpen(false)}
+            >
+              完成
+            </button>
+          </footer>
+        </section>
+      )}
 
       {result.data && result.data.warnings.length > 0 && (
         <div className="data-note" role="status">

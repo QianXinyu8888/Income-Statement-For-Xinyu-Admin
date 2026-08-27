@@ -142,6 +142,7 @@ describe('AnalyticsPage drilldown', () => {
 
     expect(container.querySelector('.page')).toHaveClass('page--analytics');
     expect(await screen.findByRole('heading', { name: '月度利润' })).toBeInTheDocument();
+    expect(container.querySelector('.analytics-mobile-dashboard')).toBeInTheDocument();
     expect(screen.getByText('按月对比')).toBeInTheDocument();
     expect(screen.getByRole('img', { name: '月度利润趋势图' })).toBeInTheDocument();
     expect(screen.getByTestId('monthly-profit-scroll')).toBeInTheDocument();

@@ -52,6 +52,7 @@ describe('OverviewPage', () => {
       expect(screen.getByText(label)).toBeInTheDocument();
     }
     expect(container.querySelector('.metric--profit')).toHaveTextContent('¥21,764.14');
+    expect(container.querySelector('.overview-profit-hero')).toHaveTextContent('¥21,764.14');
     expect(screen.getByRole('status')).toHaveTextContent('65 条已售出记录字段不完整');
     expect(screen.getByText('月度利润')).toBeInTheDocument();
   });

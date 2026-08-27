@@ -3,6 +3,7 @@ import {
   Globe,
   List,
   LogOut,
+  Menu,
   Monitor,
   Moon,
   Settings,
@@ -10,12 +11,13 @@ import {
   Tag,
   UserRound,
   WalletCards,
+  X,
 } from 'lucide-react';
-import { NavLink, Outlet, useNavigate } from 'react-router-dom';
+import { NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { apiClient, type User } from '../api/client';
 import { useQueryClient } from '@tanstack/react-query';
 import { useLanguage } from '../i18n';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import type { TranslationKey } from '../i18n/translations';
 
 const navigation: { to: string; labelKey: TranslationKey; icon: typeof List }[] = [
@@ -37,12 +39,27 @@ export function AppShell({
   onTheme: () => void;
 }) {
   const navigate = useNavigate();
+  const location = useLocation();
   const queryClient = useQueryClient();
   const { t, language, setLanguage } = useLanguage();
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const [langMenuOpen, setLangMenuOpen] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const activeNavigation = navigation.find(({ to }) => to === location.pathname) ?? navigation[0];
+  const closeMobileMenu = () => setMobileMenuOpen(false);
+
+  useEffect(() => {
+    if (!mobileMenuOpen) return;
+    const closeOnEscape = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') closeMobileMenu();
+    };
+    window.addEventListener('keydown', closeOnEscape);
+    return () => window.removeEventListener('keydown', closeOnEscape);
+  }, [mobileMenuOpen]);
+
   const logout = async () => {
     setUserMenuOpen(false);
+    closeMobileMenu();
     await apiClient.logout();
     queryClient.clear();
     navigate('/login', { replace: true });
@@ -63,6 +80,18 @@ export function AppShell({
         </nav>
       </aside>
       <div className="workspace">
+        <header className="mobile-app-bar">
+          <button
+            type="button"
+            className="icon-button"
+            aria-label="打开导航菜单"
+            aria-expanded={mobileMenuOpen}
+            onClick={() => setMobileMenuOpen(true)}
+          >
+            <Menu size={20} />
+          </button>
+          <span>{t(activeNavigation.labelKey)}</span>
+        </header>
         <header className="topbar">
           <button
             className="icon-button topbar-theme"
@@ -145,18 +174,65 @@ export function AppShell({
           <Outlet />
         </main>
       </div>
-      <nav className="bottom-nav" aria-label={t('nav.mobileMain')}>
-        {navigation.map(({ to, labelKey, icon: Icon }) => (
-          <NavLink key={to} to={to}>
-            <Icon size={19} />
-            <span>{t(labelKey)}</span>
-          </NavLink>
-        ))}
-        <button type="button" className="bottom-nav-logout" onClick={logout}>
-          <LogOut size={19} />
-          <span>{t('topbar.logout')}</span>
-        </button>
-      </nav>
+      {mobileMenuOpen && (
+        <div className="mobile-sidebar-layer">
+          <button
+            type="button"
+            className="mobile-sidebar-backdrop"
+            aria-label="关闭导航菜单"
+            onClick={closeMobileMenu}
+          />
+          <aside className="mobile-sidebar" role="dialog" aria-modal="true" aria-label={t('nav.main')}>
+            <header className="mobile-sidebar__header">
+              <div className="brand" aria-label={t('nav.brandLabel')}>
+                X
+              </div>
+              <button
+                type="button"
+                className="icon-button"
+                aria-label="关闭导航菜单"
+                onClick={closeMobileMenu}
+              >
+                <X size={20} />
+              </button>
+            </header>
+            <nav className="mobile-sidebar__nav" aria-label={t('nav.main')}>
+              {navigation.map(({ to, labelKey, icon: Icon }) => (
+                <NavLink key={to} to={to} onClick={closeMobileMenu}>
+                  <Icon size={18} />
+                  <span>{t(labelKey)}</span>
+                </NavLink>
+              ))}
+            </nav>
+            <footer className="mobile-sidebar__footer">
+              <button type="button" className="mobile-sidebar__action" onClick={onTheme}>
+                {theme === 'dark' ? <Sun size={17} /> : <Moon size={17} />}
+                {theme === 'dark' ? t('topbar.switchToLight') : t('topbar.switchToDark')}
+              </button>
+              <div className="mobile-sidebar__language" aria-label={t('language.label')}>
+                <button
+                  type="button"
+                  className={language === 'zh' ? 'is-active' : ''}
+                  onClick={() => setLanguage('zh')}
+                >
+                  {t('language.zh')}
+                </button>
+                <button
+                  type="button"
+                  className={language === 'en' ? 'is-active' : ''}
+                  onClick={() => setLanguage('en')}
+                >
+                  {t('language.en')}
+                </button>
+              </div>
+              <button type="button" className="mobile-sidebar__action" onClick={logout}>
+                <LogOut size={17} />
+                {t('topbar.logout')}
+              </button>
+            </footer>
+          </aside>
+        </div>
+      )}
     </div>
   );
 }
