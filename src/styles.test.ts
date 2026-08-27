@@ -72,3 +72,19 @@ describe('mobile navigation styles', () => {
     ).toBe(true);
   });
 });
+
+describe('sale dialog price input styles', () => {
+  it('keeps the price input from drawing a second focus outline', () => {
+    const styleRules = Array.from(document.styleSheets).flatMap((sheet) =>
+      Array.from(sheet.cssRules).filter((rule): rule is CSSStyleRule => 'selectorText' in rule),
+    );
+
+    expect(
+      styleRules.some(
+        (rule) =>
+          rule.selectorText === '.sale-dialog .sale-dialog__money-input input:focus' &&
+          rule.style.getPropertyValue('outline') === '0',
+      ),
+    ).toBe(true);
+  });
+});
