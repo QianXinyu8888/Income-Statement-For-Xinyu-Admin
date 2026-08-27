@@ -29,6 +29,12 @@ const navigation: { to: string; labelKey: TranslationKey; icon: typeof List }[] 
   { to: '/settings', labelKey: 'nav.settings', icon: Settings },
 ];
 
+const mobileNavigationGroups: { labelKey: TranslationKey; destinations: string[] }[] = [
+  { labelKey: 'nav.group.transactions', destinations: ['/transactions'] },
+  { labelKey: 'nav.group.analytics', destinations: ['/overview', '/analytics'] },
+  { labelKey: 'nav.group.productStatus', destinations: ['/listed', '/self-use'] },
+];
+
 export function AppShell({
   user,
   theme,
@@ -116,7 +122,7 @@ export function AppShell({
             type="button"
             className="icon-button"
             ref={mobileMenuTriggerRef}
-            aria-label="打开导航菜单"
+            aria-label={t('nav.openMobileMenu')}
             aria-expanded={mobileMenuOpen}
             onClick={() => setMobileMenuOpen(true)}
           >
@@ -211,7 +217,7 @@ export function AppShell({
           <button
             type="button"
             className="mobile-sidebar-backdrop"
-            aria-label="关闭导航菜单"
+            aria-label={t('nav.closeMobileMenu')}
             tabIndex={-1}
             onClick={() => closeMobileMenu()}
           />
@@ -221,51 +227,50 @@ export function AppShell({
             role="dialog"
             aria-modal="true"
             aria-label={t('nav.main')}
-          >
+            >
             <header className="mobile-sidebar__header">
-              <div className="brand" aria-label={t('nav.brandLabel')}>
-                X
+              <div className="mobile-sidebar__account" aria-label={t('topbar.accountLabel', { username: user.username })}>
+                {user.username}
               </div>
               <button
                 type="button"
                 className="icon-button"
                 autoFocus
-                aria-label="关闭导航菜单"
+                aria-label={t('nav.closeMobileMenu')}
                 onClick={() => closeMobileMenu()}
               >
                 <X size={20} />
               </button>
             </header>
             <nav className="mobile-sidebar__nav" aria-label={t('nav.main')}>
-              {navigation.map(({ to, labelKey, icon: Icon }) => (
-                <NavLink key={to} to={to} onClick={() => closeMobileMenu(false)}>
-                  <Icon size={18} />
-                  <span>{t(labelKey)}</span>
-                </NavLink>
+              {mobileNavigationGroups.map(({ labelKey, destinations }) => (
+                <section className="mobile-sidebar__group" key={labelKey}>
+                  <h2 className="mobile-sidebar__group-title">{t(labelKey)}</h2>
+                  {navigation
+                    .filter(({ to }) => destinations.includes(to))
+                    .map(({ to, labelKey: itemLabelKey, icon: Icon }) => (
+                      <NavLink key={to} to={to} onClick={() => closeMobileMenu(false)}>
+                        <Icon size={18} />
+                        <span>{t(itemLabelKey)}</span>
+                      </NavLink>
+                    ))}
+                </section>
               ))}
             </nav>
             <footer className="mobile-sidebar__footer">
-              <button type="button" className="mobile-sidebar__action" onClick={onTheme}>
-                {theme === 'dark' ? <Sun size={17} /> : <Moon size={17} />}
-                {theme === 'dark' ? t('topbar.switchToLight') : t('topbar.switchToDark')}
-              </button>
-              <div className="mobile-sidebar__language" aria-label={t('language.label')}>
-                <button
-                  type="button"
-                  className={language === 'zh' ? 'is-active' : ''}
-                  onClick={() => setLanguage('zh')}
-                >
-                  {t('language.zh')}
-                </button>
-                <button
-                  type="button"
-                  className={language === 'en' ? 'is-active' : ''}
-                  onClick={() => setLanguage('en')}
-                >
-                  {t('language.en')}
-                </button>
-              </div>
-              <button type="button" className="mobile-sidebar__action" onClick={logout}>
+              <NavLink
+                className="mobile-sidebar__action"
+                to="/settings"
+                onClick={() => closeMobileMenu(false)}
+              >
+                <Settings size={17} />
+                <span>{t('nav.settings')}</span>
+              </NavLink>
+              <button
+                type="button"
+                className="mobile-sidebar__action mobile-sidebar__logout"
+                onClick={logout}
+              >
                 <LogOut size={17} />
                 {t('topbar.logout')}
               </button>

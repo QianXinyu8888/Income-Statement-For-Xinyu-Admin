@@ -7,8 +7,12 @@ import { AppShell } from './AppShell';
 import { apiClient } from '../api/client';
 import { LanguageProvider } from '../i18n';
 import { BrowserPreferencesProvider } from '../preferences/BrowserPreferencesContext';
+import { PREFERENCES_STORAGE_KEY } from '../preferences/browser-preferences';
 
-afterEach(cleanup);
+afterEach(() => {
+  cleanup();
+  window.localStorage.clear();
+});
 
 function renderShell(onTheme = vi.fn()) {
   vi.stubGlobal('navigator', { languages: ['zh-CN', 'zh'] });
@@ -54,15 +58,51 @@ describe('AppShell', () => {
     await user.click(screen.getByRole('button', { name: '打开导航菜单' }));
 
     const menu = screen.getByRole('dialog', { name: '主导航' });
-    expect(within(menu).getAllByRole('link').map((link) => link.textContent)).toEqual([
-      '交易',
-      '在售中',
-      '自用中',
-      '概览',
-      '分析',
-      '设置',
-    ]);
+    expect(
+      within(menu)
+        .getAllByRole('link')
+        .map((link) => link.textContent),
+    ).toEqual(['交易', '概览', '分析', '在售中', '自用中', '设置']);
+    expect(within(menu).getByText('xinyu')).toBeInTheDocument();
     expect(within(menu).getByRole('button', { name: '退出登录' })).toBeInTheDocument();
+  });
+
+  it('groups mobile workspaces by task and keeps preferences in settings', async () => {
+    renderShell();
+    const user = userEvent.setup();
+
+    await user.click(screen.getByRole('button', { name: '打开导航菜单' }));
+
+    const menu = screen.getByRole('dialog', { name: '主导航' });
+    expect(within(menu).getByRole('heading', { name: '交易管理' })).toBeInTheDocument();
+    expect(within(menu).getByRole('heading', { name: '经营分析' })).toBeInTheDocument();
+    expect(within(menu).getByRole('heading', { name: '产品状态' })).toBeInTheDocument();
+    expect(within(menu).getByRole('link', { name: '设置' })).toBeInTheDocument();
+    expect(within(menu).queryByRole('button', { name: '切换到深色模式' })).not.toBeInTheDocument();
+    expect(within(menu).queryByRole('button', { name: '简体中文' })).not.toBeInTheDocument();
+  });
+
+  it('localizes the mobile navigation controls and workspace groups', async () => {
+    window.localStorage.setItem(
+      PREFERENCES_STORAGE_KEY,
+      JSON.stringify({
+        version: 1,
+        themeMode: 'light',
+        visibleTransactionFields: [],
+        analysisMonth: '2026-08',
+        language: 'en',
+      }),
+    );
+    renderShell();
+    const user = userEvent.setup();
+
+    await user.click(screen.getByRole('button', { name: 'Open navigation menu' }));
+
+    const menu = screen.getByRole('dialog', { name: 'Main navigation' });
+    expect(within(menu).getByRole('button', { name: 'Close navigation menu' })).toBeInTheDocument();
+    expect(within(menu).getByRole('heading', { name: 'Transaction management' })).toBeInTheDocument();
+    expect(within(menu).getByRole('heading', { name: 'Business insights' })).toBeInTheDocument();
+    expect(within(menu).getByRole('heading', { name: 'Product status' })).toBeInTheDocument();
   });
 
   it('closes the mobile sidebar after navigation', async () => {
@@ -70,7 +110,9 @@ describe('AppShell', () => {
     const user = userEvent.setup();
 
     await user.click(screen.getByRole('button', { name: '打开导航菜单' }));
-    await user.click(within(screen.getByRole('dialog', { name: '主导航' })).getByRole('link', { name: '概览' }));
+    await user.click(
+      within(screen.getByRole('dialog', { name: '主导航' })).getByRole('link', { name: '概览' }),
+    );
 
     expect(screen.queryByRole('dialog', { name: '主导航' })).not.toBeInTheDocument();
   });

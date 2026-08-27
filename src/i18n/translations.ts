@@ -24,7 +24,12 @@ export type TranslationKey =
   | 'nav.overview'
   | 'nav.analytics'
   | 'nav.settings'
+  | 'nav.group.transactions'
+  | 'nav.group.analytics'
+  | 'nav.group.productStatus'
   | 'nav.mobileMain'
+  | 'nav.openMobileMenu'
+  | 'nav.closeMobileMenu'
   | 'topbar.switchToLight'
   | 'topbar.switchToDark'
   | 'topbar.logout'
@@ -77,7 +82,12 @@ export const translations: Record<Language, TranslationMap> = {
     'nav.overview': '概览',
     'nav.analytics': '分析',
     'nav.settings': '设置',
+    'nav.group.transactions': '交易管理',
+    'nav.group.analytics': '经营分析',
+    'nav.group.productStatus': '产品状态',
     'nav.mobileMain': '移动端主导航',
+    'nav.openMobileMenu': '打开导航菜单',
+    'nav.closeMobileMenu': '关闭导航菜单',
     'topbar.switchToLight': '切换到浅色模式',
     'topbar.switchToDark': '切换到深色模式',
     'topbar.logout': '退出登录',
@@ -126,7 +136,12 @@ export const translations: Record<Language, TranslationMap> = {
     'nav.overview': 'Overview',
     'nav.analytics': 'Analytics',
     'nav.settings': 'Settings',
+    'nav.group.transactions': 'Transaction management',
+    'nav.group.analytics': 'Business insights',
+    'nav.group.productStatus': 'Product status',
     'nav.mobileMain': 'Mobile navigation',
+    'nav.openMobileMenu': 'Open navigation menu',
+    'nav.closeMobileMenu': 'Close navigation menu',
     'topbar.switchToLight': 'Switch to light mode',
     'topbar.switchToDark': 'Switch to dark mode',
     'topbar.logout': 'Sign out',

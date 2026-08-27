@@ -60,19 +60,18 @@ describe('SelfUseList actions', () => {
     expect(container.querySelector('.self-use-mobile-card')).not.toHaveTextContent('自用中');
   });
 
-  it('uses macOS-style action buttons for a self-use record', async () => {
+  it('uses a status menu for each self-use record', async () => {
     const user = userEvent.setup();
     const { onMarkListed, onSell } = renderList();
 
-    expect(screen.getAllByText('设为')).toHaveLength(2);
-    expect(screen.getAllByRole('button', { name: '设置 耳机 为在售中' })).toHaveLength(2);
-    expect(screen.getAllByRole('button', { name: '设置 耳机 为已售出' })).toHaveLength(2);
-    expect(screen.getAllByText('在售中')).toHaveLength(2);
-    expect(screen.getAllByText('已售出')).toHaveLength(2);
-    expect(screen.queryByRole('checkbox')).not.toBeInTheDocument();
+    const menus = screen.getAllByRole('combobox', { name: '设置 耳机 的状态' });
+    expect(menus).toHaveLength(2);
+    expect(screen.getAllByRole('option', { name: '设为状态' })).toHaveLength(2);
+    expect(screen.getAllByRole('option', { name: '在售中' })).toHaveLength(2);
+    expect(screen.getAllByRole('option', { name: '已售出' })).toHaveLength(2);
 
-    await user.click(screen.getAllByRole('button', { name: '设置 耳机 为在售中' })[0]);
-    await user.click(screen.getAllByRole('button', { name: '设置 耳机 为已售出' })[0]);
+    await user.selectOptions(menus[0], 'listed');
+    await user.selectOptions(menus[1], 'sold');
 
     expect(onMarkListed).toHaveBeenCalledWith(record);
     expect(onSell).toHaveBeenCalledWith(record);
@@ -81,8 +80,7 @@ describe('SelfUseList actions', () => {
   it('shows only the sale action in the listed workspace', () => {
     renderList(false);
 
-    expect(screen.queryByRole('button', { name: '设置 耳机 为在售中' })).not.toBeInTheDocument();
-    expect(screen.getAllByRole('button', { name: '设置 耳机 为已售出' })).toHaveLength(2);
-    expect(screen.getAllByText('已售出')).toHaveLength(2);
+    expect(screen.queryByRole('option', { name: '在售中' })).not.toBeInTheDocument();
+    expect(screen.getAllByRole('option', { name: '已售出' })).toHaveLength(2);
   });
 });
