@@ -77,14 +77,11 @@ export function SelfUseList({
             <tr>
               <th scope="col">物品</th>
               <th scope="col">成本</th>
-              <th scope="col">持有</th>
-              <th scope="col">状态</th>
               <th scope="col">处理</th>
             </tr>
           </thead>
           <tbody>
             {records.map((record) => {
-              const isListed = record.status === '在售中';
               const pending = listingId === record.id;
               return (
                 <tr key={record.id} data-transaction-id={record.id}>
@@ -94,14 +91,6 @@ export function SelfUseList({
                     </button>
                   </td>
                   <td>{displayMoney(record.totalCost)}</td>
-                  <td>{record.holdingDays === null ? '—' : `${record.holdingDays} 天`}</td>
-                  <td>
-                    <span
-                      className={`self-use-status self-use-status--${isListed ? 'listed' : 'personal'}`}
-                    >
-                      {record.status}
-                    </span>
-                  </td>
                   <td>
                     <SelfUseActions
                       record={record}
@@ -119,7 +108,6 @@ export function SelfUseList({
       </div>
       <div className="self-use-mobile-list">
         {records.map((record) => {
-          const isListed = record.status === '在售中';
           const pending = listingId === record.id;
           return (
             <article key={record.id} className="self-use-mobile-card">
@@ -131,17 +119,8 @@ export function SelfUseList({
                   <dt>成本</dt>
                   <dd>{displayMoney(record.totalCost)}</dd>
                 </div>
-                <div>
-                  <dt>持有</dt>
-                  <dd>{record.holdingDays === null ? '—' : `${record.holdingDays} 天`}</dd>
-                </div>
               </dl>
               <div className="self-use-mobile-footer">
-                <span
-                  className={`self-use-status self-use-status--${isListed ? 'listed' : 'personal'}`}
-                >
-                  {record.status}
-                </span>
                 <SelfUseActions
                   record={record}
                   pending={pending}

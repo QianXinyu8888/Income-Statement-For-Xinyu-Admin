@@ -51,6 +51,7 @@ export default function SelfUsePage({ status = '自用中' }: { status?: SelfUse
   const sortOption = sortOptions[sortIndex];
   const itemLabel = status === '自用中' ? '自用物品' : '在售物品';
   const managementLabel = status === '自用中' ? '管理自用状态' : '管理售出状态';
+  const pageTitle = status === '自用中' ? '正在自用中的产品' : '正在售卖的产品';
 
   const result = useQuery({
     queryKey: ['self-use-records', status, search],
@@ -121,7 +122,7 @@ export default function SelfUsePage({ status = '自用中' }: { status?: SelfUse
     <section className="page page--self-use">
       <header className="page-header self-use-page-header">
         <div>
-          <h1>{status}</h1>
+          <h1>{pageTitle}</h1>
           <p>{result.data ? `${records.length} 件物品 · ${managementLabel}` : managementLabel}</p>
         </div>
         <button className="button button--primary" onClick={() => openDrawer(null)}>

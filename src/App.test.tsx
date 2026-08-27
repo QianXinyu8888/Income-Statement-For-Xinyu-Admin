@@ -37,7 +37,7 @@ describe('App routes', () => {
       </QueryClientProvider>,
     );
 
-    expect(await screen.findByRole('heading', { name: '自用中' })).toBeInTheDocument();
+    expect(await screen.findByRole('heading', { name: '正在自用中的产品' })).toBeInTheDocument();
   });
 
   it('renders the listed workspace at /listed', async () => {
@@ -63,6 +63,6 @@ describe('App routes', () => {
       </QueryClientProvider>,
     );
 
-    expect(await screen.findByRole('heading', { name: '在售中' })).toBeInTheDocument();
+    expect(await screen.findByRole('heading', { name: '正在售卖的产品' })).toBeInTheDocument();
   });
 });

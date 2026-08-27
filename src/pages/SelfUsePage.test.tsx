@@ -51,11 +51,11 @@ const listedPage: TransactionPage = {
   warnings: [],
 };
 
-function renderPage() {
+function renderPage(status: '自用中' | '在售中' = '自用中') {
   const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
   return render(
     <QueryClientProvider client={client}>
-      <SelfUsePage />
+      <SelfUsePage status={status} />
     </QueryClientProvider>,
   );
 }
@@ -67,6 +67,22 @@ function mockActiveRecords() {
 }
 
 describe('SelfUsePage', () => {
+  it('uses product-focused titles for self-use and listed workspaces', async () => {
+    mockActiveRecords();
+    renderPage();
+
+    expect(
+      await screen.findByRole('heading', { name: '正在自用中的产品' }),
+    ).toBeInTheDocument();
+
+    cleanup();
+    renderPage('在售中');
+
+    expect(
+      await screen.findByRole('heading', { name: '正在售卖的产品' }),
+    ).toBeInTheDocument();
+  });
+
   it('loads only self-use records and excludes other statuses', async () => {
     mockActiveRecords();
     renderPage();

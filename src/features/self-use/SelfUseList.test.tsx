@@ -39,6 +39,27 @@ function renderList(showListedAction = true) {
 }
 
 describe('SelfUseList actions', () => {
+  it('keeps only product, cost, and actions in the active-products list', () => {
+    const { container } = render(
+      <SelfUseList
+        records={[record]}
+        listingId={null}
+        onMarkListed={vi.fn()}
+        onSell={vi.fn()}
+        onOpen={vi.fn()}
+      />,
+    );
+
+    expect([...container.querySelectorAll('.self-use-table th')].map((cell) => cell.textContent)).toEqual([
+      '物品',
+      '成本',
+      '处理',
+    ]);
+    expect(container.querySelector('.self-use-mobile-card')).toHaveTextContent('成本¥920.00');
+    expect(container.querySelector('.self-use-mobile-card')).not.toHaveTextContent('持有');
+    expect(container.querySelector('.self-use-mobile-card')).not.toHaveTextContent('自用中');
+  });
+
   it('uses macOS-style action buttons for a self-use record', async () => {
     const user = userEvent.setup();
     const { onMarkListed, onSell } = renderList();
