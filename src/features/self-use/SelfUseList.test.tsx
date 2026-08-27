@@ -64,15 +64,15 @@ describe('SelfUseList actions', () => {
     const user = userEvent.setup();
     const { onMarkListed, onSell } = renderList();
 
-    expect(screen.getAllByRole('button', { name: '标记 耳机 为在售中' })).toHaveLength(2);
-    expect(screen.getAllByRole('button', { name: '确认出售 耳机' })).toHaveLength(2);
-    expect(screen.getAllByText('设置为在售中')).toHaveLength(2);
-    expect(screen.getAllByText('设置为已售出')).toHaveLength(2);
-    expect(screen.queryByText('确认售出')).not.toBeInTheDocument();
+    expect(screen.getAllByText('设置为')).toHaveLength(2);
+    expect(screen.getAllByRole('button', { name: '设置 耳机 为在售中' })).toHaveLength(2);
+    expect(screen.getAllByRole('button', { name: '设置 耳机 为已售出' })).toHaveLength(2);
+    expect(screen.getAllByText('在售中')).toHaveLength(2);
+    expect(screen.getAllByText('已售出')).toHaveLength(2);
     expect(screen.queryByRole('checkbox')).not.toBeInTheDocument();
 
-    await user.click(screen.getAllByRole('button', { name: '标记 耳机 为在售中' })[0]);
-    await user.click(screen.getAllByRole('button', { name: '确认出售 耳机' })[0]);
+    await user.click(screen.getAllByRole('button', { name: '设置 耳机 为在售中' })[0]);
+    await user.click(screen.getAllByRole('button', { name: '设置 耳机 为已售出' })[0]);
 
     expect(onMarkListed).toHaveBeenCalledWith(record);
     expect(onSell).toHaveBeenCalledWith(record);
@@ -81,8 +81,8 @@ describe('SelfUseList actions', () => {
   it('shows only the sale action in the listed workspace', () => {
     renderList(false);
 
-    expect(screen.queryByRole('button', { name: '标记 耳机 为在售中' })).not.toBeInTheDocument();
-    expect(screen.getAllByRole('button', { name: '确认出售 耳机' })).toHaveLength(2);
-    expect(screen.getAllByText('设置为已售出')).toHaveLength(2);
+    expect(screen.queryByRole('button', { name: '设置 耳机 为在售中' })).not.toBeInTheDocument();
+    expect(screen.getAllByRole('button', { name: '设置 耳机 为已售出' })).toHaveLength(2);
+    expect(screen.getAllByText('已售出')).toHaveLength(2);
   });
 });

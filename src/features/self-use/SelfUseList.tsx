@@ -1,4 +1,3 @@
-import { BadgeCheck, CircleDollarSign } from 'lucide-react';
 import type { Transaction } from '../../domain/transaction';
 
 const money = new Intl.NumberFormat('zh-CN', {
@@ -27,27 +26,26 @@ function SelfUseActions({
   const title = record.title ?? '未命名物品';
   return (
     <div className="self-use-actions">
+      <span className="self-use-action-label">设置为</span>
       {showListedAction && (
         <button
           type="button"
           className="self-use-action self-use-action--listed"
-          aria-label={`标记 ${title} 为在售中`}
+          aria-label={`设置 ${title} 为在售中`}
           onClick={() => onMarkListed(record)}
           disabled={pending}
         >
-          <BadgeCheck size={14} aria-hidden="true" />
-          <span>设置为在售中</span>
+          <span>在售中</span>
         </button>
       )}
       <button
         type="button"
         className="self-use-action self-use-action--sale"
-        aria-label={`确认出售 ${title}`}
+        aria-label={`设置 ${title} 为已售出`}
         onClick={() => onSell(record)}
         disabled={pending}
       >
-        <CircleDollarSign size={14} aria-hidden="true" />
-        <span>设置为已售出</span>
+        <span>已售出</span>
       </button>
     </div>
   );
