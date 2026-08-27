@@ -36,7 +36,7 @@ function SelfUseActions({
           disabled={pending}
         >
           <BadgeCheck size={14} aria-hidden="true" />
-          <span>标记在售</span>
+          <span>设置为在售中</span>
         </button>
       )}
       <button
@@ -47,7 +47,7 @@ function SelfUseActions({
         disabled={pending}
       >
         <CircleDollarSign size={14} aria-hidden="true" />
-        <span>确认售出</span>
+        <span>设置为已售出</span>
       </button>
     </div>
   );
