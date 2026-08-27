@@ -1,3 +1,4 @@
+import { BadgeCheck, CircleDollarSign } from 'lucide-react';
 import type { Transaction } from '../../domain/transaction';
 
 const money = new Intl.NumberFormat('zh-CN', {
@@ -8,6 +9,48 @@ const money = new Intl.NumberFormat('zh-CN', {
 
 function displayMoney(value: number | null) {
   return value === null ? '—' : money.format(value);
+}
+
+function SelfUseActions({
+  record,
+  pending,
+  showListedAction,
+  onMarkListed,
+  onSell,
+}: {
+  record: Transaction;
+  pending: boolean;
+  showListedAction: boolean;
+  onMarkListed: (record: Transaction) => void;
+  onSell: (record: Transaction) => void;
+}) {
+  const title = record.title ?? '未命名物品';
+  return (
+    <div className="self-use-actions">
+      {showListedAction && (
+        <button
+          type="button"
+          className="self-use-action"
+          aria-label={`标记 ${title} 为在售中`}
+          onClick={() => onMarkListed(record)}
+          disabled={pending}
+        >
+          <BadgeCheck size={14} aria-hidden="true" />
+          <span>在售中</span>
+        </button>
+      )}
+      <button
+        type="button"
+        className="self-use-action self-use-action--sale"
+        aria-label={`确认出售 ${title}`}
+        onClick={() => onSell(record)}
+        disabled={pending}
+      >
+        <CircleDollarSign size={14} aria-hidden="true" />
+        <span>售出…</span>
+      </button>
+    </div>
+  );
 }
 
 export function SelfUseList({
@@ -60,30 +103,13 @@ export function SelfUseList({
                     </span>
                   </td>
                   <td>
-                    <div className="self-use-actions">
-                      {showListedAction && (
-                        <label className="self-use-check">
-                          <input
-                            type="checkbox"
-                            aria-label={`标记 ${title(record)} 在售中`}
-                            checked={isListed}
-                            onChange={() => onMarkListed(record)}
-                            disabled={pending || isListed}
-                          />
-                          <span>在售中</span>
-                        </label>
-                      )}
-                      <label className="self-use-check">
-                        <input
-                          type="checkbox"
-                          aria-label={`标记 ${title(record)} 已售出`}
-                          checked={false}
-                          onChange={() => onSell(record)}
-                          disabled={pending}
-                        />
-                        <span>已售出</span>
-                      </label>
-                    </div>
+                    <SelfUseActions
+                      record={record}
+                      pending={pending}
+                      showListedAction={showListedAction}
+                      onMarkListed={onMarkListed}
+                      onSell={onSell}
+                    />
                   </td>
                 </tr>
               );
@@ -116,30 +142,13 @@ export function SelfUseList({
                 >
                   {record.status}
                 </span>
-                <div className="self-use-actions">
-                  {showListedAction && (
-                    <label className="self-use-check">
-                      <input
-                        type="checkbox"
-                        aria-label={`标记 ${title(record)} 在售中`}
-                        checked={isListed}
-                        onChange={() => onMarkListed(record)}
-                        disabled={pending || isListed}
-                      />
-                      <span>在售中</span>
-                    </label>
-                  )}
-                  <label className="self-use-check">
-                    <input
-                      type="checkbox"
-                      aria-label={`标记 ${title(record)} 已售出`}
-                      checked={false}
-                      onChange={() => onSell(record)}
-                      disabled={pending}
-                    />
-                    <span>已售出</span>
-                  </label>
-                </div>
+                <SelfUseActions
+                  record={record}
+                  pending={pending}
+                  showListedAction={showListedAction}
+                  onMarkListed={onMarkListed}
+                  onSell={onSell}
+                />
               </div>
             </article>
           );

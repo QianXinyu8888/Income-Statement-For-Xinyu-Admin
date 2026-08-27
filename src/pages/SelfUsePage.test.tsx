@@ -117,7 +117,7 @@ describe('SelfUsePage', () => {
     });
     renderPage();
 
-    await user.click((await screen.findAllByRole('checkbox', { name: '标记 耳机 在售中' }))[0]);
+    await user.click((await screen.findAllByRole('button', { name: '标记 耳机 为在售中' }))[0]);
 
     await waitFor(() => expect(markListed).toHaveBeenCalledWith([personal.id], '在售中'));
   });
@@ -130,7 +130,7 @@ describe('SelfUsePage', () => {
     });
     renderPage();
 
-    await user.click((await screen.findAllByRole('checkbox', { name: '标记 耳机 在售中' }))[0]);
+    await user.click((await screen.findAllByRole('button', { name: '标记 耳机 为在售中' }))[0]);
 
     expect(await screen.findByRole('status')).toHaveTextContent('飞书暂不可用');
   });
@@ -141,7 +141,7 @@ describe('SelfUsePage', () => {
     vi.spyOn(apiClient, 'batchStatus').mockRejectedValue(new Error('网络异常'));
     renderPage();
 
-    await user.click((await screen.findAllByRole('checkbox', { name: '标记 耳机 在售中' }))[0]);
+    await user.click((await screen.findAllByRole('button', { name: '标记 耳机 为在售中' }))[0]);
 
     expect(await screen.findByRole('status')).toHaveTextContent('网络异常');
   });
@@ -152,7 +152,7 @@ describe('SelfUsePage', () => {
     vi.spyOn(apiClient, 'updateTransaction').mockResolvedValue({ ...personal, status: '已售出' });
     renderPage();
 
-    await user.click((await screen.findAllByRole('checkbox', { name: '标记 耳机 已售出' }))[0]);
+    await user.click((await screen.findAllByRole('button', { name: '确认出售 耳机' }))[0]);
     await user.type(screen.getByRole('spinbutton', { name: '售价' }), '1200');
     await user.click(screen.getByRole('button', { name: '确认售出' }));
 

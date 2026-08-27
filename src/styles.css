@@ -3677,25 +3677,48 @@ tbody tr:nth-child(n + 5),
 .self-use-actions {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 6px;
   white-space: nowrap;
 }
-.self-use-check {
+.self-use-action {
   display: inline-flex;
   align-items: center;
+  justify-content: center;
+  min-height: 29px;
   gap: 5px;
-  color: var(--muted);
+  border: 1px solid var(--border-strong);
+  border-radius: 6px;
+  padding: 0 9px;
+  background: var(--surface);
+  color: var(--text);
   font-size: 12px;
+  font-weight: 500;
+  font-family: inherit;
   cursor: pointer;
+  transition:
+    background-color 140ms ease,
+    border-color 140ms ease,
+    color 140ms ease;
 }
-.self-use-check input {
-  width: 15px;
-  height: 15px;
-  accent-color: #34a853;
+.self-use-action:hover:not(:disabled) {
+  border-color: color-mix(in srgb, var(--text), transparent 72%);
+  background: var(--surface-2);
 }
-.self-use-check:has(input:disabled) {
+.self-use-action--sale {
+  color: var(--accent);
+  border-color: color-mix(in srgb, var(--accent), transparent 56%);
+}
+.self-use-action--sale:hover:not(:disabled) {
+  border-color: var(--accent);
+  background: color-mix(in srgb, var(--accent), transparent 92%);
+}
+.self-use-action:focus-visible {
+  outline: 2px solid color-mix(in srgb, var(--accent), transparent 36%);
+  outline-offset: 2px;
+}
+.self-use-action:disabled {
   cursor: default;
-  opacity: 0.66;
+  opacity: 0.48;
 }
 .self-use-mobile-list {
   display: none;
