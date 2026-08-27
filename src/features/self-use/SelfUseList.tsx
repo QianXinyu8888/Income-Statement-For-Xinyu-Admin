@@ -73,7 +73,7 @@ export function SelfUseList({
         <table className="self-use-table">
           <thead>
             <tr>
-              <th scope="col">物品</th>
+              <th scope="col">商品名称</th>
               <th scope="col">成本</th>
               <th scope="col" aria-label="状态设置" />
             </tr>

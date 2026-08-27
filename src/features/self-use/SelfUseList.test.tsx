@@ -51,7 +51,7 @@ describe('SelfUseList actions', () => {
     );
 
     expect([...container.querySelectorAll('.self-use-table th')].map((cell) => cell.textContent)).toEqual([
-      '物品',
+      '商品名称',
       '成本',
       '',
     ]);
