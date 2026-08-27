@@ -53,7 +53,7 @@ describe('SelfUseList actions', () => {
     expect([...container.querySelectorAll('.self-use-table th')].map((cell) => cell.textContent)).toEqual([
       '物品',
       '成本',
-      '处理',
+      '',
     ]);
     expect(container.querySelector('.self-use-mobile-card')).toHaveTextContent('成本¥920.00');
     expect(container.querySelector('.self-use-mobile-card')).not.toHaveTextContent('持有');

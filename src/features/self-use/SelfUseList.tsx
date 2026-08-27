@@ -75,7 +75,7 @@ export function SelfUseList({
             <tr>
               <th scope="col">物品</th>
               <th scope="col">成本</th>
-              <th scope="col">处理</th>
+              <th scope="col" aria-label="状态设置" />
             </tr>
           </thead>
           <tbody>
