@@ -64,7 +64,7 @@ describe('SelfUseList actions', () => {
     const user = userEvent.setup();
     const { onMarkListed, onSell } = renderList();
 
-    expect(screen.getAllByText('设置为')).toHaveLength(2);
+    expect(screen.getAllByText('设为')).toHaveLength(2);
     expect(screen.getAllByRole('button', { name: '设置 耳机 为在售中' })).toHaveLength(2);
     expect(screen.getAllByRole('button', { name: '设置 耳机 为已售出' })).toHaveLength(2);
     expect(screen.getAllByText('在售中')).toHaveLength(2);

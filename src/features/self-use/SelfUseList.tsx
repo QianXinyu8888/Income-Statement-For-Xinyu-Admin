@@ -26,7 +26,7 @@ function SelfUseActions({
   const title = record.title ?? '未命名物品';
   return (
     <div className="self-use-actions">
-      <span className="self-use-action-label">设置为</span>
+      <span className="self-use-action-label">设为</span>
       {showListedAction && (
         <button
           type="button"
