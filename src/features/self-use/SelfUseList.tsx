@@ -30,13 +30,13 @@ function SelfUseActions({
       {showListedAction && (
         <button
           type="button"
-          className="self-use-action"
+          className="self-use-action self-use-action--listed"
           aria-label={`标记 ${title} 为在售中`}
           onClick={() => onMarkListed(record)}
           disabled={pending}
         >
           <BadgeCheck size={14} aria-hidden="true" />
-          <span>在售中</span>
+          <span>标记在售</span>
         </button>
       )}
       <button
@@ -47,7 +47,7 @@ function SelfUseActions({
         disabled={pending}
       >
         <CircleDollarSign size={14} aria-hidden="true" />
-        <span>售出…</span>
+        <span>确认售出</span>
       </button>
     </div>
   );

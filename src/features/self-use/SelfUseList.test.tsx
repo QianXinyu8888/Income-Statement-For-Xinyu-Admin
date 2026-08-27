@@ -66,6 +66,9 @@ describe('SelfUseList actions', () => {
 
     expect(screen.getAllByRole('button', { name: '标记 耳机 为在售中' })).toHaveLength(2);
     expect(screen.getAllByRole('button', { name: '确认出售 耳机' })).toHaveLength(2);
+    expect(screen.getAllByText('标记在售')).toHaveLength(2);
+    expect(screen.getAllByText('确认售出')).toHaveLength(2);
+    expect(screen.queryByText('售出…')).not.toBeInTheDocument();
     expect(screen.queryByRole('checkbox')).not.toBeInTheDocument();
 
     await user.click(screen.getAllByRole('button', { name: '标记 耳机 为在售中' })[0]);
@@ -80,5 +83,6 @@ describe('SelfUseList actions', () => {
 
     expect(screen.queryByRole('button', { name: '标记 耳机 为在售中' })).not.toBeInTheDocument();
     expect(screen.getAllByRole('button', { name: '确认出售 耳机' })).toHaveLength(2);
+    expect(screen.getAllByText('确认售出')).toHaveLength(2);
   });
 });
