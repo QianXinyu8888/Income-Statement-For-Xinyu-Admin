@@ -3957,7 +3957,9 @@ tbody tr:nth-child(n + 5),
 }
 
 @media (max-width: 680px) {
-  .topbar,
+  .topbar {
+    display: none;
+  }
   .bottom-nav {
     display: none;
   }
@@ -4076,6 +4078,18 @@ tbody tr:nth-child(n + 5),
   }
   .analytics-mobile-dashboard .analytics-stat-card {
     padding: 16px;
+  }
+  .self-use-window {
+    border-width: 1px 0;
+    border-radius: 0;
+    box-shadow: none;
+  }
+  .self-use-toolbar {
+    min-height: 44px;
+    padding: 0 0 12px;
+  }
+  .drawer {
+    max-height: 96dvh;
   }
   .mobile-sidebar-layer {
     position: fixed;

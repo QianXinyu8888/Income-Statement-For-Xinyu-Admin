@@ -75,6 +75,35 @@ describe('AppShell', () => {
     expect(screen.queryByRole('dialog', { name: '主导航' })).not.toBeInTheDocument();
   });
 
+  it('moves focus into the mobile sidebar and restores it after Escape', async () => {
+    renderShell();
+    const user = userEvent.setup();
+    const trigger = screen.getByRole('button', { name: '打开导航菜单' });
+
+    await user.click(trigger);
+    expect(
+      within(screen.getByRole('dialog', { name: '主导航' })).getByRole('button', {
+        name: '关闭导航菜单',
+      }),
+    ).toHaveFocus();
+    await user.keyboard('{Escape}');
+
+    expect(screen.queryByRole('dialog', { name: '主导航' })).not.toBeInTheDocument();
+    expect(trigger).toHaveFocus();
+  });
+
+  it('traps keyboard focus within the mobile sidebar', async () => {
+    renderShell();
+    const user = userEvent.setup();
+
+    await user.click(screen.getByRole('button', { name: '打开导航菜单' }));
+    const menu = screen.getByRole('dialog', { name: '主导航' });
+    expect(within(menu).getByRole('button', { name: '关闭导航菜单' })).toHaveFocus();
+
+    await user.tab({ shift: true });
+    expect(within(menu).getByRole('button', { name: '退出登录' })).toHaveFocus();
+  });
+
   it('places the desktop theme action in the top utility bar', async () => {
     const { onTheme } = renderShell();
     const topbar = document.querySelector<HTMLElement>('.topbar')!;

@@ -17,7 +17,7 @@ import { NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { apiClient, type User } from '../api/client';
 import { useQueryClient } from '@tanstack/react-query';
 import { useLanguage } from '../i18n';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import type { TranslationKey } from '../i18n/translations';
 
 const navigation: { to: string; labelKey: TranslationKey; icon: typeof List }[] = [
@@ -45,21 +45,52 @@ export function AppShell({
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const [langMenuOpen, setLangMenuOpen] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const mobileMenuTriggerRef = useRef<HTMLButtonElement>(null);
+  const mobileSidebarRef = useRef<HTMLElement>(null);
+  const restoreMobileMenuFocus = useRef(false);
   const activeNavigation = navigation.find(({ to }) => to === location.pathname) ?? navigation[0];
-  const closeMobileMenu = () => setMobileMenuOpen(false);
+  const closeMobileMenu = (restoreFocus = true) => {
+    restoreMobileMenuFocus.current = restoreFocus;
+    setMobileMenuOpen(false);
+  };
 
   useEffect(() => {
     if (!mobileMenuOpen) return;
     const closeOnEscape = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') closeMobileMenu();
+      if (event.key === 'Escape') {
+        closeMobileMenu();
+        return;
+      }
+      if (event.key !== 'Tab') return;
+      const focusable = Array.from(
+        mobileSidebarRef.current?.querySelectorAll<HTMLElement>(
+          'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled])',
+        ) ?? [],
+      );
+      const first = focusable[0];
+      const last = focusable.at(-1);
+      if (!first || !last) return;
+      if (event.shiftKey && document.activeElement === first) {
+        event.preventDefault();
+        last.focus();
+      } else if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault();
+        first.focus();
+      }
     };
     window.addEventListener('keydown', closeOnEscape);
     return () => window.removeEventListener('keydown', closeOnEscape);
   }, [mobileMenuOpen]);
 
+  useEffect(() => {
+    if (mobileMenuOpen || !restoreMobileMenuFocus.current) return;
+    restoreMobileMenuFocus.current = false;
+    mobileMenuTriggerRef.current?.focus();
+  }, [mobileMenuOpen]);
+
   const logout = async () => {
     setUserMenuOpen(false);
-    closeMobileMenu();
+    closeMobileMenu(false);
     await apiClient.logout();
     queryClient.clear();
     navigate('/login', { replace: true });
@@ -84,6 +115,7 @@ export function AppShell({
           <button
             type="button"
             className="icon-button"
+            ref={mobileMenuTriggerRef}
             aria-label="打开导航菜单"
             aria-expanded={mobileMenuOpen}
             onClick={() => setMobileMenuOpen(true)}
@@ -180,9 +212,16 @@ export function AppShell({
             type="button"
             className="mobile-sidebar-backdrop"
             aria-label="关闭导航菜单"
-            onClick={closeMobileMenu}
+            tabIndex={-1}
+            onClick={() => closeMobileMenu()}
           />
-          <aside className="mobile-sidebar" role="dialog" aria-modal="true" aria-label={t('nav.main')}>
+          <aside
+            ref={mobileSidebarRef}
+            className="mobile-sidebar"
+            role="dialog"
+            aria-modal="true"
+            aria-label={t('nav.main')}
+          >
             <header className="mobile-sidebar__header">
               <div className="brand" aria-label={t('nav.brandLabel')}>
                 X
@@ -190,15 +229,16 @@ export function AppShell({
               <button
                 type="button"
                 className="icon-button"
+                autoFocus
                 aria-label="关闭导航菜单"
-                onClick={closeMobileMenu}
+                onClick={() => closeMobileMenu()}
               >
                 <X size={20} />
               </button>
             </header>
             <nav className="mobile-sidebar__nav" aria-label={t('nav.main')}>
               {navigation.map(({ to, labelKey, icon: Icon }) => (
-                <NavLink key={to} to={to} onClick={closeMobileMenu}>
+                <NavLink key={to} to={to} onClick={() => closeMobileMenu(false)}>
                   <Icon size={18} />
                   <span>{t(labelKey)}</span>
                 </NavLink>
