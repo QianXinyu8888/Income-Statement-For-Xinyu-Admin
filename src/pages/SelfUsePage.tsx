@@ -52,6 +52,7 @@ export default function SelfUsePage({ status = '自用中' }: { status?: SelfUse
   const itemLabel = status === '自用中' ? '自用物品' : '在售物品';
   const managementLabel = status === '自用中' ? '管理自用状态' : '管理售出状态';
   const pageTitle = status === '自用中' ? '正在自用中的产品' : '正在售卖中的产品';
+  const loadingLabel = status === '自用中' ? '正在加载自用中的产品' : '正在加载售卖中的产品';
 
   const result = useQuery({
     queryKey: ['self-use-records', status, search],
@@ -159,7 +160,7 @@ export default function SelfUsePage({ status = '自用中' }: { status?: SelfUse
           </div>
         )}
         {result.isLoading ? (
-          <LoadingState label={`正在加载${itemLabel}`} />
+          <LoadingState label={loadingLabel} />
         ) : result.isError ? (
           <ErrorState message={result.error.message} onRetry={() => result.refetch()} />
         ) : records.length === 0 ? (

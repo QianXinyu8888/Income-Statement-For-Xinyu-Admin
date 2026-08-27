@@ -83,6 +83,20 @@ describe('SelfUsePage', () => {
     ).toBeInTheDocument();
   });
 
+  it('uses product-focused loading copy for self-use and listed workspaces', () => {
+    vi.spyOn(apiClient, 'transactions').mockImplementation(
+      () => new Promise<TransactionPage>(() => {}),
+    );
+    renderPage();
+
+    expect(screen.getByText('正在加载自用中的产品')).toBeInTheDocument();
+
+    cleanup();
+    renderPage('在售中');
+
+    expect(screen.getByText('正在加载售卖中的产品')).toBeInTheDocument();
+  });
+
   it('loads only self-use records and excludes other statuses', async () => {
     mockActiveRecords();
     renderPage();
