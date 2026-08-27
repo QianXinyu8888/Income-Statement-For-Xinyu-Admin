@@ -136,7 +136,7 @@ export function SaleConfirmDialog({
           <div className="sale-dialog__content">
             <h2 id="sale-dialog-title">确认售出</h2>
             <p>
-              今天是你自用 {record.title ?? '该物品'} 的第 {usageDayNumber ?? '—'} 天
+              今天是你自用{record.title ?? '该物品'}的第 {usageDayNumber ?? '—'} 天
             </p>
             <label>
               售价 <em>*</em>

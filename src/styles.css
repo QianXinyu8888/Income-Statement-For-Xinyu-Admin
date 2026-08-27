@@ -3798,15 +3798,23 @@ tbody tr:nth-child(n + 5),
   border: 1px solid var(--border-strong);
   border-radius: 7px;
   background: var(--surface);
-  padding-left: 10px;
+  gap: 8px;
+  padding: 0 10px;
 }
 .sale-dialog__money-input b {
+  flex: 0 0 12px;
   color: var(--muted);
   font-weight: 500;
+  text-align: center;
 }
 .sale-dialog__money-input input {
+  min-width: 0;
   border: 0;
   border-radius: 0;
+  padding: 8px 0;
+}
+.sale-dialog__money-input input:focus {
+  outline: 0;
 }
 .sale-dialog__money-input:focus-within,
 .sale-dialog input:focus,

@@ -38,7 +38,7 @@ describe('SaleConfirmDialog', () => {
     );
 
     expect(
-      screen.getByText(`今天是你自用 AirPods Pro 的第 ${getUsageDayNumber(record.purchaseDate)} 天`),
+      screen.getByText(`今天是你自用AirPods Pro的第 ${getUsageDayNumber(record.purchaseDate)} 天`),
     ).toBeInTheDocument();
     expect(screen.getByText('利润').parentElement).toHaveTextContent('—');
     expect(screen.getByRole('textbox', { name: '备注' })).not.toHaveAttribute('placeholder');
