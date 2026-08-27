@@ -79,7 +79,7 @@ describe('SelfUsePage', () => {
     renderPage('在售中');
 
     expect(
-      await screen.findByRole('heading', { name: '正在售卖的产品' }),
+      await screen.findByRole('heading', { name: '正在售卖中的产品' }),
     ).toBeInTheDocument();
   });
 

@@ -51,7 +51,7 @@ export default function SelfUsePage({ status = '自用中' }: { status?: SelfUse
   const sortOption = sortOptions[sortIndex];
   const itemLabel = status === '自用中' ? '自用物品' : '在售物品';
   const managementLabel = status === '自用中' ? '管理自用状态' : '管理售出状态';
-  const pageTitle = status === '自用中' ? '正在自用中的产品' : '正在售卖的产品';
+  const pageTitle = status === '自用中' ? '正在自用中的产品' : '正在售卖中的产品';
 
   const result = useQuery({
     queryKey: ['self-use-records', status, search],
