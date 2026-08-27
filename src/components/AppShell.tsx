@@ -20,8 +20,8 @@ import type { TranslationKey } from '../i18n/translations';
 
 const navigation: { to: string; labelKey: TranslationKey; icon: typeof List }[] = [
   { to: '/transactions', labelKey: 'nav.transactions', icon: List },
-  { to: '/self-use', labelKey: 'nav.selfUse', icon: Monitor },
   { to: '/listed', labelKey: 'nav.listed', icon: Tag },
+  { to: '/self-use', labelKey: 'nav.selfUse', icon: Monitor },
   { to: '/overview', labelKey: 'nav.overview', icon: WalletCards },
   { to: '/analytics', labelKey: 'nav.analytics', icon: BarChart3 },
   { to: '/settings', labelKey: 'nav.settings', icon: Settings },

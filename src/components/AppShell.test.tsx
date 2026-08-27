@@ -47,6 +47,29 @@ describe('AppShell', () => {
     expect(screen.getAllByRole('link', { name: '在售中' })).toHaveLength(2);
   });
 
+  it('places the listed workspace before the self-use workspace in both navigation menus', () => {
+    renderShell();
+
+    const sidebar = screen.getByRole('complementary', { name: '主导航' });
+    const bottomNav = screen.getByRole('navigation', { name: '移动端主导航' });
+    expect(within(sidebar).getAllByRole('link').map((link) => link.textContent)).toEqual([
+      '交易',
+      '在售中',
+      '自用中',
+      '概览',
+      '分析',
+      '设置',
+    ]);
+    expect(within(bottomNav).getAllByRole('link').map((link) => link.textContent)).toEqual([
+      '交易',
+      '在售中',
+      '自用中',
+      '概览',
+      '分析',
+      '设置',
+    ]);
+  });
+
   it('keeps four destinations in both desktop and mobile navigation', () => {
     renderShell();
     expect(screen.getAllByRole('link', { name: '交易' })).toHaveLength(2);
