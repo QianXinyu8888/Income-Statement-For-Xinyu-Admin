@@ -58,3 +58,21 @@ export function createSaleInput(record: Transaction, values: SaleValues): Transa
 export function previewProfit(salePrice: number | null, totalCost: number | null) {
   return salePrice === null || totalCost === null ? null : salePrice - totalCost;
 }
+
+export function getUsageDayNumber(purchaseDate: string | null, today = new Date()) {
+  if (!purchaseDate) return null;
+  const [year, month, day] = purchaseDate.split('-').map(Number);
+  const purchaseDay = new Date(year, month - 1, day);
+  if (
+    !Number.isFinite(purchaseDay.getTime()) ||
+    purchaseDay.getFullYear() !== year ||
+    purchaseDay.getMonth() !== month - 1 ||
+    purchaseDay.getDate() !== day
+  ) {
+    return null;
+  }
+
+  const currentDay = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+  const daysSincePurchase = Math.floor((currentDay.getTime() - purchaseDay.getTime()) / 86_400_000);
+  return daysSincePurchase < 0 ? null : daysSincePurchase + 1;
+}

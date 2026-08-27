@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState, type FormEvent } from 'react';
 import { createPortal } from 'react-dom';
 import type { Transaction } from '../../domain/transaction';
-import { previewProfit, type SaleValues } from '../../domain/self-use';
+import { getUsageDayNumber, previewProfit, type SaleValues } from '../../domain/self-use';
 
 const money = new Intl.NumberFormat('zh-CN', {
   style: 'currency',
@@ -88,6 +88,7 @@ export function SaleConfirmDialog({
 
   if (!open || !record) return null;
 
+  const usageDayNumber = getUsageDayNumber(record.purchaseDate);
   const submit = async (event: FormEvent) => {
     event.preventDefault();
     if (!salePrice.trim()) {
@@ -135,7 +136,7 @@ export function SaleConfirmDialog({
           <div className="sale-dialog__content">
             <h2 id="sale-dialog-title">确认售出</h2>
             <p>
-              今天是你自用 {record.title ?? '该物品'} 的第 {record.holdingDays ?? '—'} 天
+              今天是你自用 {record.title ?? '该物品'} 的第 {usageDayNumber ?? '—'} 天
             </p>
             <label>
               售价 <em>*</em>

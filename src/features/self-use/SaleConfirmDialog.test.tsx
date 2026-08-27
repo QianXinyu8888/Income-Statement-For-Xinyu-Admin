@@ -2,6 +2,7 @@ import { cleanup, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import type { Transaction } from '../../domain/transaction';
+import { getUsageDayNumber } from '../../domain/self-use';
 import { SaleConfirmDialog } from './SaleConfirmDialog';
 
 afterEach(cleanup);
@@ -36,7 +37,9 @@ describe('SaleConfirmDialog', () => {
       />,
     );
 
-    expect(screen.getByText('今天是你自用 AirPods Pro 的第 126 天')).toBeInTheDocument();
+    expect(
+      screen.getByText(`今天是你自用 AirPods Pro 的第 ${getUsageDayNumber(record.purchaseDate)} 天`),
+    ).toBeInTheDocument();
     expect(screen.getByText('利润').parentElement).toHaveTextContent('—');
     expect(screen.getByRole('textbox', { name: '备注' })).not.toHaveAttribute('placeholder');
 

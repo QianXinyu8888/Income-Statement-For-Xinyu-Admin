@@ -1,6 +1,11 @@
 import { describe, expect, it } from 'vitest';
 import type { Transaction } from './transaction';
-import { createSaleInput, getSelfUseRecords, previewProfit } from './self-use';
+import {
+  createSaleInput,
+  getSelfUseRecords,
+  getUsageDayNumber,
+  previewProfit,
+} from './self-use';
 
 const personal: Transaction = {
   id: 'personal',
@@ -70,5 +75,14 @@ describe('self-use workspace helpers', () => {
   it('calculates sale profit only when both price and total cost exist', () => {
     expect(previewProfit(1200, 920)).toBe(280);
     expect(previewProfit(1200, null)).toBeNull();
+  });
+
+  it('calculates the current usage day from the purchase date, including the purchase day', () => {
+    const today = new Date(2026, 7, 27);
+
+    expect(getUsageDayNumber('2026-04-23', today)).toBe(127);
+    expect(getUsageDayNumber('2026-08-27', today)).toBe(1);
+    expect(getUsageDayNumber(null, today)).toBeNull();
+    expect(getUsageDayNumber('2026-08-28', today)).toBeNull();
   });
 });
