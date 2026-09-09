@@ -147,7 +147,7 @@ describe('SelfUsePage', () => {
     });
     renderPage();
 
-    await user.selectOptions((await screen.findAllByRole('combobox', { name: '设置 耳机 的状态' }))[0], 'listed');
+    await user.click((await screen.findAllByRole('button', { name: '设置 耳机 为在售中' }))[0]);
 
     await waitFor(() => expect(markListed).toHaveBeenCalledWith([personal.id], '在售中'));
   });
@@ -160,7 +160,7 @@ describe('SelfUsePage', () => {
     });
     renderPage();
 
-    await user.selectOptions((await screen.findAllByRole('combobox', { name: '设置 耳机 的状态' }))[0], 'listed');
+    await user.click((await screen.findAllByRole('button', { name: '设置 耳机 为在售中' }))[0]);
 
     expect(await screen.findByRole('status')).toHaveTextContent('飞书暂不可用');
   });
@@ -171,7 +171,7 @@ describe('SelfUsePage', () => {
     vi.spyOn(apiClient, 'batchStatus').mockRejectedValue(new Error('网络异常'));
     renderPage();
 
-    await user.selectOptions((await screen.findAllByRole('combobox', { name: '设置 耳机 的状态' }))[0], 'listed');
+    await user.click((await screen.findAllByRole('button', { name: '设置 耳机 为在售中' }))[0]);
 
     expect(await screen.findByRole('status')).toHaveTextContent('网络异常');
   });
@@ -182,7 +182,7 @@ describe('SelfUsePage', () => {
     vi.spyOn(apiClient, 'updateTransaction').mockResolvedValue({ ...personal, status: '已售出' });
     renderPage();
 
-    await user.selectOptions((await screen.findAllByRole('combobox', { name: '设置 耳机 的状态' }))[0], 'sold');
+    await user.click((await screen.findAllByRole('button', { name: '设置 耳机 为已售出' }))[0]);
     await user.type(screen.getByRole('spinbutton', { name: '售价' }), '1200');
     await user.click(screen.getByRole('button', { name: '确认售出' }));
 
