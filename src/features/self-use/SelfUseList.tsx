@@ -26,22 +26,27 @@ function SelfUseActions({
   const title = record.title ?? '未命名物品';
   return (
     <div className="self-use-actions">
-      <select
-        className="self-use-status-select"
-        aria-label={`设置 ${title} 的状态`}
-        value=""
+      <span className="self-use-action-label">设为</span>
+      {showListedAction && (
+        <button
+          type="button"
+          className="self-use-action self-use-action--listed"
+          aria-label={`设置 ${title} 为在售中`}
+          onClick={() => onMarkListed(record)}
+          disabled={pending}
+        >
+          在售中
+        </button>
+      )}
+      <button
+        type="button"
+        className="self-use-action self-use-action--sale"
+        aria-label={`设置 ${title} 为已售出`}
+        onClick={() => onSell(record)}
         disabled={pending}
-        onChange={(event) => {
-          if (event.target.value === 'listed') onMarkListed(record);
-          if (event.target.value === 'sold') onSell(record);
-        }}
       >
-        <option value="" disabled>
-          设为状态
-        </option>
-        {showListedAction && <option value="listed">在售中</option>}
-        <option value="sold">已售出</option>
-      </select>
+        已售出
+      </button>
     </div>
   );
 }
