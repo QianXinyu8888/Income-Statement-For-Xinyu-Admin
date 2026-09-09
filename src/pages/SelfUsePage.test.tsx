@@ -195,4 +195,32 @@ describe('SelfUsePage', () => {
       expect.objectContaining({ status: '已售出', salePrice: 1200, soldDate: '2026-06-20' }),
     );
   });
+
+  it('sells a listed record with the confirmed sale details', async () => {
+    const user = userEvent.setup();
+    mockActiveRecords();
+    vi.spyOn(apiClient, 'updateTransaction').mockResolvedValue({ ...listed, status: '已售出' });
+    renderPage('在售中');
+
+    await user.click((await screen.findAllByRole('button', { name: '设置 键盘 为已售出' }))[0]);
+    const soldDate = screen.getByLabelText('售出日期');
+    await user.clear(soldDate);
+    await user.type(soldDate, '2026-06-21');
+    await user.type(screen.getByRole('spinbutton', { name: '售价' }), '1500');
+    await user.type(screen.getByRole('textbox', { name: '备注' }), '顺丰到付');
+    await user.click(screen.getByRole('button', { name: '确认售出' }));
+
+    await waitFor(() =>
+      expect(apiClient.updateTransaction).toHaveBeenCalledWith(listed.id, {
+        title: listed.title,
+        salePrice: 1500,
+        costPrice: listed.costPrice,
+        shippingFee: listed.shippingFee,
+        status: '已售出',
+        purchaseDate: listed.purchaseDate,
+        soldDate: '2026-06-21',
+        note: '顺丰到付',
+      }),
+    );
+  });
 });
