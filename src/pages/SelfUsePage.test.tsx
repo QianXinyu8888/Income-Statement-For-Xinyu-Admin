@@ -183,13 +183,16 @@ describe('SelfUsePage', () => {
     renderPage();
 
     await user.click((await screen.findAllByRole('button', { name: '设置 耳机 为已售出' }))[0]);
+    const soldDate = screen.getByLabelText('售出日期');
+    await user.clear(soldDate);
+    await user.type(soldDate, '2026-06-20');
     await user.type(screen.getByRole('spinbutton', { name: '售价' }), '1200');
     await user.click(screen.getByRole('button', { name: '确认售出' }));
 
     await waitFor(() => expect(screen.queryByText('耳机')).not.toBeInTheDocument());
     expect(apiClient.updateTransaction).toHaveBeenCalledWith(
       personal.id,
-      expect.objectContaining({ status: '已售出', salePrice: 1200 }),
+      expect.objectContaining({ status: '已售出', salePrice: 1200, soldDate: '2026-06-20' }),
     );
   });
 });
