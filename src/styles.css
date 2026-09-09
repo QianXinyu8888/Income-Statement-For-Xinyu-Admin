@@ -3677,21 +3677,28 @@ tbody tr:nth-child(n + 5),
 .self-use-actions {
   display: flex;
   align-items: center;
+  gap: 4px;
   white-space: nowrap;
 }
-.self-use-status-select {
-  min-height: 32px;
-  border: 1px solid var(--border-strong);
-  border-radius: 6px;
-  padding: 0 9px;
-  background: var(--surface);
-  color: var(--text);
+.self-use-action-label {
+  margin-right: 2px;
+  color: var(--muted);
   font-size: 12px;
   font-weight: 500;
-  font-family: inherit;
+}
+.self-use-action {
+  min-height: 29px;
+  border: 1px solid #0071e3;
+  border-radius: 6px;
+  padding: 0 9px;
+  background: #0071e3;
+  color: #fff;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 600;
   cursor: pointer;
 }
-.self-use-status-select:disabled {
+.self-use-action:disabled {
   cursor: default;
   opacity: 0.48;
 }
@@ -3889,12 +3896,8 @@ tbody tr:nth-child(n + 5),
     gap: 10px;
   }
   .self-use-actions {
-    width: 100%;
-  }
-  .self-use-status-select {
-    width: 100%;
-    min-height: 44px;
-    font-size: 14px;
+    gap: 9px;
+    flex-wrap: wrap;
   }
   .sale-dialog-layer {
     align-items: end;
