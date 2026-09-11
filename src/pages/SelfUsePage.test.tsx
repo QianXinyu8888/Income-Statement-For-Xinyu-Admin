@@ -51,8 +51,21 @@ const listedPage: TransactionPage = {
   pageSize: 100,
   warnings: [],
 };
+const pending: Transaction = {
+  ...personal,
+  id: 'pending',
+  title: '相机',
+  status: '待收货',
+};
+const pendingPage: TransactionPage = {
+  items: [pending, listed],
+  total: 2,
+  page: 1,
+  pageSize: 100,
+  warnings: [],
+};
 
-function renderPage(status: '自用中' | '在售中' = '自用中') {
+function renderPage(status: '待收货' | '自用中' | '在售中' = '自用中') {
   const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
   return render(
     <QueryClientProvider client={client}>
@@ -63,7 +76,13 @@ function renderPage(status: '自用中' | '在售中' = '自用中') {
 
 function mockActiveRecords() {
   vi.spyOn(apiClient, 'transactions').mockImplementation((query) =>
-    Promise.resolve(query.status === '在售中' ? listedPage : personalPage),
+    Promise.resolve(
+      query.status === '待收货'
+        ? pendingPage
+        : query.status === '在售中'
+          ? listedPage
+          : personalPage,
+    ),
   );
 }
 
@@ -82,6 +101,20 @@ describe('SelfUsePage', () => {
     expect(
       await screen.findByRole('heading', { name: '正在售卖中的产品' }),
     ).toBeInTheDocument();
+  });
+
+  it('renders pending receipt as a product status workspace', async () => {
+    mockActiveRecords();
+    renderPage('待收货');
+
+    expect(await screen.findByRole('heading', { name: '待收货产品' })).toBeInTheDocument();
+    expect(await screen.findAllByText('相机')).toHaveLength(2);
+    expect(screen.queryByText('键盘')).not.toBeInTheDocument();
+    expect(screen.getByText('1 件物品 · 管理待收货产品')).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: /设置 .* 为/ })).not.toBeInTheDocument();
+    expect(apiClient.transactions).toHaveBeenCalledWith(
+      expect.objectContaining({ status: '待收货', pageSize: 100 }),
+    );
   });
 
   it('uses product-focused loading copy for self-use and listed workspaces', () => {

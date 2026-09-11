@@ -43,7 +43,7 @@ export default function App() {
           path="/pending-receipt"
           element={
             <Suspense fallback={<LoadingState />}>
-              <TransactionsPage initialStatus="待收货" />
+              <SelfUsePage status="待收货" />
             </Suspense>
           }
         />

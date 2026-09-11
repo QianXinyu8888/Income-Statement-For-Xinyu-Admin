@@ -56,13 +56,15 @@ export function SelfUseList({
   onChangeStatus,
   onSell,
   onOpen,
+  showActions = true,
 }: {
   records: Transaction[];
   listingId: string | null;
-  alternateStatus: '在售中' | '自用中';
-  onChangeStatus: (record: Transaction, nextStatus: '在售中' | '自用中') => void;
-  onSell: (record: Transaction) => void;
+  alternateStatus?: '在售中' | '自用中';
+  onChangeStatus?: (record: Transaction, nextStatus: '在售中' | '自用中') => void;
+  onSell?: (record: Transaction) => void;
   onOpen: (record: Transaction) => void;
+  showActions?: boolean;
 }) {
   const title = (record: Transaction) => record.title ?? '未命名物品';
   return (
@@ -88,13 +90,15 @@ export function SelfUseList({
                   </td>
                   <td>{displayMoney(record.totalCost)}</td>
                   <td>
-                    <SelfUseActions
-                      record={record}
-                      pending={pending}
-                      alternateStatus={alternateStatus}
-                      onChangeStatus={onChangeStatus}
-                      onSell={onSell}
-                    />
+                    {showActions && alternateStatus && onChangeStatus && onSell ? (
+                      <SelfUseActions
+                        record={record}
+                        pending={pending}
+                        alternateStatus={alternateStatus}
+                        onChangeStatus={onChangeStatus}
+                        onSell={onSell}
+                      />
+                    ) : null}
                   </td>
                 </tr>
               );
@@ -117,13 +121,15 @@ export function SelfUseList({
                 </div>
               </dl>
               <div className="self-use-mobile-footer">
-                <SelfUseActions
-                  record={record}
-                  pending={pending}
-                  alternateStatus={alternateStatus}
-                  onChangeStatus={onChangeStatus}
-                  onSell={onSell}
-                />
+                {showActions && alternateStatus && onChangeStatus && onSell ? (
+                  <SelfUseActions
+                    record={record}
+                    pending={pending}
+                    alternateStatus={alternateStatus}
+                    onChangeStatus={onChangeStatus}
+                    onSell={onSell}
+                  />
+                ) : null}
               </div>
             </article>
           );

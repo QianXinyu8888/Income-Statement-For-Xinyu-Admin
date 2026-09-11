@@ -49,11 +49,24 @@ export default function SelfUsePage({ status = '自用中' }: { status?: SelfUse
   const [dismissedIds, setDismissedIds] = useState<Set<string>>(() => new Set());
   const [notice, setNotice] = useState('');
   const sortOption = sortOptions[sortIndex];
-  const itemLabel = status === '自用中' ? '自用物品' : '在售物品';
-  const managementLabel = status === '自用中' ? '管理自用产品' : '管理在售产品';
-  const pageTitle = status === '自用中' ? '正在自用中的产品' : '正在售卖中的产品';
-  const loadingLabel = status === '自用中' ? '正在加载自用中的产品' : '正在加载售卖中的产品';
-  const alternateStatus = status === '自用中' ? '在售中' : '自用中';
+  const isPendingReceipt = status === '待收货';
+  const itemLabel = isPendingReceipt ? '待收货物品' : status === '自用中' ? '自用物品' : '在售物品';
+  const managementLabel = isPendingReceipt
+    ? '管理待收货产品'
+    : status === '自用中'
+      ? '管理自用产品'
+      : '管理在售产品';
+  const pageTitle = isPendingReceipt
+    ? '待收货产品'
+    : status === '自用中'
+      ? '正在自用中的产品'
+      : '正在售卖中的产品';
+  const loadingLabel = isPendingReceipt
+    ? '正在加载待收货产品'
+    : status === '自用中'
+      ? '正在加载自用中的产品'
+      : '正在加载售卖中的产品';
+  const alternateStatus = isPendingReceipt ? undefined : status === '自用中' ? '在售中' : '自用中';
 
   const result = useQuery({
     queryKey: ['self-use-records', status, search],
@@ -180,6 +193,7 @@ export default function SelfUsePage({ status = '自用中' }: { status?: SelfUse
             onChangeStatus={(record, nextStatus) => changeStatus.mutate({ record, nextStatus })}
             onSell={setSelling}
             onOpen={openDrawer}
+            showActions={!isPendingReceipt}
           />
         )}
       </div>

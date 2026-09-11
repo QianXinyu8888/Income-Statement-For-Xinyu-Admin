@@ -1,6 +1,6 @@
 import type { Transaction, TransactionInput } from './transaction';
 
-export const SELF_USE_STATUSES = ['自用中', '在售中'] as const;
+export const SELF_USE_STATUSES = ['待收货', '自用中', '在售中'] as const;
 export type SelfUseStatus = (typeof SELF_USE_STATUSES)[number];
 export type SelfUseSort = 'purchaseDate' | 'holdingDays' | 'totalCost';
 
