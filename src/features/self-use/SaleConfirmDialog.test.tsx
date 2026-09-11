@@ -24,7 +24,7 @@ const record: Transaction = {
 };
 
 describe('SaleConfirmDialog', () => {
-  it('requires price and shows the confirmed copy and profit preview', async () => {
+  it('allows blank sale details and shows the confirmed copy and profit preview', async () => {
     const user = userEvent.setup();
     const onConfirm = vi.fn().mockResolvedValue(undefined);
     render(
@@ -44,7 +44,14 @@ describe('SaleConfirmDialog', () => {
     expect(screen.getByRole('textbox', { name: '备注' })).not.toHaveAttribute('placeholder');
 
     await user.click(screen.getByRole('button', { name: '确认售出' }));
-    expect(screen.getByRole('alert')).toHaveTextContent('请输入售价');
+    await waitFor(() =>
+      expect(onConfirm).toHaveBeenCalledWith({
+        salePrice: null,
+        soldDate: null,
+        note: '',
+      }),
+    );
+    expect(screen.queryByRole('alert')).not.toBeInTheDocument();
 
     await user.type(screen.getByRole('spinbutton', { name: '售价' }), '1450');
     expect(screen.getByText('利润').parentElement).toHaveTextContent('+¥151.00');
@@ -53,10 +60,30 @@ describe('SaleConfirmDialog', () => {
     await waitFor(() =>
       expect(onConfirm).toHaveBeenCalledWith({
         salePrice: 1450,
-        soldDate: expect.any(String),
+        soldDate: null,
         note: '',
       }),
     );
+  });
+
+  it('rejects a negative non-empty sale price', async () => {
+    const user = userEvent.setup();
+    const onConfirm = vi.fn().mockResolvedValue(undefined);
+    render(
+      <SaleConfirmDialog
+        record={record}
+        open
+        saving={false}
+        onClose={vi.fn()}
+        onConfirm={onConfirm}
+      />,
+    );
+
+    await user.type(screen.getByRole('spinbutton', { name: '售价' }), '-1');
+    await user.click(screen.getByRole('button', { name: '确认售出' }));
+
+    expect(screen.getByRole('alert')).toHaveTextContent('请输入有效售价');
+    expect(onConfirm).not.toHaveBeenCalled();
   });
 
   it('keeps its values and shows a save error when confirmation rejects', async () => {

@@ -72,6 +72,21 @@ describe('self-use workspace helpers', () => {
     });
   });
 
+  it('allows an update to sold status without sale details', () => {
+    expect(
+      createSaleInput(personal, {
+        salePrice: null,
+        soldDate: null,
+        note: '',
+      }),
+    ).toMatchObject({
+      status: '已售出',
+      salePrice: null,
+      soldDate: null,
+      note: null,
+    });
+  });
+
   it('calculates sale profit only when both price and total cost exist', () => {
     expect(previewProfit(1200, 920)).toBe(280);
     expect(previewProfit(1200, null)).toBeNull();

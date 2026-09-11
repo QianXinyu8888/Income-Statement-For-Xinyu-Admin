@@ -9,13 +9,6 @@ const money = new Intl.NumberFormat('zh-CN', {
   minimumFractionDigits: 2,
 });
 
-function localDate() {
-  const now = new Date();
-  return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(
-    now.getDate(),
-  ).padStart(2, '0')}`;
-}
-
 function profitText(value: number | null) {
   if (value === null) return '—';
   return `${value >= 0 ? '+' : ''}${money.format(value)}`;
@@ -35,7 +28,7 @@ export function SaleConfirmDialog({
   onConfirm: (values: SaleValues) => Promise<void>;
 }) {
   const [salePrice, setSalePrice] = useState('');
-  const [soldDate, setSoldDate] = useState(localDate);
+  const [soldDate, setSoldDate] = useState('');
   const [note, setNote] = useState('');
   const [error, setError] = useState('');
   const dialogRef = useRef<HTMLElement>(null);
@@ -44,7 +37,7 @@ export function SaleConfirmDialog({
   useEffect(() => {
     if (!open || !record) return;
     setSalePrice('');
-    setSoldDate(localDate());
+    setSoldDate('');
     setNote(record.note ?? '');
     setError('');
   }, [open, record]);
@@ -91,22 +84,15 @@ export function SaleConfirmDialog({
   const usageDayNumber = getUsageDayNumber(record.purchaseDate);
   const submit = async (event: FormEvent) => {
     event.preventDefault();
-    if (!salePrice.trim()) {
-      setError('请输入售价');
-      return;
-    }
-    const parsedPrice = Number(salePrice);
-    if (!Number.isFinite(parsedPrice) || parsedPrice < 0) {
+    const priceText = salePrice.trim();
+    const parsedPrice = priceText === '' ? null : Number(priceText);
+    if (parsedPrice !== null && (!Number.isFinite(parsedPrice) || parsedPrice < 0)) {
       setError('请输入有效售价');
-      return;
-    }
-    if (!soldDate) {
-      setError('请输入售出日期');
       return;
     }
     setError('');
     try {
-      await onConfirm({ salePrice: parsedPrice, soldDate, note });
+      await onConfirm({ salePrice: parsedPrice, soldDate: soldDate || null, note });
     } catch (reason) {
       setError(reason instanceof Error ? reason.message : '保存失败');
     }
@@ -139,14 +125,13 @@ export function SaleConfirmDialog({
               今天是你自用{record.title ?? '该物品'}的第 {usageDayNumber ?? '—'} 天
             </p>
             <label>
-              售价 <em>*</em>
+              售价
               <span className="sale-dialog__money-input">
                 <b>¥</b>
                 <input
                   ref={priceRef}
                   aria-label="售价"
                   type="number"
-                  min="0"
                   step="0.01"
                   value={salePrice}
                   onChange={(event) => setSalePrice(event.target.value)}
@@ -155,7 +140,7 @@ export function SaleConfirmDialog({
               </span>
             </label>
             <label>
-              售出日期 <em>*</em>
+              售出日期
               <input
                 aria-label="售出日期"
                 type="date"

@@ -5,8 +5,8 @@ export type SelfUseStatus = (typeof SELF_USE_STATUSES)[number];
 export type SelfUseSort = 'purchaseDate' | 'holdingDays' | 'totalCost';
 
 export interface SaleValues {
-  salePrice: number;
-  soldDate: string;
+  salePrice: number | null;
+  soldDate: string | null;
   note: string;
 }
 
