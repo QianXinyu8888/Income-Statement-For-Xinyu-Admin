@@ -1,7 +1,9 @@
+import { LoadingSpinner } from './LoadingSpinner';
+
 export function LoadingState({ label = '正在加载' }: { label?: string }) {
   return (
     <div className="state" role="status">
-      <img className="loading-gif" src="/loading.gif" alt="加载中" />
+      <LoadingSpinner />
       {label}
     </div>
   );

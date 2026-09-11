@@ -3,6 +3,7 @@ import { apiClient } from '../api/client';
 import { useLanguage } from '../i18n';
 import { useBrowserPreferences } from '../preferences/BrowserPreferencesContext';
 import { formatVersionUpdatedAt, VERSION_UPDATED_AT } from '../version';
+import { LoadingSpinner } from '../components/LoadingSpinner';
 
 export default function SettingsPage() {
   const session = useQuery({
@@ -38,7 +39,7 @@ export default function SettingsPage() {
           <dd>
             <strong>
               {session.isFetching ? (
-                <img className="loading-gif" src="/loading.gif" alt="" />
+                <LoadingSpinner />
               ) : session.isError ? (
                 t('settings.syncFailed')
               ) : (

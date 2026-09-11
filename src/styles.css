@@ -698,10 +698,11 @@ tbody tr.is-selected {
 .state--error strong {
   color: var(--loss);
 }
-.loading-gif {
+.loading-spinner {
   width: 32px;
   height: 32px;
   object-fit: contain;
+  color: var(--accent);
 }
 
 .pagination-wrap {

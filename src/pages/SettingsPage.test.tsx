@@ -64,13 +64,13 @@ describe('SettingsPage', () => {
     expect(session).toHaveBeenCalledOnce();
   });
 
-  it('shows the shared loading gif while account permissions synchronize', () => {
+  it('shows the shared theme-aware svg while account permissions synchronize', () => {
     vi.spyOn(apiClient, 'session').mockReturnValue(new Promise(() => {}));
     vi.spyOn(apiClient, 'health').mockResolvedValue({ connected: true, checkedAt: '2026-08-13' });
 
     renderPage();
 
-    expect(screen.getByRole('presentation')).toHaveAttribute('src', '/loading.gif');
+    expect(screen.getByRole('presentation')).toHaveClass('loading-spinner');
     expect(screen.queryByText('同步中')).not.toBeInTheDocument();
   });
 
