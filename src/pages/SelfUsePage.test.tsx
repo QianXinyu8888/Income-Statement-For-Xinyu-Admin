@@ -1,9 +1,10 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { cleanup, render, screen, waitFor } from '@testing-library/react';
+import { act, cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { apiClient, type TransactionPage } from '../api/client';
 import type { Transaction } from '../domain/transaction';
+import type { TransactionWorkspace } from '../domain/transaction-workspace';
 import SelfUsePage from './SelfUsePage';
 
 afterEach(() => {
@@ -75,15 +76,19 @@ function renderPage(status: '待收货' | '自用中' | '在售中' = '自用中
 }
 
 function mockActiveRecords() {
-  vi.spyOn(apiClient, 'transactions').mockImplementation((query) =>
-    Promise.resolve(
+  vi.spyOn(apiClient, 'transactionWorkspace').mockImplementation((query) => {
+    const transactions =
       query.status === '待收货'
         ? pendingPage
         : query.status === '在售中'
           ? listedPage
-          : personalPage,
-    ),
-  );
+          : personalPage;
+    return Promise.resolve({
+      transactions,
+      summary: {} as TransactionWorkspace['summary'],
+      warnings: [],
+    });
+  });
 }
 
 describe('SelfUsePage', () => {
@@ -91,16 +96,12 @@ describe('SelfUsePage', () => {
     mockActiveRecords();
     renderPage();
 
-    expect(
-      await screen.findByRole('heading', { name: '正在自用中的产品' }),
-    ).toBeInTheDocument();
+    expect(await screen.findByRole('heading', { name: '正在自用中的产品' })).toBeInTheDocument();
 
     cleanup();
     renderPage('在售中');
 
-    expect(
-      await screen.findByRole('heading', { name: '正在售卖中的产品' }),
-    ).toBeInTheDocument();
+    expect(await screen.findByRole('heading', { name: '正在售卖中的产品' })).toBeInTheDocument();
   });
 
   it('renders pending receipt as a product status workspace', async () => {
@@ -113,8 +114,8 @@ describe('SelfUsePage', () => {
     expect(screen.getByText('1 件物品 · 管理待收货产品')).toBeInTheDocument();
     expect(screen.getAllByRole('button', { name: '设置 相机 为在售中' }).length).toBeGreaterThan(0);
     expect(screen.queryByRole('button', { name: '设置 相机 为已售出' })).not.toBeInTheDocument();
-    expect(apiClient.transactions).toHaveBeenCalledWith(
-      expect.objectContaining({ status: '待收货', pageSize: 100 }),
+    expect(apiClient.transactionWorkspace).toHaveBeenCalledWith(
+      expect.objectContaining({ status: '待收货', pageSize: 100, all: true }),
     );
   });
 
@@ -140,10 +141,10 @@ describe('SelfUsePage', () => {
     expect(screen.queryByText('键盘')).not.toBeInTheDocument();
     expect(screen.queryByText('显示器')).not.toBeInTheDocument();
     expect(screen.getByText('1 件物品 · 管理自用产品')).toBeInTheDocument();
-    expect(apiClient.transactions).toHaveBeenCalledWith(
-      expect.objectContaining({ status: '自用中', pageSize: 100 }),
+    expect(apiClient.transactionWorkspace).toHaveBeenCalledWith(
+      expect.objectContaining({ status: '自用中', pageSize: 100, all: true }),
     );
-    expect(apiClient.transactions).not.toHaveBeenCalledWith(
+    expect(apiClient.transactionWorkspace).not.toHaveBeenCalledWith(
       expect.objectContaining({ status: '在售中' }),
     );
   });
@@ -156,22 +157,44 @@ describe('SelfUsePage', () => {
     expect(screen.queryByRole('region', { name: '在售中' })).not.toBeInTheDocument();
   });
 
-  it('loads every page for an active status before sorting the workspace', async () => {
-    vi.spyOn(apiClient, 'transactions').mockImplementation((query) => {
-      if (query.status === '自用中' && query.page === 1)
-        return Promise.resolve({ ...personalPage, total: 101, page: 1, pageSize: 100 });
-      if (query.status === '自用中' && query.page === 2)
-        return Promise.resolve({ items: [], total: 101, page: 2, pageSize: 100, warnings: [] });
-      return Promise.resolve(listedPage);
+  it('loads every active-status record through one all-record workspace query before sorting', async () => {
+    vi.spyOn(apiClient, 'transactionWorkspace').mockResolvedValue({
+      transactions: { ...personalPage, total: 101, pageSize: 101 },
+      summary: {} as TransactionWorkspace['summary'],
+      warnings: [],
     });
     renderPage();
 
     await screen.findAllByText('耳机');
     await waitFor(() =>
-      expect(apiClient.transactions).toHaveBeenCalledWith(
-        expect.objectContaining({ status: '自用中', page: 2, pageSize: 100 }),
+      expect(apiClient.transactionWorkspace).toHaveBeenCalledWith(
+        expect.objectContaining({ status: '自用中', page: 1, pageSize: 100, all: true }),
       ),
     );
+  });
+
+  it('waits for typing to settle before issuing one status search request', async () => {
+    vi.useFakeTimers();
+    mockActiveRecords();
+    renderPage();
+    await act(async () => {});
+    const workspaceMock = vi.mocked(apiClient.transactionWorkspace);
+    expect(workspaceMock).toHaveBeenCalledTimes(1);
+
+    fireEvent.change(screen.getByRole('textbox', { name: '搜索自用物品' }), {
+      target: { value: '耳' },
+    });
+    fireEvent.change(screen.getByRole('textbox', { name: '搜索自用物品' }), {
+      target: { value: '耳机' },
+    });
+    await act(async () => vi.advanceTimersByTime(249));
+    expect(workspaceMock).toHaveBeenCalledTimes(1);
+
+    await act(async () => vi.advanceTimersByTime(1));
+    expect(workspaceMock).toHaveBeenLastCalledWith(
+      expect.objectContaining({ status: '自用中', q: '耳机', all: true }),
+    );
+    vi.useRealTimers();
   });
 
   it('marks an item as listed through the existing status API', async () => {

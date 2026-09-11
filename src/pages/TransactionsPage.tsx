@@ -68,26 +68,24 @@ export default function TransactionsPage({
     setQuery({ ...DEFAULT_QUERY, status: initialStatus });
   };
 
+  const summaryRange = { summaryFrom: `${month}-01`, summaryTo: `${month}-${monthEnd}` };
+  const workspaceKey = ['transaction-workspace', query, month] as const;
   const result = useQuery({
-    queryKey: ['transactions', query],
-    queryFn: () => apiClient.transactions(query),
+    queryKey: workspaceKey,
+    queryFn: () => apiClient.transactionWorkspace(query, summaryRange),
     placeholderData: (previousData) => previousData,
   });
-  const monthSummary = useQuery({
-    queryKey: ['summary', month],
-    queryFn: () => apiClient.summary(`${month}-01`, `${month}-${monthEnd}`),
-  });
-  const invalidate = async () => {
-    await Promise.all([
-      client.invalidateQueries({ queryKey: ['transactions'] }),
-      client.invalidateQueries({ queryKey: ['summary'] }),
-    ]);
+  const transactionData = result.data?.transactions;
+  const refreshWorkspace = async () => {
+    const fresh = await apiClient.transactionWorkspace(query, summaryRange);
+    client.setQueryData(workspaceKey, fresh);
+    return fresh;
   };
   const save = useMutation({
     mutationFn: ({ record, input }: { record: Transaction | null; input: TransactionInput }) =>
       record ? apiClient.updateTransaction(record.id, input) : apiClient.createTransaction(input),
     onSuccess: async () => {
-      await invalidate();
+      await refreshWorkspace();
       setDrawer(false);
       setNotice('交易已保存');
     },
@@ -95,7 +93,7 @@ export default function TransactionsPage({
   const remove = useMutation({
     mutationFn: (id: string) => apiClient.deleteTransaction(id),
     onSuccess: async () => {
-      await invalidate();
+      await refreshWorkspace();
       setDrawer(false);
       setNotice('交易已删除');
     },
@@ -104,7 +102,7 @@ export default function TransactionsPage({
     mutationFn: (status: TransactionStatus) => apiClient.batchStatus([...selected], status),
     onSuccess: async ({ results }) => {
       const failed = results.filter((item) => !item.success).length;
-      await invalidate();
+      await refreshWorkspace();
       if (!failed) setSelected(new Set());
       setNotice(failed ? `${failed} 条记录更新失败，已保留选择` : '状态已更新');
     },
@@ -113,7 +111,7 @@ export default function TransactionsPage({
     mutationFn: () => apiClient.batchDelete([...selected]),
     onSuccess: async ({ results }) => {
       const failed = results.filter((item) => !item.success).length;
-      await invalidate();
+      await refreshWorkspace();
       if (!failed) setSelected(new Set());
       setNotice(failed ? `${failed} 条记录删除失败，已保留选择` : '记录已删除');
     },
@@ -121,23 +119,23 @@ export default function TransactionsPage({
   const exportAll = useMutation({
     mutationFn: apiClient.exportTransactions,
   });
-  const records = useMemo(() => result.data?.items ?? [], [result.data?.items]);
+  const records = useMemo(() => transactionData?.items ?? [], [transactionData?.items]);
   useEffect(() => {
     const focusId = query.focusId;
-    if (!focusId || !result.data || focusedId) return;
+    if (!focusId || !transactionData || focusedId) return;
     const nextParams = new URLSearchParams(searchParams);
     nextParams.delete('focus');
     setSearchParams(nextParams, { replace: true });
     if (!records.some((record) => record.id === focusId)) {
       setQuery((current) => ({
         ...current,
-        page: result.data.page,
+        page: transactionData.page,
         focusId: undefined,
       }));
       return;
     }
     setFocusedId(focusId);
-  }, [focusedId, query.focusId, records, result.data, searchParams, setSearchParams]);
+  }, [focusedId, query.focusId, records, searchParams, setSearchParams, transactionData]);
   useEffect(() => {
     if (!focusedId) return;
     const frame = requestAnimationFrame(() => {
@@ -153,7 +151,7 @@ export default function TransactionsPage({
       setFocusedId(null);
       setQuery((current) => ({
         ...current,
-        page: result.data?.page ?? current.page,
+        page: transactionData?.page ?? current.page,
         focusId: undefined,
       }));
     }, 1500);
@@ -161,7 +159,7 @@ export default function TransactionsPage({
       cancelAnimationFrame(frame);
       window.clearTimeout(timer);
     };
-  }, [focusedId, result.data?.page]);
+  }, [focusedId, transactionData?.page]);
   const open = (record: Transaction | null, field: EditableTransactionField = 'title') => {
     setEditing(record);
     setInitialFocus(field);
@@ -204,15 +202,17 @@ export default function TransactionsPage({
             <h1>交易明细</h1>
             <span className="monthly-profit">
               本月利润{' '}
-              {monthSummary.data?.profit === null || monthSummary.data?.profit === undefined
+              {result.data?.summary.profit === null || result.data?.summary.profit === undefined
                 ? '—'
-                : `¥${monthSummary.data.profit.toLocaleString('zh-CN', {
+                : `¥${result.data.summary.profit.toLocaleString('zh-CN', {
                     minimumFractionDigits: 2,
                     maximumFractionDigits: 2,
                   })}`}
             </span>
           </div>
-          <p>{result.data ? `共 ${result.data.total} 条记录` : '查找、记录和管理每一笔交易'}</p>
+          <p>
+            {transactionData ? `共 ${transactionData.total} 条记录` : '查找、记录和管理每一笔交易'}
+          </p>
         </div>
         <button className="button button--primary" onClick={() => open(null)}>
           <Plus size={16} />
@@ -496,11 +496,11 @@ export default function TransactionsPage({
           onOpen={open}
         />
       )}
-      {result.data && result.data.total > 0 && (
+      {transactionData && transactionData.total > 0 && (
         <Pagination
-          page={result.data.page}
-          pageSize={result.data.pageSize}
-          total={result.data.total}
+          page={transactionData.page}
+          pageSize={transactionData.pageSize}
+          total={transactionData.total}
           onPageChange={(targetPage) => setQuery((current) => ({ ...current, page: targetPage }))}
         />
       )}

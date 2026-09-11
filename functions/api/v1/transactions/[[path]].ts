@@ -10,6 +10,7 @@ import {
   TRANSACTION_STATUSES,
 } from '../../../../src/domain/transaction';
 import { queryTransactions } from '../../../../src/domain/transaction-query';
+import { buildTransactionWorkspace } from '../../../../src/domain/transaction-workspace';
 
 const querySchema = z.object({
   page: z.coerce.number().int().min(1).default(1),
@@ -41,6 +42,11 @@ const batchStatusSchema = z.object({
   status: z.enum(TRANSACTION_STATUSES),
 });
 const batchDeleteSchema = z.object({ ids: z.array(z.string().min(1)).min(1).max(100) });
+const workspaceQuerySchema = querySchema.extend({
+  summaryFrom: z.string().date().optional(),
+  summaryTo: z.string().date().optional(),
+  all: z.coerce.boolean().default(false),
+});
 
 function routePath(value: unknown): string {
   return Array.isArray(value) ? value.join('/') : String(value ?? '');
@@ -80,6 +86,23 @@ export const onRequest: PagesFunction = async ({ request, env, params }) => {
     if (path === 'export' && request.method === 'GET') {
       const { records, warnings } = await readAll();
       return jsonResponse(request, { items: records, total: records.length, warnings });
+    }
+    if (path === 'workspace' && request.method === 'GET') {
+      const parsed = workspaceQuerySchema.parse(
+        Object.fromEntries(new URL(request.url).searchParams),
+      );
+      const { summaryFrom, summaryTo, all, ...query } = parsed;
+      const { records, warnings } = await readAll();
+      const listQuery = all
+        ? { ...query, page: 1, pageSize: Math.max(records.length, 1), focusId: undefined }
+        : query;
+      return jsonResponse(
+        request,
+        buildTransactionWorkspace(records, warnings, listQuery, {
+          from: summaryFrom,
+          to: summaryTo,
+        }),
+      );
     }
     if (!path && request.method === 'POST') {
       const body = await request.json();

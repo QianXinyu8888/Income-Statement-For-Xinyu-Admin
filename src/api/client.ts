@@ -1,6 +1,7 @@
 import type { AnalyticsSummary } from '../domain/analytics';
 import type { Transaction, TransactionInput, TransactionStatus } from '../domain/transaction';
 import type { TransactionDateField } from '../domain/transaction-query';
+import type { TransactionWorkspace } from '../domain/transaction-workspace';
 
 interface ApiEnvelope<T> {
   data: T | null;
@@ -83,6 +84,17 @@ export const apiClient = {
     api<TransactionPage>(
       `/transactions?${new URLSearchParams(
         Object.entries(query)
+          .filter(([, value]) => value !== undefined && value !== '')
+          .map(([key, value]) => [key, String(value)]),
+      )}`,
+    ),
+  transactionWorkspace: (
+    query: TransactionQuery & { all?: boolean },
+    summary: { summaryFrom?: string; summaryTo?: string } = {},
+  ) =>
+    api<TransactionWorkspace>(
+      `/transactions/workspace?${new URLSearchParams(
+        Object.entries({ ...query, ...summary })
           .filter(([, value]) => value !== undefined && value !== '')
           .map(([key, value]) => [key, String(value)]),
       )}`,

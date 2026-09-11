@@ -16,7 +16,7 @@ export default defineConfig({
     __VERSION_UPDATED_AT__: JSON.stringify(latestCommitTime()),
   },
   server: { port: 3010, strictPort: true, host: true },
-  build: { outDir: 'dist', sourcemap: true },
+  build: { outDir: 'dist', sourcemap: false },
   test: {
     environment: 'jsdom',
     setupFiles: './src/test/setup.ts',

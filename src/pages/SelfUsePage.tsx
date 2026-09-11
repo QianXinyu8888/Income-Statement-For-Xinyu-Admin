@@ -21,27 +21,10 @@ const sortOptions: Array<{ label: string; sort: SelfUseSort; order: 'asc' | 'des
   { label: '成本最高', sort: 'totalCost', order: 'desc' },
 ];
 
-async function fetchStatusRecords(status: SelfUseStatus, search: string) {
-  const items: Transaction[] = [];
-  let page = 1;
-  while (true) {
-    const response = await apiClient.transactions({
-      page,
-      pageSize: 100,
-      status,
-      q: search || undefined,
-      sort: 'sourceOrder',
-      order: 'asc',
-    });
-    items.push(...response.items);
-    if (page * response.pageSize >= response.total) return items;
-    page += 1;
-  }
-}
-
 export default function SelfUsePage({ status = '自用中' }: { status?: SelfUseStatus }) {
   const queryClient = useQueryClient();
   const [search, setSearch] = useState('');
+  const [debouncedSearch, setDebouncedSearch] = useState('');
   const [sortIndex, setSortIndex] = useState(0);
   const [selling, setSelling] = useState<Transaction | null>(null);
   const [editing, setEditing] = useState<Transaction | null>(null);
@@ -56,6 +39,14 @@ export default function SelfUsePage({ status = '自用中' }: { status?: SelfUse
     setEditing(null);
     setDrawerOpen(false);
   }, [status]);
+  useEffect(() => {
+    if (!search) {
+      setDebouncedSearch('');
+      return;
+    }
+    const timer = window.setTimeout(() => setDebouncedSearch(search), 250);
+    return () => window.clearTimeout(timer);
+  }, [search]);
 
   const isPendingReceipt = status === '待收货';
   const itemLabel = isPendingReceipt ? '待收货物品' : status === '自用中' ? '自用物品' : '在售物品';
@@ -77,36 +68,61 @@ export default function SelfUsePage({ status = '自用中' }: { status?: SelfUse
   const alternateStatus = isPendingReceipt ? '在售中' : status === '自用中' ? '在售中' : '自用中';
 
   const result = useQuery({
-    queryKey: ['self-use-records', status, search],
-    queryFn: () => fetchStatusRecords(status, search),
+    queryKey: ['self-use-workspace', status, debouncedSearch],
+    queryFn: () =>
+      apiClient.transactionWorkspace({
+        page: 1,
+        pageSize: 100,
+        status,
+        q: debouncedSearch || undefined,
+        sort: 'sourceOrder',
+        order: 'asc',
+        all: true,
+      }),
+    placeholderData: (previousData) => previousData,
   });
 
   const records = useMemo(
     () =>
-      getSelfUseRecords(result.data ?? [], sortOption.sort, sortOption.order, status).filter(
-        (record) => !dismissedIds.has(record.id),
-      ),
+      getSelfUseRecords(
+        result.data?.transactions.items ?? [],
+        sortOption.sort,
+        sortOption.order,
+        status,
+      ).filter((record) => !dismissedIds.has(record.id)),
     [dismissedIds, result.data, sortOption.order, sortOption.sort, status],
   );
 
   const refresh = async () => {
-    await Promise.all([
-      queryClient.invalidateQueries({ queryKey: ['self-use-records'] }),
-      queryClient.invalidateQueries({ queryKey: ['transactions'] }),
-      queryClient.invalidateQueries({ queryKey: ['summary'] }),
-    ]);
+    const fresh = await apiClient.transactionWorkspace({
+      page: 1,
+      pageSize: 100,
+      status,
+      q: debouncedSearch || undefined,
+      sort: 'sourceOrder',
+      order: 'asc',
+      all: true,
+    });
+    queryClient.setQueryData(['self-use-workspace', status, debouncedSearch], fresh);
+    return fresh;
   };
 
   const changeStatus = useMutation({
-    mutationFn: async ({ record, nextStatus }: { record: Transaction; nextStatus: SelfUseStatus }) => {
+    mutationFn: async ({
+      record,
+      nextStatus,
+    }: {
+      record: Transaction;
+      nextStatus: SelfUseStatus;
+    }) => {
       const response = await apiClient.batchStatus([record.id], nextStatus);
       const failed = response.results.find((item) => !item.success);
       if (failed) throw new Error(failed.message ?? '状态更新失败');
       return response;
     },
     onSuccess: async (_, { record, nextStatus }) => {
-      setDismissedIds((current) => new Set(current).add(record.id));
       await refresh();
+      setDismissedIds((current) => new Set(current).add(record.id));
       setNotice(`已标记为${nextStatus}`);
     },
     onError: (error) => {
@@ -117,9 +133,9 @@ export default function SelfUsePage({ status = '自用中' }: { status?: SelfUse
     mutationFn: ({ record, values }: { record: Transaction; values: SaleValues }) =>
       apiClient.updateTransaction(record.id, createSaleInput(record, values)),
     onSuccess: async (updated) => {
+      await refresh();
       setDismissedIds((current) => new Set(current).add(updated.id));
       setSelling(null);
-      await refresh();
       setNotice('已售出');
     },
   });
@@ -127,8 +143,8 @@ export default function SelfUsePage({ status = '自用中' }: { status?: SelfUse
     mutationFn: ({ record, input }: { record: Transaction | null; input: TransactionInput }) =>
       record ? apiClient.updateTransaction(record.id, input) : apiClient.createTransaction(input),
     onSuccess: async () => {
-      setDrawerOpen(false);
       await refresh();
+      setDrawerOpen(false);
       setNotice('交易已保存');
     },
   });

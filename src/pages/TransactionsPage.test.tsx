@@ -5,6 +5,7 @@ import { MemoryRouter, useLocation } from 'react-router-dom';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { apiClient, type TransactionPage } from '../api/client';
 import type { AnalyticsSummary } from '../domain/analytics';
+import type { TransactionWorkspace } from '../domain/transaction-workspace';
 import type { Transaction, TransactionStatus } from '../domain/transaction';
 import { BrowserPreferencesProvider } from '../preferences/BrowserPreferencesContext';
 import { PREFERENCES_STORAGE_KEY } from '../preferences/browser-preferences';
@@ -43,6 +44,14 @@ const summary: AnalyticsSummary = {
   returnItems: [],
 };
 
+function workspace(items: Transaction[] = [target]): TransactionWorkspace {
+  return {
+    transactions: { items, total: items.length, page: 1, pageSize: 20 },
+    summary,
+    warnings: [],
+  };
+}
+
 function LocationSearch() {
   return <output aria-label="当前查询参数">{useLocation().search}</output>;
 }
@@ -79,7 +88,7 @@ describe('TransactionsPage focused navigation', () => {
       configurable: true,
       value: scrollIntoView,
     });
-    vi.spyOn(apiClient, 'summary').mockResolvedValue(summary);
+    vi.spyOn(apiClient, 'transactionWorkspace').mockResolvedValue(workspace());
   });
 
   afterEach(() => {
@@ -99,18 +108,21 @@ describe('TransactionsPage focused navigation', () => {
       pageSize: 20,
       warnings: [],
     };
-    let resolveRefresh!: (page: TransactionPage) => void;
-    const pendingRefresh = new Promise<TransactionPage>((resolve) => {
+    let resolveRefresh!: (value: TransactionWorkspace) => void;
+    const pendingRefresh = new Promise<TransactionWorkspace>((resolve) => {
       resolveRefresh = resolve;
     });
-    vi.spyOn(apiClient, 'transactions').mockImplementation((query) =>
-      query.focusId ? Promise.resolve(focusedPage) : pendingRefresh,
+    vi.spyOn(apiClient, 'transactionWorkspace').mockImplementation((query) =>
+      query.focusId
+        ? Promise.resolve({ ...workspace([target]), transactions: focusedPage })
+        : pendingRefresh,
     );
     const { container } = renderPage();
 
     await waitFor(() =>
-      expect(apiClient.transactions).toHaveBeenCalledWith(
+      expect(apiClient.transactionWorkspace).toHaveBeenCalledWith(
         expect.objectContaining({ focusId: 'target' }),
+        expect.any(Object),
       ),
     );
     const desktopTarget = await waitFor(() => {
@@ -133,25 +145,64 @@ describe('TransactionsPage focused navigation', () => {
     );
     expect(targetDuringRefresh).toBeInTheDocument();
     expect(targetDuringRefresh).not.toHaveAttribute('data-focused');
-    expect(apiClient.transactions).toHaveBeenLastCalledWith(
+    expect(apiClient.transactionWorkspace).toHaveBeenLastCalledWith(
       expect.objectContaining({ page: 2, focusId: undefined }),
+      expect.any(Object),
     );
-    await act(async () => resolveRefresh(focusedPage));
+    await act(async () => resolveRefresh({ ...workspace([target]), transactions: focusedPage }));
+  });
+
+  it('loads the transaction list and monthly profit through one workspace request', async () => {
+    vi.spyOn(apiClient, 'transactionWorkspace').mockResolvedValue(workspace());
+    vi.spyOn(apiClient, 'transactions').mockRejectedValue(new Error('不应读取旧列表接口'));
+    vi.spyOn(apiClient, 'summary').mockRejectedValue(new Error('不应读取旧汇总接口'));
+
+    renderPage('/transactions');
+
+    expect((await screen.findAllByText('目标产品')).length).toBeGreaterThan(0);
+    expect(apiClient.transactionWorkspace).toHaveBeenCalledTimes(1);
+    expect(apiClient.transactions).not.toHaveBeenCalled();
+    expect(apiClient.summary).not.toHaveBeenCalled();
+  });
+
+  it('keeps the save drawer open until the single strict workspace reread finishes', async () => {
+    const user = userEvent.setup();
+    let resolveReread!: (value: TransactionWorkspace) => void;
+    const reread = new Promise<TransactionWorkspace>((resolve) => {
+      resolveReread = resolve;
+    });
+    const workspaceMock = vi
+      .spyOn(apiClient, 'transactionWorkspace')
+      .mockResolvedValueOnce(workspace())
+      .mockReturnValueOnce(reread);
+    vi.spyOn(apiClient, 'createTransaction').mockResolvedValue({ ...target, id: 'new-record' });
+    renderPage('/transactions');
+
+    await user.click(await screen.findByRole('button', { name: '新增交易' }));
+    await user.type(screen.getByRole('textbox', { name: '商品名称' }), '新交易');
+    await user.click(screen.getByRole('button', { name: '保存' }));
+
+    await waitFor(() => expect(apiClient.createTransaction).toHaveBeenCalledTimes(1));
+    expect(screen.getByRole('dialog')).toBeInTheDocument();
+    expect(screen.queryByText('交易已保存')).not.toBeInTheDocument();
+    expect(workspaceMock).toHaveBeenCalledTimes(2);
+
+    await act(async () =>
+      resolveReread(workspace([{ ...target, id: 'new-record', title: '新交易' }])),
+    );
+
+    await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument());
+    expect(screen.getByText('交易已保存')).toBeInTheDocument();
   });
 
   it('silently clears an invalid focused id without scrolling', async () => {
-    vi.spyOn(apiClient, 'transactions').mockResolvedValue({
-      items: [],
-      total: 0,
-      page: 1,
-      pageSize: 20,
-      warnings: [],
-    });
+    vi.spyOn(apiClient, 'transactionWorkspace').mockResolvedValue(workspace([]));
     renderPage('/transactions?focus=missing');
 
     await waitFor(() =>
-      expect(apiClient.transactions).toHaveBeenLastCalledWith(
+      expect(apiClient.transactionWorkspace).toHaveBeenLastCalledWith(
         expect.objectContaining({ focusId: undefined }),
+        expect.any(Object),
       ),
     );
     expect(scrollIntoView).not.toHaveBeenCalled();
@@ -169,14 +220,15 @@ describe('TransactionsPage focused navigation', () => {
     renderPage('/transactions');
 
     await waitFor(() =>
-      expect(apiClient.transactions).toHaveBeenCalledWith(
+      expect(apiClient.transactionWorkspace).toHaveBeenCalledWith(
         expect.objectContaining({ sort: 'purchaseDate', order: 'desc' }),
+        expect.any(Object),
       ),
     );
 
     fireEvent.click(screen.getByRole('button', { name: '重置筛选' }));
     await waitFor(() =>
-      expect(apiClient.transactions).toHaveBeenLastCalledWith(
+      expect(apiClient.transactionWorkspace).toHaveBeenLastCalledWith(
         expect.objectContaining({
           page: 1,
           pageSize: 20,
@@ -184,6 +236,7 @@ describe('TransactionsPage focused navigation', () => {
           sort: 'purchaseDate',
           order: 'desc',
         }),
+        expect.any(Object),
       ),
     );
   });
@@ -200,8 +253,9 @@ describe('TransactionsPage focused navigation', () => {
     renderPage('/pending-receipt', '待收货');
 
     await waitFor(() =>
-      expect(apiClient.transactions).toHaveBeenCalledWith(
+      expect(apiClient.transactionWorkspace).toHaveBeenCalledWith(
         expect.objectContaining({ status: '待收货' }),
+        expect.any(Object),
       ),
     );
   });
@@ -230,13 +284,14 @@ describe('TransactionsPage focused navigation', () => {
     });
 
     await waitFor(() =>
-      expect(apiClient.transactions).toHaveBeenLastCalledWith(
+      expect(apiClient.transactionWorkspace).toHaveBeenLastCalledWith(
         expect.objectContaining({
           status: '已售出',
           dateField: 'soldDate',
           from: '2026-01-01',
           to: '2026-08-01',
         }),
+        expect.any(Object),
       ),
     );
   });
@@ -257,8 +312,9 @@ describe('TransactionsPage focused navigation', () => {
     await user.click(screen.getByRole('button', { name: '开始搜索' }));
 
     await waitFor(() =>
-      expect(apiClient.transactions).toHaveBeenLastCalledWith(
+      expect(apiClient.transactionWorkspace).toHaveBeenLastCalledWith(
         expect.objectContaining({ q: '目标产品', page: 1 }),
+        expect.any(Object),
       ),
     );
   });
