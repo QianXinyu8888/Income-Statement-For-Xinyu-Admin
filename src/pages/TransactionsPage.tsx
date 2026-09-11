@@ -160,6 +160,22 @@ export default function TransactionsPage({
       window.clearTimeout(timer);
     };
   }, [focusedId, transactionData?.page]);
+  useEffect(() => {
+    if (!mobileFiltersOpen) return;
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    const closeOnEscape = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        event.preventDefault();
+        setMobileFiltersOpen(false);
+      }
+    };
+    window.addEventListener('keydown', closeOnEscape);
+    return () => {
+      document.body.style.overflow = previousOverflow;
+      window.removeEventListener('keydown', closeOnEscape);
+    };
+  }, [mobileFiltersOpen]);
   const open = (record: Transaction | null, field: EditableTransactionField = 'title') => {
     setEditing(record);
     setInitialFocus(field);
@@ -352,114 +368,122 @@ export default function TransactionsPage({
         </button>
       </div>
       {mobileFiltersOpen && (
-        <section className="mobile-filter-sheet" role="region" aria-label="筛选交易">
-          <header>
-            <h2>筛选交易</h2>
-            <button
-              type="button"
-              className="icon-button"
-              aria-label="关闭筛选条件"
-              onClick={() => setMobileFiltersOpen(false)}
-            >
-              <X size={18} />
-            </button>
-          </header>
-          <label>
-            状态
-            <select
-              aria-label="状态"
-              value={query.status ?? ''}
-              onChange={(event) =>
-                setQuery((current) => ({
-                  ...current,
-                  page: 1,
-                  status: (event.target.value || undefined) as TransactionStatus | undefined,
-                }))
-              }
-            >
-              <option value="">全部状态</option>
-              {TRANSACTION_STATUSES.map((status) => (
-                <option key={status}>{status}</option>
-              ))}
-            </select>
-          </label>
-          <label>
-            日期类型
-            <select
-              aria-label="日期类型"
-              value={query.dateField ?? 'purchaseDate'}
-              onChange={(event) =>
-                setQuery((current) => ({
-                  ...current,
-                  page: 1,
-                  dateField: event.target.value as TransactionDateField,
-                }))
-              }
-            >
-              <option value="purchaseDate">购入日期</option>
-              <option value="soldDate">售出日期</option>
-            </select>
-          </label>
-          <label>
-            {dateLabel}开始
-            <div className={`date-input-shell${query.from ? ' has-value' : ''}`}>
-              <input
-                aria-label={`${dateLabel}开始`}
-                title="可直接输入日期，也可点击日历选择"
-                inputMode="numeric"
-                className="date-filter-input"
-                type="date"
-                value={query.from ?? ''}
+        <>
+          <button
+            type="button"
+            className="mobile-filter-backdrop"
+            aria-label="关闭筛选条件"
+            onClick={() => setMobileFiltersOpen(false)}
+          />
+          <section className="mobile-filter-sheet" role="region" aria-label="筛选交易">
+            <header>
+              <h2>筛选交易</h2>
+              <button
+                type="button"
+                className="icon-button"
+                aria-label="关闭筛选条件"
+                onClick={() => setMobileFiltersOpen(false)}
+              >
+                <X size={18} />
+              </button>
+            </header>
+            <label>
+              状态
+              <select
+                aria-label="状态"
+                value={query.status ?? ''}
                 onChange={(event) =>
                   setQuery((current) => ({
                     ...current,
                     page: 1,
-                    from: event.target.value || undefined,
+                    status: (event.target.value || undefined) as TransactionStatus | undefined,
                   }))
                 }
-              />
-              {!query.from && <span aria-hidden="true">年-月-日</span>}
-            </div>
-          </label>
-          <label>
-            {dateLabel}结束
-            <div className={`date-input-shell${query.to ? ' has-value' : ''}`}>
-              <input
-                aria-label={`${dateLabel}结束`}
-                title="可直接输入日期，也可点击日历选择"
-                inputMode="numeric"
-                className="date-filter-input"
-                type="date"
-                value={query.to ?? ''}
+              >
+                <option value="">全部状态</option>
+                {TRANSACTION_STATUSES.map((status) => (
+                  <option key={status}>{status}</option>
+                ))}
+              </select>
+            </label>
+            <label>
+              日期类型
+              <select
+                aria-label="日期类型"
+                value={query.dateField ?? 'purchaseDate'}
                 onChange={(event) =>
                   setQuery((current) => ({
                     ...current,
                     page: 1,
-                    to: event.target.value || undefined,
+                    dateField: event.target.value as TransactionDateField,
                   }))
                 }
-              />
-              {!query.to && <span aria-hidden="true">年-月-日</span>}
-            </div>
-          </label>
-          <footer>
-            <button
-              type="button"
-              className="button button--secondary"
-              onClick={handleResetFilters}
-              disabled={!hasActiveFilters}
-            >
-              重置
-            </button>
-            <button
-              type="button"
-              className="button button--primary"
-              onClick={() => setMobileFiltersOpen(false)}
-            >
-              完成
-            </button>
-          </footer>
-        </section>
+              >
+                <option value="purchaseDate">购入日期</option>
+                <option value="soldDate">售出日期</option>
+              </select>
+            </label>
+            <label>
+              {dateLabel}开始
+              <div className={`date-input-shell${query.from ? ' has-value' : ''}`}>
+                <input
+                  aria-label={`${dateLabel}开始`}
+                  title="可直接输入日期，也可点击日历选择"
+                  inputMode="numeric"
+                  className="date-filter-input"
+                  type="date"
+                  value={query.from ?? ''}
+                  onChange={(event) =>
+                    setQuery((current) => ({
+                      ...current,
+                      page: 1,
+                      from: event.target.value || undefined,
+                    }))
+                  }
+                />
+                {!query.from && <span aria-hidden="true">年-月-日</span>}
+              </div>
+            </label>
+            <label>
+              {dateLabel}结束
+              <div className={`date-input-shell${query.to ? ' has-value' : ''}`}>
+                <input
+                  aria-label={`${dateLabel}结束`}
+                  title="可直接输入日期，也可点击日历选择"
+                  inputMode="numeric"
+                  className="date-filter-input"
+                  type="date"
+                  value={query.to ?? ''}
+                  onChange={(event) =>
+                    setQuery((current) => ({
+                      ...current,
+                      page: 1,
+                      to: event.target.value || undefined,
+                    }))
+                  }
+                />
+                {!query.to && <span aria-hidden="true">年-月-日</span>}
+              </div>
+            </label>
+            <footer>
+              <button
+                type="button"
+                className="button button--secondary"
+                onClick={handleResetFilters}
+                disabled={!hasActiveFilters}
+              >
+                重置
+              </button>
+              <button
+                type="button"
+                className="button button--primary"
+                onClick={() => setMobileFiltersOpen(false)}
+              >
+                完成
+              </button>
+            </footer>
+          </section>
+        </>
       )}
 
       {result.data && result.data.warnings.length > 0 && (

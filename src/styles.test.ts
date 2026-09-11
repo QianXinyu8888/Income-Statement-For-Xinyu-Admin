@@ -71,8 +71,12 @@ describe('overview monthly chart styles', () => {
     `;
 
     const chart = document.querySelector<HTMLElement>('.overview-monthly-chart .simple-chart')!;
-    const item = document.querySelector<HTMLElement>('.overview-monthly-chart .simple-chart__item')!;
-    const plot = document.querySelector<HTMLElement>('.overview-monthly-chart .simple-chart__plot')!;
+    const item = document.querySelector<HTMLElement>(
+      '.overview-monthly-chart .simple-chart__item',
+    )!;
+    const plot = document.querySelector<HTMLElement>(
+      '.overview-monthly-chart .simple-chart__plot',
+    )!;
 
     expect(getComputedStyle(chart).height).toBe('254px');
     expect(getComputedStyle(item).display).toBe('grid');
@@ -97,8 +101,7 @@ describe('mobile navigation styles', () => {
     expect(
       mobileRules.some(
         (rule) =>
-          rule.selectorText === '.bottom-nav' &&
-          rule.style.getPropertyValue('display') === 'none',
+          rule.selectorText === '.bottom-nav' && rule.style.getPropertyValue('display') === 'none',
       ),
     ).toBe(true);
     expect(
@@ -131,6 +134,36 @@ describe('mobile status workspace styles', () => {
           rule.selectorText === '.self-use-window' &&
           rule.style.getPropertyValue('border-width') === '1px 0' &&
           rule.style.getPropertyValue('box-shadow') === 'none',
+      ),
+    ).toBe(true);
+  });
+});
+
+describe('mobile touch interaction styles', () => {
+  it('keeps filter overlays bounded and primary pagination controls touchable', () => {
+    const mobileRules = Array.from(document.styleSheets).flatMap((sheet) =>
+      Array.from(sheet.cssRules)
+        .filter((rule): rule is CSSMediaRule => rule instanceof CSSMediaRule)
+        .filter((rule) => rule.conditionText.includes('max-width: 680px'))
+        .flatMap((rule) =>
+          Array.from(rule.cssRules).filter(
+            (nested): nested is CSSStyleRule => 'selectorText' in nested,
+          ),
+        ),
+    );
+
+    expect(
+      mobileRules.some(
+        (rule) =>
+          rule.selectorText === '.mobile-filter-sheet' &&
+          rule.style.getPropertyValue('overflow-y') === 'auto',
+      ),
+    ).toBe(true);
+    expect(
+      mobileRules.some(
+        (rule) =>
+          rule.selectorText.includes('.pagination-nav-btn') &&
+          rule.style.getPropertyValue('min-height') === '44px',
       ),
     ).toBe(true);
   });

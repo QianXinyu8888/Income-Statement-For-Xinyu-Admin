@@ -491,6 +491,104 @@ tbody tr.is-selected {
   }
 }
 
+/* 移动端触屏收尾：保持关键操作可触达，并避免抽屉/筛选打开时页面穿透滚动。 */
+@media (max-width: 680px) {
+  .mobile-app-bar {
+    height: calc(56px + env(safe-area-inset-top));
+    padding-top: env(safe-area-inset-top);
+  }
+
+  .search-box input,
+  .self-use-search input,
+  .mobile-filter-sheet input,
+  .mobile-filter-sheet select,
+  .drawer input,
+  .drawer select,
+  .drawer textarea {
+    min-width: 0;
+    font-size: 16px;
+  }
+
+  .mobile-filter-backdrop {
+    position: fixed;
+    z-index: 79;
+    inset: 0;
+    width: 100%;
+    border: 0;
+    background: rgba(12, 16, 22, 0.32);
+  }
+
+  .mobile-filter-sheet {
+    z-index: 80;
+    max-height: min(82dvh, 640px);
+    overflow-y: auto;
+    overscroll-behavior: contain;
+  }
+
+  .mobile-row__heading {
+    min-height: 44px;
+    align-items: center;
+  }
+
+  .pagination-wrap {
+    width: 100%;
+    gap: 10px;
+    padding: 12px;
+  }
+
+  .pagination-nav-group,
+  .pagination-select-container,
+  .pagination-nav-btn,
+  .pagination-select {
+    width: 100%;
+  }
+
+  .pagination-nav-group {
+    gap: 8px;
+  }
+
+  .pagination-nav-btn,
+  select.pagination-select {
+    min-height: 44px;
+  }
+
+  .self-use-toolbar {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(96px, auto);
+    align-items: center;
+    gap: 8px;
+  }
+
+  .self-use-search {
+    min-width: 0;
+    width: 100%;
+  }
+
+  .self-use-toolbar > select {
+    min-width: 96px;
+    min-height: 44px;
+  }
+
+  .self-use-action {
+    min-height: 44px;
+    padding-inline: 12px;
+  }
+
+  .drawer {
+    max-height: min(96dvh, 760px);
+  }
+
+  .drawer form {
+    min-height: 0;
+    overscroll-behavior: contain;
+  }
+
+  .drawer footer {
+    bottom: -18px;
+    box-shadow: 0 -8px 20px color-mix(in srgb, var(--text), transparent 94%);
+  }
+}
+
 .product-cell {
   width: 320px;
   max-width: 360px;

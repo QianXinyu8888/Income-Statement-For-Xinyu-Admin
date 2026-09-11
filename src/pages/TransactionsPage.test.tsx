@@ -333,12 +333,32 @@ describe('TransactionsPage focused navigation', () => {
     await user.click(screen.getByRole('button', { name: '打开筛选条件' }));
 
     const sheet = screen.getByRole('region', { name: '筛选交易' });
+    expect(within(sheet).getByRole('button', { name: '关闭筛选条件' })).toBeInTheDocument();
     expect(within(sheet).getByRole('combobox', { name: '状态' })).toBeInTheDocument();
     expect(within(sheet).getByRole('combobox', { name: '日期类型' })).toBeInTheDocument();
     expect(within(sheet).getByLabelText('购入日期开始')).toBeInTheDocument();
     expect(within(sheet).getByLabelText('购入日期结束')).toBeInTheDocument();
     await user.click(within(sheet).getByRole('button', { name: '关闭筛选条件' }));
     expect(screen.queryByRole('region', { name: '筛选交易' })).not.toBeInTheDocument();
+  });
+
+  it('closes the mobile filter sheet with Escape', async () => {
+    vi.spyOn(apiClient, 'transactions').mockResolvedValue({
+      items: [target],
+      total: 1,
+      page: 1,
+      pageSize: 20,
+      warnings: [],
+    });
+    const user = userEvent.setup();
+    renderPage('/transactions');
+
+    await user.click(screen.getByRole('button', { name: '打开筛选条件' }));
+    fireEvent.keyDown(window, { key: 'Escape' });
+
+    await waitFor(() =>
+      expect(screen.queryByRole('region', { name: '筛选交易' })).not.toBeInTheDocument(),
+    );
   });
 
   it('marks the transaction page for stable mobile animation rules', () => {
