@@ -152,6 +152,19 @@ describe('SelfUsePage', () => {
     await waitFor(() => expect(markListed).toHaveBeenCalledWith([personal.id], '在售中'));
   });
 
+  it('marks a listed item as self-use through the existing status API', async () => {
+    const user = userEvent.setup();
+    mockActiveRecords();
+    const markSelfUse = vi.spyOn(apiClient, 'batchStatus').mockResolvedValue({
+      results: [{ id: listed.id, success: true }],
+    });
+    renderPage('在售中');
+
+    await user.click((await screen.findAllByRole('button', { name: '设置 键盘 为自用中' }))[0]);
+
+    await waitFor(() => expect(markSelfUse).toHaveBeenCalledWith([listed.id], '自用中'));
+  });
+
   it('shows an error instead of a success notice when listing returns a failed item', async () => {
     const user = userEvent.setup();
     mockActiveRecords();

@@ -53,6 +53,7 @@ export default function SelfUsePage({ status = '自用中' }: { status?: SelfUse
   const managementLabel = status === '自用中' ? '管理自用产品' : '管理在售产品';
   const pageTitle = status === '自用中' ? '正在自用中的产品' : '正在售卖中的产品';
   const loadingLabel = status === '自用中' ? '正在加载自用中的产品' : '正在加载售卖中的产品';
+  const alternateStatus = status === '自用中' ? '在售中' : '自用中';
 
   const result = useQuery({
     queryKey: ['self-use-records', status, search],
@@ -75,16 +76,16 @@ export default function SelfUsePage({ status = '自用中' }: { status?: SelfUse
     ]);
   };
 
-  const markListed = useMutation({
-    mutationFn: async (record: Transaction) => {
-      const response = await apiClient.batchStatus([record.id], '在售中');
+  const changeStatus = useMutation({
+    mutationFn: async ({ record, nextStatus }: { record: Transaction; nextStatus: SelfUseStatus }) => {
+      const response = await apiClient.batchStatus([record.id], nextStatus);
       const failed = response.results.find((item) => !item.success);
       if (failed) throw new Error(failed.message ?? '状态更新失败');
       return response;
     },
-    onSuccess: async () => {
+    onSuccess: async (_, { nextStatus }) => {
       await refresh();
-      setNotice('已标记为在售中');
+      setNotice(`已标记为${nextStatus}`);
     },
     onError: (error) => {
       setNotice(error instanceof Error ? error.message : '状态更新失败');
@@ -174,11 +175,11 @@ export default function SelfUsePage({ status = '自用中' }: { status?: SelfUse
         ) : (
           <SelfUseList
             records={records}
-            listingId={markListed.isPending ? markListed.variables.id : null}
-            onMarkListed={(record) => markListed.mutate(record)}
+            listingId={changeStatus.isPending ? changeStatus.variables.record.id : null}
+            alternateStatus={alternateStatus}
+            onChangeStatus={(record, nextStatus) => changeStatus.mutate({ record, nextStatus })}
             onSell={setSelling}
             onOpen={openDrawer}
-            showListedAction={status === '自用中'}
           />
         )}
       </div>

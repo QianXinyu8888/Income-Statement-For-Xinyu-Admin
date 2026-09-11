@@ -13,31 +13,29 @@ function displayMoney(value: number | null) {
 function SelfUseActions({
   record,
   pending,
-  showListedAction,
-  onMarkListed,
+  alternateStatus,
+  onChangeStatus,
   onSell,
 }: {
   record: Transaction;
   pending: boolean;
-  showListedAction: boolean;
-  onMarkListed: (record: Transaction) => void;
+  alternateStatus: '在售中' | '自用中';
+  onChangeStatus: (record: Transaction, nextStatus: '在售中' | '自用中') => void;
   onSell: (record: Transaction) => void;
 }) {
   const title = record.title ?? '未命名物品';
   return (
     <div className="self-use-actions">
       <span className="self-use-action-label">设为</span>
-      {showListedAction && (
-        <button
-          type="button"
-          className="self-use-action self-use-action--listed"
-          aria-label={`设置 ${title} 为在售中`}
-          onClick={() => onMarkListed(record)}
-          disabled={pending}
-        >
-          在售中
-        </button>
-      )}
+      <button
+        type="button"
+        className="self-use-action self-use-action--listed"
+        aria-label={`设置 ${title} 为${alternateStatus}`}
+        onClick={() => onChangeStatus(record, alternateStatus)}
+        disabled={pending}
+      >
+        {alternateStatus}
+      </button>
       <button
         type="button"
         className="self-use-action self-use-action--sale"
@@ -54,17 +52,17 @@ function SelfUseActions({
 export function SelfUseList({
   records,
   listingId,
-  onMarkListed,
+  alternateStatus,
+  onChangeStatus,
   onSell,
   onOpen,
-  showListedAction = true,
 }: {
   records: Transaction[];
   listingId: string | null;
-  onMarkListed: (record: Transaction) => void;
+  alternateStatus: '在售中' | '自用中';
+  onChangeStatus: (record: Transaction, nextStatus: '在售中' | '自用中') => void;
   onSell: (record: Transaction) => void;
   onOpen: (record: Transaction) => void;
-  showListedAction?: boolean;
 }) {
   const title = (record: Transaction) => record.title ?? '未命名物品';
   return (
@@ -93,8 +91,8 @@ export function SelfUseList({
                     <SelfUseActions
                       record={record}
                       pending={pending}
-                      showListedAction={showListedAction}
-                      onMarkListed={onMarkListed}
+                      alternateStatus={alternateStatus}
+                      onChangeStatus={onChangeStatus}
                       onSell={onSell}
                     />
                   </td>
@@ -122,8 +120,8 @@ export function SelfUseList({
                 <SelfUseActions
                   record={record}
                   pending={pending}
-                  showListedAction={showListedAction}
-                  onMarkListed={onMarkListed}
+                  alternateStatus={alternateStatus}
+                  onChangeStatus={onChangeStatus}
                   onSell={onSell}
                 />
               </div>

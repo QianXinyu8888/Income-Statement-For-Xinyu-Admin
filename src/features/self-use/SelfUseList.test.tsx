@@ -22,20 +22,20 @@ const record: Transaction = {
 
 afterEach(cleanup);
 
-function renderList(showListedAction = true) {
-  const onMarkListed = vi.fn();
+function renderList(alternateStatus: '在售中' | '自用中' = '在售中') {
+  const onChangeStatus = vi.fn();
   const onSell = vi.fn();
   render(
     <SelfUseList
       records={[record]}
       listingId={null}
-      onMarkListed={onMarkListed}
+      alternateStatus={alternateStatus}
+      onChangeStatus={onChangeStatus}
       onSell={onSell}
       onOpen={vi.fn()}
-      showListedAction={showListedAction}
     />,
   );
-  return { onMarkListed, onSell };
+  return { onChangeStatus, onSell };
 }
 
 describe('SelfUseList actions', () => {
@@ -44,7 +44,8 @@ describe('SelfUseList actions', () => {
       <SelfUseList
         records={[record]}
         listingId={null}
-        onMarkListed={vi.fn()}
+        alternateStatus="在售中"
+        onChangeStatus={vi.fn()}
         onSell={vi.fn()}
         onOpen={vi.fn()}
       />,
@@ -62,7 +63,7 @@ describe('SelfUseList actions', () => {
 
   it('shows direct listed and sale actions for self-use records', async () => {
     const user = userEvent.setup();
-    const { onMarkListed, onSell } = renderList();
+    const { onChangeStatus, onSell } = renderList();
 
     const listedButtons = screen.getAllByRole('button', { name: '设置 耳机 为在售中' });
     const saleButtons = screen.getAllByRole('button', { name: '设置 耳机 为已售出' });
@@ -71,15 +72,20 @@ describe('SelfUseList actions', () => {
     await user.click(listedButtons[0]);
     await user.click(saleButtons[1]);
 
-    expect(onMarkListed).toHaveBeenCalledWith(record);
+    expect(onChangeStatus).toHaveBeenCalledWith(record, '在售中');
     expect(onSell).toHaveBeenCalledWith(record);
   });
 
-  it('shows only the sale action in the listed workspace', () => {
-    renderList(false);
+  it('shows the self-use action in the listed workspace', async () => {
+    const user = userEvent.setup();
+    const { onChangeStatus } = renderList('自用中');
 
+    const selfUseButtons = screen.getAllByRole('button', { name: '设置 耳机 为自用中' });
     expect(screen.queryByRole('button', { name: '设置 耳机 为在售中' })).not.toBeInTheDocument();
     expect(screen.getAllByRole('button', { name: '设置 耳机 为已售出' })).toHaveLength(2);
-    expect(screen.queryByRole('combobox', { name: '设置 耳机 的状态' })).not.toBeInTheDocument();
+
+    await user.click(selfUseButtons[0]);
+
+    expect(onChangeStatus).toHaveBeenCalledWith(record, '自用中');
   });
 });
