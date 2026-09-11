@@ -42,7 +42,12 @@ export function summarizeTransactions(records: Transaction[]): AnalyticsSummary 
   const returned = records.filter((record) => record.status === '已退货');
   const revenue = sumKnown(sold.map((record) => record.salePrice));
   const totalCost = sumKnown(sold.map((record) => record.totalCost));
-  const shipping = sumKnown(sold.map((record) => record.shippingFee));
+  const shipping = sumKnown(
+    sold.map((record) => {
+      if (record.purchaseShippingFee === null && record.saleShippingFee === null) return null;
+      return (record.purchaseShippingFee ?? 0) + (record.saleShippingFee ?? 0);
+    }),
+  );
   const profit = sumKnown(sold.map((record) => record.profit));
   const monthlyMap = new Map<string, Transaction[]>();
   sold.forEach((record) => {

@@ -9,7 +9,8 @@ describe('buildCsv', () => {
       title: '=HYPERLINK("bad")',
       salePrice: 10,
       costPrice: 5,
-      shippingFee: 1,
+      purchaseShippingFee: 1,
+      saleShippingFee: 0,
       totalCost: 6,
       profit: 4,
       roi: 4 / 6,
@@ -21,7 +22,7 @@ describe('buildCsv', () => {
     };
     const csv = buildCsv([row]);
     expect(csv).toContain(
-      '商品名称,交易状态,购入日期,售出日期,成交价,购入成本,运费,总成本,利润,ROI,持有天数,备注',
+      '商品名称,交易状态,购入日期,售出日期,成交价,购入成本,购入运费,售出运费,总成本,利润,ROI,持有天数,备注',
     );
     expect(csv).toContain("'=HYPERLINK");
     expect(csv).toContain("'+cmd");
@@ -33,7 +34,8 @@ describe('buildCsv', () => {
       title: '待补记录',
       salePrice: null,
       costPrice: null,
-      shippingFee: null,
+      purchaseShippingFee: null,
+      saleShippingFee: null,
       totalCost: null,
       profit: null,
       roi: null,
@@ -46,6 +48,6 @@ describe('buildCsv', () => {
     const csv = buildCsv([row]);
     expect(csv).not.toContain('undefined');
     expect(csv).not.toContain('null');
-    expect(csv.split('\r\n')[1]?.split(',')).toHaveLength(12);
+    expect(csv.split('\r\n')[1]?.split(',')).toHaveLength(13);
   });
 });

@@ -81,7 +81,11 @@ export const onRequest: PagesFunction = async ({ request, env, params }) => {
       return jsonResponse(request, { items: records, total: records.length, warnings });
     }
     if (!path && request.method === 'POST') {
-      const input = transactionSchema.parse(await request.json());
+      const body = await request.json();
+      const input = transactionSchema.parse({
+        ...(body && typeof body === 'object' ? body : {}),
+        status: '待收货',
+      });
       return jsonResponse(
         request,
         mapFeishuRecord(await createRecord(config, toFeishuFields(input))).transaction,

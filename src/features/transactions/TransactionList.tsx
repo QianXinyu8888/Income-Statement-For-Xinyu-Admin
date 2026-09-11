@@ -111,7 +111,8 @@ export function TransactionList({
               {shows('soldDate') && <th>售出日期</th>}
               {shows('holdingDays') && <th className="number">持有天数</th>}
               {shows('costPrice') && <th className="number">购入成本</th>}
-              {shows('shippingFee') && <th className="number">运费</th>}
+              {shows('purchaseShippingFee') && <th className="number">购入运费</th>}
+              {shows('saleShippingFee') && <th className="number">售出运费</th>}
               {shows('totalCost') && <th className="number">总成本</th>}
               {shows('salePrice') && <th className="number">成交价</th>}
               {shows('profit') && <th className="number">利润</th>}
@@ -199,15 +200,27 @@ export function TransactionList({
                     </EditableField>
                   </td>
                 )}
-                {shows('shippingFee') && (
+                {shows('purchaseShippingFee') && (
                   <td className="number muted">
                     <EditableField
-                      field="shippingFee"
-                      label="运费"
-                      value={displayMoney(record.shippingFee)}
-                      onClick={() => onOpen(record, 'shippingFee')}
+                      field="purchaseShippingFee"
+                      label="购入运费"
+                      value={displayMoney(record.purchaseShippingFee)}
+                      onClick={() => onOpen(record, 'purchaseShippingFee')}
                     >
-                      {displayMoney(record.shippingFee)}
+                      {displayMoney(record.purchaseShippingFee)}
+                    </EditableField>
+                  </td>
+                )}
+                {shows('saleShippingFee') && (
+                  <td className="number muted">
+                    <EditableField
+                      field="saleShippingFee"
+                      label="售出运费"
+                      value={displayMoney(record.saleShippingFee)}
+                      onClick={() => onOpen(record, 'saleShippingFee')}
+                    >
+                      {displayMoney(record.saleShippingFee)}
                     </EditableField>
                   </td>
                 )}
@@ -347,17 +360,32 @@ export function TransactionList({
                       </dd>
                     </div>
                   )}
-                  {shows('shippingFee') && (
-                    <div className={mobileDetailClass('shippingFee')}>
-                      <dt>运费</dt>
+                  {shows('purchaseShippingFee') && (
+                    <div className={mobileDetailClass('purchaseShippingFee')}>
+                      <dt>购入运费</dt>
                       <dd>
                         <EditableField
-                          field="shippingFee"
-                          label="运费"
-                          value={displayMoney(record.shippingFee)}
-                          onClick={() => onOpen(record, 'shippingFee')}
+                          field="purchaseShippingFee"
+                          label="购入运费"
+                          value={displayMoney(record.purchaseShippingFee)}
+                          onClick={() => onOpen(record, 'purchaseShippingFee')}
                         >
-                          {displayMoney(record.shippingFee)}
+                          {displayMoney(record.purchaseShippingFee)}
+                        </EditableField>
+                      </dd>
+                    </div>
+                  )}
+                  {shows('saleShippingFee') && (
+                    <div className={mobileDetailClass('saleShippingFee')}>
+                      <dt>售出运费</dt>
+                      <dd>
+                        <EditableField
+                          field="saleShippingFee"
+                          label="售出运费"
+                          value={displayMoney(record.saleShippingFee)}
+                          onClick={() => onOpen(record, 'saleShippingFee')}
+                        >
+                          {displayMoney(record.saleShippingFee)}
                         </EditableField>
                       </dd>
                     </div>

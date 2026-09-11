@@ -7,7 +7,8 @@ const HEADERS = [
   '售出日期',
   '成交价',
   '购入成本',
-  '运费',
+  '购入运费',
+  '售出运费',
   '总成本',
   '利润',
   'ROI',
@@ -30,7 +31,8 @@ function row(record: Transaction): unknown[] {
     record.soldDate,
     record.salePrice,
     record.costPrice,
-    record.shippingFee,
+    record.purchaseShippingFee,
+    record.saleShippingFee,
     record.totalCost,
     record.profit,
     record.roi,
@@ -70,7 +72,7 @@ export async function downloadExcel(records: Transaction[], filename: string) {
     ),
   );
   sheet.getRow(1).font = { bold: true };
-  [5, 6, 7, 8, 9].forEach((column) => {
+  [5, 6, 7, 8, 9, 10].forEach((column) => {
     sheet.getColumn(column).numFmt = '¥#,##0.00';
   });
   sheet.getColumn(10).numFmt = '0.00%';

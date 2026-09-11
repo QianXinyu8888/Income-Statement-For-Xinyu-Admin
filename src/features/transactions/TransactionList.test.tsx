@@ -9,7 +9,8 @@ const record: Transaction = {
   title: 'iPhone 15 Pro',
   salePrice: 5200,
   costPrice: 4100,
-  shippingFee: 18,
+  purchaseShippingFee: 18,
+  saleShippingFee: 6,
   totalCost: 4118,
   profit: 1082,
   roi: 1082 / 4118,
@@ -86,7 +87,8 @@ describe('TransactionList', () => {
       '售出日期',
       '持有天数',
       '购入成本',
-      '运费',
+      '购入运费',
+      '售出运费',
       '总成本',
       '成交价',
       '利润',
@@ -116,7 +118,7 @@ describe('TransactionList', () => {
     expect(mobile!).toHaveTextContent('售出日期2026-08-10');
     expect(mobile!).toHaveTextContent('持有天数131 天');
     expect(mobile!).toHaveTextContent('购入成本¥4,100.00');
-    expect(mobile!).toHaveTextContent('运费¥18.00');
+    expect(mobile!).toHaveTextContent('购入运费¥18.00');
     expect(mobile!).toHaveTextContent('总成本¥4,118.00');
     expect(mobile!).toHaveTextContent('成交价¥5,200.00');
     expect(mobile!).toHaveTextContent('利润+¥1,082.00');
@@ -165,7 +167,8 @@ describe('TransactionList', () => {
       'purchaseDate',
       'soldDate',
       'costPrice',
-      'shippingFee',
+      'purchaseShippingFee',
+      'saleShippingFee',
       'salePrice',
       'note',
     ];
@@ -218,7 +221,8 @@ describe('TransactionList', () => {
       'purchaseDate',
       'soldDate',
       'costPrice',
-      'shippingFee',
+      'purchaseShippingFee',
+      'saleShippingFee',
       'salePrice',
       'note',
     ];

@@ -24,8 +24,9 @@ const empty: TransactionForm = {
   title: '',
   salePrice: null,
   costPrice: null,
-  shippingFee: null,
-  status: '',
+  purchaseShippingFee: null,
+  saleShippingFee: null,
+  status: '待收货',
   purchaseDate: null,
   soldDate: null,
   note: null,
@@ -68,7 +69,8 @@ export function TransactionDrawer({
               title: record.title ?? '',
               salePrice: record.salePrice,
               costPrice: record.costPrice,
-              shippingFee: record.shippingFee,
+              purchaseShippingFee: record.purchaseShippingFee,
+              saleShippingFee: record.saleShippingFee,
               status: record.status ?? '',
               purchaseDate: record.purchaseDate,
               soldDate: record.soldDate,
@@ -147,7 +149,9 @@ export function TransactionDrawer({
     }
   };
   const estimatedTotalCost =
-    form.costPrice === null || form.shippingFee === null ? null : form.costPrice + form.shippingFee;
+    form.costPrice === null || form.purchaseShippingFee === null
+      ? null
+      : form.costPrice + form.purchaseShippingFee;
   const estimatedProfit =
     form.salePrice === null || estimatedTotalCost === null
       ? null
@@ -198,43 +202,55 @@ export function TransactionDrawer({
               required
             />
           </label>
-          <label htmlFor="tx-status">
-            状态
-            <select
-              id="tx-status"
-              name="status"
-              ref={(element) => {
-                fieldRefs.current.status = element ?? undefined;
-              }}
-              value={form.status}
-              onChange={(event) => set('status', event.target.value as TransactionInput['status'])}
-            >
-              <option value="" disabled>
-                请选择
-              </option>
-              {TRANSACTION_STATUSES.map((status) => (
-                <option key={status}>{status}</option>
-              ))}
-            </select>
-          </label>
-          <div className="form-grid">
-            <label htmlFor="tx-sale-price">
-              售价
-              <input
-                id="tx-sale-price"
-                name="salePrice"
+          {record ? (
+            <label htmlFor="tx-status">
+              状态
+              <select
+                id="tx-status"
+                name="status"
                 ref={(element) => {
-                  fieldRefs.current.salePrice = element ?? undefined;
+                  fieldRefs.current.status = element ?? undefined;
                 }}
-                type="number"
-                min="0"
-                step="0.01"
-                value={form.salePrice ?? ''}
+                value={form.status}
                 onChange={(event) =>
-                  set('salePrice', event.target.value === '' ? null : Number(event.target.value))
+                  set('status', event.target.value as TransactionInput['status'])
                 }
-              />
+              >
+                <option value="" disabled>
+                  请选择
+                </option>
+                {TRANSACTION_STATUSES.map((status) => (
+                  <option key={status}>{status}</option>
+                ))}
+              </select>
             </label>
+          ) : (
+            <div className="calculated-field">
+              <span>状态</span>
+              <strong>待收货</strong>
+              <small>新增交易默认状态</small>
+            </div>
+          )}
+          <div className="form-grid">
+            {record && (
+              <label htmlFor="tx-sale-price">
+                售价
+                <input
+                  id="tx-sale-price"
+                  name="salePrice"
+                  ref={(element) => {
+                    fieldRefs.current.salePrice = element ?? undefined;
+                  }}
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  value={form.salePrice ?? ''}
+                  onChange={(event) =>
+                    set('salePrice', event.target.value === '' ? null : Number(event.target.value))
+                  }
+                />
+              </label>
+            )}
             <label htmlFor="tx-cost-price">
               购入成本
               <input
@@ -254,23 +270,48 @@ export function TransactionDrawer({
             </label>
           </div>
           <div className="form-grid">
-            <label htmlFor="tx-shipping-fee">
-              运费
+            <label htmlFor="tx-purchase-shipping-fee">
+              购入运费
               <input
-                id="tx-shipping-fee"
-                name="shippingFee"
+                id="tx-purchase-shipping-fee"
+                name="purchaseShippingFee"
                 ref={(element) => {
-                  fieldRefs.current.shippingFee = element ?? undefined;
+                  fieldRefs.current.purchaseShippingFee = element ?? undefined;
                 }}
                 type="number"
                 min="0"
                 step="0.01"
-                value={form.shippingFee ?? ''}
+                value={form.purchaseShippingFee ?? ''}
                 onChange={(event) =>
-                  set('shippingFee', event.target.value === '' ? null : Number(event.target.value))
+                  set(
+                    'purchaseShippingFee',
+                    event.target.value === '' ? null : Number(event.target.value),
+                  )
                 }
               />
             </label>
+            {record && (
+              <label htmlFor="tx-sale-shipping-fee">
+                售出运费
+                <input
+                  id="tx-sale-shipping-fee"
+                  name="saleShippingFee"
+                  ref={(element) => {
+                    fieldRefs.current.saleShippingFee = element ?? undefined;
+                  }}
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  value={form.saleShippingFee ?? ''}
+                  onChange={(event) =>
+                    set(
+                      'saleShippingFee',
+                      event.target.value === '' ? null : Number(event.target.value),
+                    )
+                  }
+                />
+              </label>
+            )}
             <label htmlFor="tx-purchase-date">
               购入日期
               <input
@@ -284,19 +325,21 @@ export function TransactionDrawer({
                 onChange={(event) => set('purchaseDate', event.target.value || null)}
               />
             </label>
-            <label htmlFor="tx-sold-date">
-              售出日期
-              <input
-                id="tx-sold-date"
-                name="soldDate"
-                ref={(element) => {
-                  fieldRefs.current.soldDate = element ?? undefined;
-                }}
-                type="date"
-                value={form.soldDate ?? ''}
-                onChange={(event) => set('soldDate', event.target.value || null)}
-              />
-            </label>
+            {record && (
+              <label htmlFor="tx-sold-date">
+                售出日期
+                <input
+                  id="tx-sold-date"
+                  name="soldDate"
+                  ref={(element) => {
+                    fieldRefs.current.soldDate = element ?? undefined;
+                  }}
+                  type="date"
+                  value={form.soldDate ?? ''}
+                  onChange={(event) => set('soldDate', event.target.value || null)}
+                />
+              </label>
+            )}
           </div>
           <div className="calculated-field">
             <span>{record ? '总成本（飞书）' : '预计总成本'}</span>

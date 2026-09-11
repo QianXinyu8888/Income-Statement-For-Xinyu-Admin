@@ -1,6 +1,6 @@
 import { z } from 'zod';
 
-export const TRANSACTION_STATUSES = ['已售出', '在售中', '自用中', '已退货'] as const;
+export const TRANSACTION_STATUSES = ['待收货', '已售出', '在售中', '自用中', '已退货'] as const;
 export type TransactionStatus = (typeof TRANSACTION_STATUSES)[number];
 
 const money = z.number().finite().min(0).multipleOf(0.01);
@@ -9,7 +9,8 @@ export const transactionSchema = z.object({
   title: z.string().trim().min(1, '请输入商品名称').max(500),
   salePrice: money.nullable(),
   costPrice: money.nullable(),
-  shippingFee: money.nullable(),
+  purchaseShippingFee: money.nullable(),
+  saleShippingFee: money.nullable(),
   status: z.enum(TRANSACTION_STATUSES),
   purchaseDate: z.string().date().nullable(),
   soldDate: z.string().date().nullable(),
@@ -24,7 +25,8 @@ export interface Transaction {
   title: string | null;
   salePrice: number | null;
   costPrice: number | null;
-  shippingFee: number | null;
+  purchaseShippingFee: number | null;
+  saleShippingFee: number | null;
   totalCost: number | null;
   profit: number | null;
   roi: number | null;
@@ -106,7 +108,12 @@ export function mapFeishuRecord(record: FeishuRecord): {
       title: optionalText(fields['商品名称']),
       salePrice: optionalNumber(fields['成交价(¥)'], '成交价(¥)', warnings),
       costPrice: optionalNumber(fields['购入成本(¥)'], '购入成本(¥)', warnings),
-      shippingFee: optionalNumber(fields['运费(¥)'], '运费(¥)', warnings),
+      purchaseShippingFee: optionalNumber(
+        fields['购入运费(¥)'] ?? fields['运费(¥)'],
+        '购入运费(¥)',
+        warnings,
+      ),
+      saleShippingFee: optionalNumber(fields['售出运费(¥)'], '售出运费(¥)', warnings),
       totalCost: optionalNumber(fields['总成本(¥)'], '总成本(¥)', warnings),
       profit: optionalNumber(fields['利润(¥)'], '利润(¥)', warnings),
       roi: optionalNumber(fields['ROI'], 'ROI', warnings),
@@ -138,7 +145,8 @@ export function toFeishuFields(value: TransactionInput): Record<string, unknown>
     商品名称: input.title,
     '成交价(¥)': input.salePrice,
     '购入成本(¥)': input.costPrice,
-    '运费(¥)': input.shippingFee,
+    '购入运费(¥)': input.purchaseShippingFee,
+    '售出运费(¥)': input.saleShippingFee,
     交易状态: input.status,
     购入日期: dateTimestamp(input.purchaseDate),
     售出日期: dateTimestamp(input.soldDate),
