@@ -88,10 +88,10 @@ describe('TransactionDrawer', () => {
     expect(screen.queryByLabelText('排序')).not.toBeInTheDocument();
   });
 
-  it('uses 待收货 and only purchase fields for a new transaction', () => {
+  it('hides the status and sale fields for a new transaction', () => {
     render(<TransactionDrawer record={null} open saving={false} onClose={vi.fn()} onSave={vi.fn()} />);
 
-    expect(screen.getByText('待收货')).toBeInTheDocument();
+    expect(screen.queryByText('待收货')).not.toBeInTheDocument();
     expect(screen.queryByRole('combobox', { name: '状态' })).not.toBeInTheDocument();
     expect(screen.getByRole('spinbutton', { name: '购入成本' })).toBeInTheDocument();
     expect(screen.getByRole('spinbutton', { name: '购入运费' })).toBeInTheDocument();

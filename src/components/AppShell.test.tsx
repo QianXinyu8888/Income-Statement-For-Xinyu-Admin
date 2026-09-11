@@ -62,7 +62,7 @@ describe('AppShell', () => {
       within(menu)
         .getAllByRole('link')
         .map((link) => link.textContent),
-    ).toEqual(['交易', '概览', '分析', '在售中', '自用中', '设置']);
+    ).toEqual(['交易', '概览', '分析', '待收货', '在售中', '自用中', '设置']);
     expect(within(menu).getByText('xinyu')).toBeInTheDocument();
     expect(within(menu).getByRole('button', { name: '退出登录' })).toBeInTheDocument();
   });

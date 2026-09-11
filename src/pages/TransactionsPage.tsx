@@ -29,7 +29,7 @@ const DEFAULT_QUERY = {
   order: 'desc',
 } as const;
 
-export default function TransactionsPage() {
+export default function TransactionsPage({ initialStatus }: { initialStatus?: TransactionStatus } = {}) {
   const client = useQueryClient();
   const [searchParams, setSearchParams] = useSearchParams();
   const {
@@ -42,6 +42,7 @@ export default function TransactionsPage() {
   const monthEnd = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
   const [query, setQuery] = useState<TransactionQuery>(() => ({
     ...DEFAULT_QUERY,
+    status: initialStatus,
     focusId: searchParams.get('focus') || undefined,
   }));
   const [search, setSearch] = useState('');
@@ -59,7 +60,7 @@ export default function TransactionsPage() {
 
   const handleResetFilters = () => {
     setSearch('');
-    setQuery({ ...DEFAULT_QUERY });
+    setQuery({ ...DEFAULT_QUERY, status: initialStatus });
   };
 
   const result = useQuery({

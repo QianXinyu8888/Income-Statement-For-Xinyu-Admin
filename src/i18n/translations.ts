@@ -19,6 +19,7 @@ export type TranslationKey =
   | 'nav.brandLabel'
   | 'nav.main'
   | 'nav.transactions'
+  | 'nav.pendingReceipt'
   | 'nav.selfUse'
   | 'nav.listed'
   | 'nav.overview'
@@ -77,6 +78,7 @@ export const translations: Record<Language, TranslationMap> = {
     'nav.brandLabel': '交易管理控制台',
     'nav.main': '主导航',
     'nav.transactions': '交易',
+    'nav.pendingReceipt': '待收货',
     'nav.selfUse': '自用中',
     'nav.listed': '在售中',
     'nav.overview': '概览',
@@ -131,6 +133,7 @@ export const translations: Record<Language, TranslationMap> = {
     'nav.brandLabel': 'Trading Console',
     'nav.main': 'Main navigation',
     'nav.transactions': 'Transactions',
+    'nav.pendingReceipt': 'Pending receipt',
     'nav.selfUse': 'Personal use',
     'nav.listed': 'Listed',
     'nav.overview': 'Overview',

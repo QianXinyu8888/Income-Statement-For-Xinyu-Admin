@@ -40,6 +40,14 @@ export default function App() {
           }
         />
         <Route
+          path="/pending-receipt"
+          element={
+            <Suspense fallback={<LoadingState />}>
+              <TransactionsPage initialStatus="待收货" />
+            </Suspense>
+          }
+        />
+        <Route
           path="/self-use"
           element={
             <Suspense fallback={<LoadingState />}>

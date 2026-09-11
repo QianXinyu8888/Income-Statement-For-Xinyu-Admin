@@ -6,6 +6,7 @@ import {
   Menu,
   Monitor,
   Moon,
+  PackageOpen,
   Settings,
   Sun,
   Tag,
@@ -22,6 +23,7 @@ import type { TranslationKey } from '../i18n/translations';
 
 const navigation: { to: string; labelKey: TranslationKey; icon: typeof List }[] = [
   { to: '/transactions', labelKey: 'nav.transactions', icon: List },
+  { to: '/pending-receipt', labelKey: 'nav.pendingReceipt', icon: PackageOpen },
   { to: '/listed', labelKey: 'nav.listed', icon: Tag },
   { to: '/self-use', labelKey: 'nav.selfUse', icon: Monitor },
   { to: '/overview', labelKey: 'nav.overview', icon: WalletCards },
@@ -32,7 +34,10 @@ const navigation: { to: string; labelKey: TranslationKey; icon: typeof List }[] 
 const mobileNavigationGroups: { labelKey: TranslationKey; destinations: string[] }[] = [
   { labelKey: 'nav.group.transactions', destinations: ['/transactions'] },
   { labelKey: 'nav.group.analytics', destinations: ['/overview', '/analytics'] },
-  { labelKey: 'nav.group.productStatus', destinations: ['/listed', '/self-use'] },
+  {
+    labelKey: 'nav.group.productStatus',
+    destinations: ['/pending-receipt', '/listed', '/self-use'],
+  },
 ];
 
 export function AppShell({

@@ -202,7 +202,7 @@ export function TransactionDrawer({
               required
             />
           </label>
-          {record ? (
+          {record && (
             <label htmlFor="tx-status">
               状态
               <select
@@ -224,12 +224,6 @@ export function TransactionDrawer({
                 ))}
               </select>
             </label>
-          ) : (
-            <div className="calculated-field">
-              <span>状态</span>
-              <strong>待收货</strong>
-              <small>新增交易默认状态</small>
-            </div>
           )}
           <div className="form-grid">
             {record && (

@@ -5,7 +5,7 @@ import { MemoryRouter, useLocation } from 'react-router-dom';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { apiClient, type TransactionPage } from '../api/client';
 import type { AnalyticsSummary } from '../domain/analytics';
-import type { Transaction } from '../domain/transaction';
+import type { Transaction, TransactionStatus } from '../domain/transaction';
 import { BrowserPreferencesProvider } from '../preferences/BrowserPreferencesContext';
 import { PREFERENCES_STORAGE_KEY } from '../preferences/browser-preferences';
 import TransactionsPage from './TransactionsPage';
@@ -47,13 +47,13 @@ function LocationSearch() {
   return <output aria-label="当前查询参数">{useLocation().search}</output>;
 }
 
-function renderPage(initialEntry = '/transactions?focus=target') {
+function renderPage(initialEntry = '/transactions?focus=target', initialStatus?: TransactionStatus) {
   const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
   return render(
     <QueryClientProvider client={client}>
       <BrowserPreferencesProvider>
         <MemoryRouter initialEntries={[initialEntry]}>
-          <TransactionsPage />
+          <TransactionsPage initialStatus={initialStatus} />
           <LocationSearch />
         </MemoryRouter>
       </BrowserPreferencesProvider>
@@ -179,6 +179,24 @@ describe('TransactionsPage focused navigation', () => {
         sort: 'purchaseDate',
         order: 'desc',
       }),
+    );
+  });
+
+  it('opens the pending-receipt shortcut with the matching status filter', async () => {
+    vi.spyOn(apiClient, 'transactions').mockResolvedValue({
+      items: [],
+      total: 0,
+      page: 1,
+      pageSize: 20,
+      warnings: [],
+    });
+
+    renderPage('/pending-receipt', '待收货');
+
+    await waitFor(() =>
+      expect(apiClient.transactions).toHaveBeenCalledWith(
+        expect.objectContaining({ status: '待收货' }),
+      ),
     );
   });
 
