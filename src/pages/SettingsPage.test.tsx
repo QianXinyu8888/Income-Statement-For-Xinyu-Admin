@@ -6,6 +6,7 @@ import { apiClient } from '../api/client';
 import { LanguageProvider } from '../i18n';
 import { BrowserPreferencesProvider } from '../preferences/BrowserPreferencesContext';
 import { PREFERENCES_STORAGE_KEY } from '../preferences/browser-preferences';
+import { formatVersionUpdatedAt, VERSION_UPDATED_AT } from '../version';
 import SettingsPage from './SettingsPage';
 
 function renderPage(client = new QueryClient({ defaultOptions: { queries: { retry: false } } })) {
@@ -43,6 +44,8 @@ describe('SettingsPage', () => {
     expect(within(metadata).getByText('数据库连接状态')).toBeInTheDocument();
     expect(await screen.findByText('xinyu')).toBeInTheDocument();
     expect(await screen.findByText('正常')).toHaveClass('connected');
+    expect(within(metadata).getByText(formatVersionUpdatedAt(VERSION_UPDATED_AT))).toBeInTheDocument();
+    expect(within(metadata).queryByText('2.0.0')).not.toBeInTheDocument();
   });
 
   it('refreshes a fresh cached session when the settings page mounts', async () => {

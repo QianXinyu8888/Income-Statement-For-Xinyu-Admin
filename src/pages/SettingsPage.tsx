@@ -2,6 +2,7 @@ import { useQuery } from '@tanstack/react-query';
 import { apiClient } from '../api/client';
 import { useLanguage } from '../i18n';
 import { useBrowserPreferences } from '../preferences/BrowserPreferencesContext';
+import { formatVersionUpdatedAt, VERSION_UPDATED_AT } from '../version';
 
 export default function SettingsPage() {
   const session = useQuery({
@@ -61,7 +62,7 @@ export default function SettingsPage() {
         <div>
           <dt>{t('settings.version')}</dt>
           <dd>
-            <strong>2.0.0</strong>
+            <strong>{formatVersionUpdatedAt(VERSION_UPDATED_AT)}</strong>
           </dd>
         </div>
       </dl>
