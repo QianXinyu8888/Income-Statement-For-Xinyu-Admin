@@ -67,7 +67,7 @@ describe('AppShell', () => {
     expect(within(menu).getByRole('button', { name: '退出登录' })).toBeInTheDocument();
   });
 
-  it('groups mobile workspaces by task and keeps preferences in settings', async () => {
+  it('groups mobile workspaces by task and keeps preferences reachable', async () => {
     renderShell();
     const user = userEvent.setup();
 
@@ -78,8 +78,27 @@ describe('AppShell', () => {
     expect(within(menu).getByRole('heading', { name: '经营分析' })).toBeInTheDocument();
     expect(within(menu).getByRole('heading', { name: '产品状态' })).toBeInTheDocument();
     expect(within(menu).getByRole('link', { name: '设置' })).toBeInTheDocument();
-    expect(within(menu).queryByRole('button', { name: '切换到深色模式' })).not.toBeInTheDocument();
-    expect(within(menu).queryByRole('button', { name: '简体中文' })).not.toBeInTheDocument();
+    expect(within(menu).getByRole('button', { name: '切换到深色模式' })).toBeInTheDocument();
+    expect(within(menu).getByRole('button', { name: '简体中文' })).toHaveAttribute(
+      'aria-pressed',
+      'true',
+    );
+  });
+
+  it('keeps theme and language shortcuts available inside the mobile menu', async () => {
+    const { onTheme } = renderShell();
+    const user = userEvent.setup();
+
+    await user.click(screen.getByRole('button', { name: '打开导航菜单' }));
+    const menu = screen.getByRole('dialog', { name: '主导航' });
+    await user.click(within(menu).getByRole('button', { name: '切换到深色模式' }));
+    await user.click(within(menu).getByRole('button', { name: 'English' }));
+
+    expect(onTheme).toHaveBeenCalledOnce();
+    expect(within(menu).getByRole('button', { name: 'English' })).toHaveAttribute(
+      'aria-pressed',
+      'true',
+    );
   });
 
   it('localizes the mobile navigation controls and workspace groups', async () => {
@@ -100,7 +119,9 @@ describe('AppShell', () => {
 
     const menu = screen.getByRole('dialog', { name: 'Main navigation' });
     expect(within(menu).getByRole('button', { name: 'Close navigation menu' })).toBeInTheDocument();
-    expect(within(menu).getByRole('heading', { name: 'Transaction management' })).toBeInTheDocument();
+    expect(
+      within(menu).getByRole('heading', { name: 'Transaction management' }),
+    ).toBeInTheDocument();
     expect(within(menu).getByRole('heading', { name: 'Business insights' })).toBeInTheDocument();
     expect(within(menu).getByRole('heading', { name: 'Product status' })).toBeInTheDocument();
   });

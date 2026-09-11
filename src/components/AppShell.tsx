@@ -232,9 +232,12 @@ export function AppShell({
             role="dialog"
             aria-modal="true"
             aria-label={t('nav.main')}
-            >
+          >
             <header className="mobile-sidebar__header">
-              <div className="mobile-sidebar__account" aria-label={t('topbar.accountLabel', { username: user.username })}>
+              <div
+                className="mobile-sidebar__account"
+                aria-label={t('topbar.accountLabel', { username: user.username })}
+              >
                 {user.username}
               </div>
               <button
@@ -263,6 +266,47 @@ export function AppShell({
               ))}
             </nav>
             <footer className="mobile-sidebar__footer">
+              <div
+                className="mobile-sidebar__preferences"
+                aria-label={t('settings.preferencesGroupLabel')}
+              >
+                <button
+                  type="button"
+                  className="mobile-sidebar__action"
+                  onClick={onTheme}
+                  aria-label={
+                    theme === 'dark' ? t('topbar.switchToLight') : t('topbar.switchToDark')
+                  }
+                >
+                  {theme === 'dark' ? <Sun size={17} /> : <Moon size={17} />}
+                  <span>
+                    {theme === 'dark' ? t('settings.themeLight') : t('settings.themeDark')}
+                  </span>
+                </button>
+                <div
+                  className="mobile-sidebar__language"
+                  role="group"
+                  aria-label={t('language.label')}
+                >
+                  <Globe size={17} aria-hidden="true" />
+                  <button
+                    type="button"
+                    className={language === 'zh' ? 'is-active' : ''}
+                    onClick={() => setLanguage('zh')}
+                    aria-pressed={language === 'zh'}
+                  >
+                    {t('language.zh')}
+                  </button>
+                  <button
+                    type="button"
+                    className={language === 'en' ? 'is-active' : ''}
+                    onClick={() => setLanguage('en')}
+                    aria-pressed={language === 'en'}
+                  >
+                    {t('language.en')}
+                  </button>
+                </div>
+              </div>
               <NavLink
                 className="mobile-sidebar__action"
                 to="/settings"

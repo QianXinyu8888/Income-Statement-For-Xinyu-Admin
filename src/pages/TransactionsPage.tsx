@@ -61,6 +61,7 @@ export default function TransactionsPage({
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
 
   const hasActiveFilters = Boolean(search || query.status || query.from || query.to || query.q);
+  const activeFilterCount = [query.status, query.from, query.to].filter(Boolean).length;
   const dateLabel = query.dateField === 'soldDate' ? '售出日期' : '购入日期';
 
   const handleResetFilters = () => {
@@ -351,10 +352,15 @@ export default function TransactionsPage({
         <button
           type="button"
           className="icon-button mobile-filter-trigger"
-          aria-label="打开筛选条件"
+          aria-label={`打开筛选条件${activeFilterCount ? `，已启用 ${activeFilterCount} 项` : ''}`}
           onClick={() => setMobileFiltersOpen(true)}
         >
           <SlidersHorizontal size={18} />
+          {activeFilterCount > 0 && (
+            <span className="mobile-filter-trigger__badge" aria-hidden="true">
+              {activeFilterCount}
+            </span>
+          )}
         </button>
         <div className="toolbar-spacer" />
         <button
