@@ -75,19 +75,80 @@ describe('queryTransactions', () => {
   });
 
   it('preserves the existing text, status, and date filtering behavior', () => {
-    const result = queryTransactions([record(3), record(4), record(5)], {
-      page: 1,
-      pageSize: 20,
-      q: '相机',
-      status: '在售中',
-      from: '2026-08-04',
-      to: '2026-08-04',
-      sort: 'title',
-      order: 'asc',
-    });
+    const result = queryTransactions(
+      [record(3), { ...record(4), purchaseDate: '2026-08-04' }, record(5)],
+      {
+        page: 1,
+        pageSize: 20,
+        q: '相机',
+        status: '在售中',
+        from: '2026-08-04',
+        to: '2026-08-04',
+        sort: 'title',
+        order: 'asc',
+      },
+    );
 
     expect(result.items.map(({ id }) => id)).toEqual(['record-4']);
     expect(result.total).toBe(1);
+  });
+
+  it('filters date ranges by purchaseDate instead of soldDate', () => {
+    const result = queryTransactions(
+      [
+        { ...record(1), purchaseDate: '2026-01-01', soldDate: '2026-08-20' },
+        { ...record(2), purchaseDate: '2026-08-10', soldDate: '2026-08-02' },
+      ],
+      {
+        page: 1,
+        pageSize: 20,
+        from: '2026-08-05',
+        to: '2026-08-31',
+        sort: 'purchaseDate',
+        order: 'asc',
+      },
+    );
+
+    expect(result.items.map(({ id }) => id)).toEqual(['record-2']);
+  });
+
+  it('filters by soldDate when the sold date field is selected', () => {
+    const result = queryTransactions(
+      [
+        { ...record(1), purchaseDate: '2026-08-10', soldDate: '2026-01-01' },
+        { ...record(2), purchaseDate: '2026-01-10', soldDate: '2026-08-02' },
+        { ...record(3), purchaseDate: '2026-08-03', soldDate: null },
+      ],
+      {
+        page: 1,
+        pageSize: 20,
+        dateField: 'soldDate',
+        from: '2026-08-01',
+        to: '2026-08-31',
+        sort: 'soldDate',
+        order: 'asc',
+      },
+    );
+
+    expect(result.items.map(({ id }) => id)).toEqual(['record-2']);
+  });
+
+  it('searches product names without matching notes', () => {
+    const result = queryTransactions(
+      [
+        { ...record(1), title: '普通商品', note: '目标产品' },
+        { ...record(2), title: '目标产品', note: '其他备注' },
+      ],
+      {
+        page: 1,
+        pageSize: 20,
+        q: '目标产品',
+        sort: 'title',
+        order: 'asc',
+      },
+    );
+
+    expect(result.items.map(({ id }) => id)).toEqual(['record-2']);
   });
 
   it('sorts transactions by purchaseDate descending placing null values at the end', () => {

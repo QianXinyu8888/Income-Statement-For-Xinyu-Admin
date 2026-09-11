@@ -1,5 +1,7 @@
 import type { Transaction, TransactionStatus } from './transaction';
 
+export type TransactionDateField = 'purchaseDate' | 'soldDate';
+
 export type TransactionSortKey =
   | 'soldDate'
   | 'purchaseDate'
@@ -16,6 +18,7 @@ export interface TransactionListQuery {
   pageSize: number;
   q?: string;
   status?: TransactionStatus;
+  dateField?: TransactionDateField;
   from?: string;
   to?: string;
   sort: TransactionSortKey;
@@ -36,9 +39,9 @@ export function queryTransactions(
 ): TransactionListResult {
   const q = (query.q ?? '').toLocaleLowerCase('zh-CN');
   const filtered = records.filter((record) => {
-    const date = record.soldDate ?? record.purchaseDate;
+    const date = record[query.dateField ?? 'purchaseDate'];
     return (
-      (!q || `${record.title ?? ''} ${record.note ?? ''}`.toLocaleLowerCase('zh-CN').includes(q)) &&
+      (!q || (record.title ?? '').toLocaleLowerCase('zh-CN').includes(q)) &&
       (!query.status || record.status === query.status) &&
       (!query.from || (date !== null && date >= query.from)) &&
       (!query.to || (date !== null && date <= query.to))

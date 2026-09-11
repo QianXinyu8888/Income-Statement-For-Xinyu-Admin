@@ -36,8 +36,8 @@ describe('ColumnVisibilityPanel', () => {
   it('toggles optional fields, locks title, restores defaults and closes with Escape', async () => {
     const user = userEvent.setup();
     render(<Harness />);
-    const trigger = screen.getByRole('button', { name: '选择显示字段' });
-    expect(trigger).toHaveTextContent('自定义字段显示');
+    const trigger = screen.getByRole('button', { name: '自定义显示字段' });
+    expect(trigger).toHaveTextContent('自定义显示字段');
 
     await user.click(trigger);
 
@@ -63,7 +63,7 @@ describe('ColumnVisibilityPanel', () => {
     const user = userEvent.setup();
     const onOutsideClick = vi.fn();
     render(<Harness onOutsideClick={onOutsideClick} />);
-    const trigger = screen.getByRole('button', { name: '选择显示字段' });
+    const trigger = screen.getByRole('button', { name: '自定义显示字段' });
 
     await user.click(trigger);
     await user.click(screen.getByRole('button', { name: '面板外按钮' }));
@@ -76,7 +76,7 @@ describe('ColumnVisibilityPanel', () => {
   it('closes from the explicit close button and returns focus to the trigger', async () => {
     const user = userEvent.setup();
     render(<Harness />);
-    const trigger = screen.getByRole('button', { name: '选择显示字段' });
+    const trigger = screen.getByRole('button', { name: '自定义显示字段' });
 
     await user.click(trigger);
     await user.click(screen.getByRole('button', { name: '关闭字段选择' }));

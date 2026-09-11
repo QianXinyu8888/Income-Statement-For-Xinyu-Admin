@@ -47,7 +47,10 @@ function LocationSearch() {
   return <output aria-label="当前查询参数">{useLocation().search}</output>;
 }
 
-function renderPage(initialEntry = '/transactions?focus=target', initialStatus?: TransactionStatus) {
+function renderPage(
+  initialEntry = '/transactions?focus=target',
+  initialStatus?: TransactionStatus,
+) {
   const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
   return render(
     <QueryClientProvider client={client}>
@@ -173,12 +176,15 @@ describe('TransactionsPage focused navigation', () => {
 
     fireEvent.click(screen.getByRole('button', { name: '重置筛选' }));
     await waitFor(() =>
-      expect(apiClient.transactions).toHaveBeenLastCalledWith({
-        page: 1,
-        pageSize: 20,
-        sort: 'purchaseDate',
-        order: 'desc',
-      }),
+      expect(apiClient.transactions).toHaveBeenLastCalledWith(
+        expect.objectContaining({
+          page: 1,
+          pageSize: 20,
+          dateField: 'purchaseDate',
+          sort: 'purchaseDate',
+          order: 'desc',
+        }),
+      ),
     );
   });
 
@@ -213,16 +219,46 @@ describe('TransactionsPage focused navigation', () => {
     fireEvent.change(screen.getByRole('combobox', { name: '状态' }), {
       target: { value: '已售出' },
     });
-    fireEvent.change(screen.getByLabelText('开始日期'), {
+    fireEvent.change(screen.getByRole('combobox', { name: '日期类型' }), {
+      target: { value: 'soldDate' },
+    });
+    fireEvent.change(screen.getByLabelText('售出日期开始'), {
       target: { value: '2026-01-01' },
+    });
+    fireEvent.change(screen.getByLabelText('售出日期结束'), {
+      target: { value: '2026-08-01' },
     });
 
     await waitFor(() =>
       expect(apiClient.transactions).toHaveBeenLastCalledWith(
         expect.objectContaining({
           status: '已售出',
+          dateField: 'soldDate',
           from: '2026-01-01',
+          to: '2026-08-01',
         }),
+      ),
+    );
+  });
+
+  it('sends the product name search to the transaction query', async () => {
+    vi.spyOn(apiClient, 'transactions').mockResolvedValue({
+      items: [target],
+      total: 1,
+      page: 1,
+      pageSize: 20,
+      warnings: [],
+    });
+    const user = userEvent.setup();
+    renderPage('/transactions');
+
+    const input = screen.getByRole('textbox', { name: '搜索交易' });
+    await user.type(input, '目标产品');
+    await user.click(screen.getByRole('button', { name: '开始搜索' }));
+
+    await waitFor(() =>
+      expect(apiClient.transactions).toHaveBeenLastCalledWith(
+        expect.objectContaining({ q: '目标产品', page: 1 }),
       ),
     );
   });
@@ -242,7 +278,9 @@ describe('TransactionsPage focused navigation', () => {
 
     const sheet = screen.getByRole('region', { name: '筛选交易' });
     expect(within(sheet).getByRole('combobox', { name: '状态' })).toBeInTheDocument();
-    expect(within(sheet).getByLabelText('开始日期')).toBeInTheDocument();
+    expect(within(sheet).getByRole('combobox', { name: '日期类型' })).toBeInTheDocument();
+    expect(within(sheet).getByLabelText('购入日期开始')).toBeInTheDocument();
+    expect(within(sheet).getByLabelText('购入日期结束')).toBeInTheDocument();
     await user.click(within(sheet).getByRole('button', { name: '关闭筛选条件' }));
     expect(screen.queryByRole('region', { name: '筛选交易' })).not.toBeInTheDocument();
   });
@@ -321,7 +359,7 @@ describe('TransactionsPage focused navigation', () => {
 
     const { container } = renderPage('/transactions');
 
-    expect(await screen.findByRole('button', { name: '选择显示字段' })).toBeInTheDocument();
+    expect(await screen.findByRole('button', { name: '自定义显示字段' })).toBeInTheDocument();
     expect(screen.getByRole('columnheader', { name: '商品名称' })).toBeInTheDocument();
     expect(screen.getByRole('columnheader', { name: '利润' })).toBeInTheDocument();
     expect(screen.queryByRole('columnheader', { name: '交易状态' })).not.toBeInTheDocument();

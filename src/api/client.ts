@@ -1,5 +1,6 @@
 import type { AnalyticsSummary } from '../domain/analytics';
 import type { Transaction, TransactionInput, TransactionStatus } from '../domain/transaction';
+import type { TransactionDateField } from '../domain/transaction-query';
 
 interface ApiEnvelope<T> {
   data: T | null;
@@ -62,6 +63,7 @@ export interface TransactionQuery {
   pageSize: number;
   q?: string;
   status?: TransactionStatus;
+  dateField?: TransactionDateField;
   from?: string;
   to?: string;
   sort?: string;

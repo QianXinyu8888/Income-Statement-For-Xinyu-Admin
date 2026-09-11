@@ -111,7 +111,8 @@ describe('SelfUsePage', () => {
     expect(await screen.findAllByText('相机')).toHaveLength(2);
     expect(screen.queryByText('键盘')).not.toBeInTheDocument();
     expect(screen.getByText('1 件物品 · 管理待收货产品')).toBeInTheDocument();
-    expect(screen.queryByRole('button', { name: /设置 .* 为/ })).not.toBeInTheDocument();
+    expect(screen.getAllByRole('button', { name: '设置 相机 为在售中' }).length).toBeGreaterThan(0);
+    expect(screen.queryByRole('button', { name: '设置 相机 为已售出' })).not.toBeInTheDocument();
     expect(apiClient.transactions).toHaveBeenCalledWith(
       expect.objectContaining({ status: '待收货', pageSize: 100 }),
     );
@@ -186,6 +187,22 @@ describe('SelfUsePage', () => {
     await waitFor(() => expect(markListed).toHaveBeenCalledWith([personal.id], '在售中'));
   });
 
+  it('marks a pending receipt item as listed and removes it from the page', async () => {
+    const user = userEvent.setup();
+    mockActiveRecords();
+    const markListed = vi.spyOn(apiClient, 'batchStatus').mockResolvedValue({
+      results: [{ id: pending.id, success: true }],
+    });
+    renderPage('待收货');
+
+    await user.click((await screen.findAllByRole('button', { name: '设置 相机 为在售中' }))[0]);
+
+    await waitFor(() => {
+      expect(markListed).toHaveBeenCalledWith([pending.id], '在售中');
+      expect(screen.queryByText('相机')).not.toBeInTheDocument();
+    });
+  });
+
   it('marks a listed item as self-use through the existing status API', async () => {
     const user = userEvent.setup();
     mockActiveRecords();
@@ -197,6 +214,45 @@ describe('SelfUsePage', () => {
     await user.click((await screen.findAllByRole('button', { name: '设置 键盘 为自用中' }))[0]);
 
     await waitFor(() => expect(markSelfUse).toHaveBeenCalledWith([listed.id], '自用中'));
+  });
+
+  it('removes a listed item after changing it to self-use', async () => {
+    const user = userEvent.setup();
+    mockActiveRecords();
+    vi.spyOn(apiClient, 'batchStatus').mockResolvedValue({
+      results: [{ id: listed.id, success: true }],
+    });
+    renderPage('在售中');
+
+    await user.click((await screen.findAllByRole('button', { name: '设置 键盘 为自用中' }))[0]);
+
+    await waitFor(() => expect(screen.queryByText('键盘')).not.toBeInTheDocument());
+  });
+
+  it('clears status notices when switching to another product status page', async () => {
+    const user = userEvent.setup();
+    mockActiveRecords();
+    vi.spyOn(apiClient, 'batchStatus').mockResolvedValue({
+      results: [{ id: personal.id, success: true }],
+    });
+    const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+    const { rerender } = render(
+      <QueryClientProvider client={client}>
+        <SelfUsePage status="自用中" />
+      </QueryClientProvider>,
+    );
+
+    await user.click((await screen.findAllByRole('button', { name: '设置 耳机 为在售中' }))[0]);
+    expect(await screen.findByText('已标记为在售中')).toBeInTheDocument();
+
+    rerender(
+      <QueryClientProvider client={client}>
+        <SelfUsePage status="待收货" />
+      </QueryClientProvider>,
+    );
+
+    await screen.findByRole('heading', { name: '待收货产品' });
+    expect(screen.queryByText('已标记为在售中')).not.toBeInTheDocument();
   });
 
   it('shows an error instead of a success notice when listing returns a failed item', async () => {

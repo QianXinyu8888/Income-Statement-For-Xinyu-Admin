@@ -84,6 +84,27 @@ describe('OverviewPage', () => {
     );
   });
 
+  it('places profit amounts next to bars and keeps dates in the bottom metadata row', async () => {
+    vi.spyOn(apiClient, 'summary').mockResolvedValue({
+      ...summary,
+      monthly: [
+        { month: '2026-08', revenue: 1000, profit: 500, count: 1 },
+        { month: '2026-07', revenue: 500, profit: -210, count: 1 },
+      ],
+    });
+    renderPage();
+
+    const positive = await screen.findByRole('img', { name: '2026-08 利润：¥500.00' });
+    const negative = screen.getByRole('img', { name: '2026-07 利润：-¥210.00' });
+
+    expect(positive.querySelector('.simple-chart__bar-label')).toHaveTextContent('¥500.00');
+    expect(negative.querySelector('.simple-chart__bar-label')).toHaveTextContent('-¥210.00');
+    expect(positive.querySelector('.simple-chart__info')).toHaveTextContent('2026.08');
+    expect(negative.querySelector('.simple-chart__info')).toHaveTextContent('2026.07');
+    expect(positive.querySelector('.simple-chart__info')).not.toHaveTextContent('¥500.00');
+    expect(negative.querySelector('.simple-chart__info')).not.toHaveTextContent('-¥210.00');
+  });
+
   it('shows the current month first and fills missing months with zero profit', async () => {
     vi.spyOn(apiClient, 'summary').mockResolvedValue({
       ...summary,

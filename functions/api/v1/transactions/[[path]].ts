@@ -16,6 +16,7 @@ const querySchema = z.object({
   pageSize: z.coerce.number().int().min(1).max(100).default(20),
   q: z.string().trim().default(''),
   status: z.enum(TRANSACTION_STATUSES).optional(),
+  dateField: z.enum(['purchaseDate', 'soldDate']).default('purchaseDate'),
   from: z.string().date().optional(),
   to: z.string().date().optional(),
   sort: z

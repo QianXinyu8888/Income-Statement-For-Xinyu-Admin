@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Plus, Search } from 'lucide-react';
 import { apiClient } from '../api/client';
@@ -49,6 +49,14 @@ export default function SelfUsePage({ status = '自用中' }: { status?: SelfUse
   const [dismissedIds, setDismissedIds] = useState<Set<string>>(() => new Set());
   const [notice, setNotice] = useState('');
   const sortOption = sortOptions[sortIndex];
+  useEffect(() => {
+    setNotice('');
+    setDismissedIds(new Set());
+    setSelling(null);
+    setEditing(null);
+    setDrawerOpen(false);
+  }, [status]);
+
   const isPendingReceipt = status === '待收货';
   const itemLabel = isPendingReceipt ? '待收货物品' : status === '自用中' ? '自用物品' : '在售物品';
   const managementLabel = isPendingReceipt
@@ -66,7 +74,7 @@ export default function SelfUsePage({ status = '自用中' }: { status?: SelfUse
     : status === '自用中'
       ? '正在加载自用中的产品'
       : '正在加载售卖中的产品';
-  const alternateStatus = isPendingReceipt ? undefined : status === '自用中' ? '在售中' : '自用中';
+  const alternateStatus = isPendingReceipt ? '在售中' : status === '自用中' ? '在售中' : '自用中';
 
   const result = useQuery({
     queryKey: ['self-use-records', status, search],
@@ -96,7 +104,8 @@ export default function SelfUsePage({ status = '自用中' }: { status?: SelfUse
       if (failed) throw new Error(failed.message ?? '状态更新失败');
       return response;
     },
-    onSuccess: async (_, { nextStatus }) => {
+    onSuccess: async (_, { record, nextStatus }) => {
+      setDismissedIds((current) => new Set(current).add(record.id));
       await refresh();
       setNotice(`已标记为${nextStatus}`);
     },
@@ -193,7 +202,8 @@ export default function SelfUsePage({ status = '自用中' }: { status?: SelfUse
             onChangeStatus={(record, nextStatus) => changeStatus.mutate({ record, nextStatus })}
             onSell={setSelling}
             onOpen={openDrawer}
-            showActions={!isPendingReceipt}
+            showActions
+            showSaleAction={!isPendingReceipt}
           />
         )}
       </div>

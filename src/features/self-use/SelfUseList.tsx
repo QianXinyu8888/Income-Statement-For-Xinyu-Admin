@@ -16,12 +16,14 @@ function SelfUseActions({
   alternateStatus,
   onChangeStatus,
   onSell,
+  showSaleAction,
 }: {
   record: Transaction;
   pending: boolean;
   alternateStatus: '在售中' | '自用中';
   onChangeStatus: (record: Transaction, nextStatus: '在售中' | '自用中') => void;
   onSell: (record: Transaction) => void;
+  showSaleAction: boolean;
 }) {
   const title = record.title ?? '未命名物品';
   return (
@@ -36,15 +38,17 @@ function SelfUseActions({
       >
         {alternateStatus}
       </button>
-      <button
-        type="button"
-        className="self-use-action self-use-action--sale"
-        aria-label={`设置 ${title} 为已售出`}
-        onClick={() => onSell(record)}
-        disabled={pending}
-      >
-        已售出
-      </button>
+      {showSaleAction && (
+        <button
+          type="button"
+          className="self-use-action self-use-action--sale"
+          aria-label={`设置 ${title} 为已售出`}
+          onClick={() => onSell(record)}
+          disabled={pending}
+        >
+          已售出
+        </button>
+      )}
     </div>
   );
 }
@@ -57,6 +61,7 @@ export function SelfUseList({
   onSell,
   onOpen,
   showActions = true,
+  showSaleAction = true,
 }: {
   records: Transaction[];
   listingId: string | null;
@@ -65,6 +70,7 @@ export function SelfUseList({
   onSell?: (record: Transaction) => void;
   onOpen: (record: Transaction) => void;
   showActions?: boolean;
+  showSaleAction?: boolean;
 }) {
   const title = (record: Transaction) => record.title ?? '未命名物品';
   return (
@@ -97,6 +103,7 @@ export function SelfUseList({
                         alternateStatus={alternateStatus}
                         onChangeStatus={onChangeStatus}
                         onSell={onSell}
+                        showSaleAction={showSaleAction}
                       />
                     ) : null}
                   </td>
@@ -128,6 +135,7 @@ export function SelfUseList({
                     alternateStatus={alternateStatus}
                     onChangeStatus={onChangeStatus}
                     onSell={onSell}
+                    showSaleAction={showSaleAction}
                   />
                 ) : null}
               </div>

@@ -10,6 +10,7 @@ import type {
   TransactionInput,
   TransactionStatus,
 } from '../domain/transaction';
+import type { TransactionDateField } from '../domain/transaction-query';
 import { TRANSACTION_STATUSES } from '../domain/transaction';
 import { downloadExcel } from '../domain/export';
 import { ErrorState, LoadingState } from '../components/LoadingState';
@@ -27,9 +28,12 @@ const DEFAULT_QUERY = {
   pageSize: 20,
   sort: 'purchaseDate',
   order: 'desc',
+  dateField: 'purchaseDate',
 } as const;
 
-export default function TransactionsPage({ initialStatus }: { initialStatus?: TransactionStatus } = {}) {
+export default function TransactionsPage({
+  initialStatus,
+}: { initialStatus?: TransactionStatus } = {}) {
   const client = useQueryClient();
   const [searchParams, setSearchParams] = useSearchParams();
   const {
@@ -57,6 +61,7 @@ export default function TransactionsPage({ initialStatus }: { initialStatus?: Tr
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
 
   const hasActiveFilters = Boolean(search || query.status || query.from || query.to || query.q);
+  const dateLabel = query.dateField === 'soldDate' ? '售出日期' : '购入日期';
 
   const handleResetFilters = () => {
     setSearch('');
@@ -251,19 +256,71 @@ export default function TransactionsPage({ initialStatus }: { initialStatus?: Tr
               <option key={status}>{status}</option>
             ))}
           </select>
-          <input
-            id="tx-from-date-filter"
-            name="fromDateFilter"
-            aria-label="开始日期"
-            type="date"
-            value={query.from ?? ''}
-            onChange={(event) =>
-              setQuery((current) => ({
-                ...current,
-                page: 1,
-                from: event.target.value || undefined,
-              }))
-            }
+          <div className="date-filter-group" aria-label="日期范围筛选">
+            <select
+              id="tx-date-field-filter"
+              name="dateFieldFilter"
+              aria-label="日期类型"
+              value={query.dateField ?? 'purchaseDate'}
+              onChange={(event) =>
+                setQuery((current) => ({
+                  ...current,
+                  page: 1,
+                  dateField: event.target.value as TransactionDateField,
+                }))
+              }
+            >
+              <option value="purchaseDate">购入日期</option>
+              <option value="soldDate">售出日期</option>
+            </select>
+            <div className={`date-input-shell${query.from ? ' has-value' : ''}`}>
+              <input
+                id="tx-from-date-filter"
+                name="fromDateFilter"
+                aria-label={`${dateLabel}开始`}
+                title="可直接输入日期，也可点击日历选择"
+                inputMode="numeric"
+                className="date-filter-input"
+                type="date"
+                value={query.from ?? ''}
+                onChange={(event) =>
+                  setQuery((current) => ({
+                    ...current,
+                    page: 1,
+                    from: event.target.value || undefined,
+                  }))
+                }
+              />
+              {!query.from && <span aria-hidden="true">年-月-日</span>}
+            </div>
+            <span className="date-filter-separator" aria-hidden="true">
+              至
+            </span>
+            <div className={`date-input-shell${query.to ? ' has-value' : ''}`}>
+              <input
+                id="tx-to-date-filter"
+                name="toDateFilter"
+                aria-label={`${dateLabel}结束`}
+                title="可直接输入日期，也可点击日历选择"
+                inputMode="numeric"
+                className="date-filter-input"
+                type="date"
+                value={query.to ?? ''}
+                onChange={(event) =>
+                  setQuery((current) => ({
+                    ...current,
+                    page: 1,
+                    to: event.target.value || undefined,
+                  }))
+                }
+              />
+              {!query.to && <span aria-hidden="true">年-月-日</span>}
+            </div>
+          </div>
+          <ColumnVisibilityPanel
+            visibleFields={visibleTransactionFields}
+            onFieldVisible={setTransactionFieldVisible}
+            onReset={resetTransactionFields}
           />
           <button
             className="button button--secondary reset-button"
@@ -273,7 +330,6 @@ export default function TransactionsPage({ initialStatus }: { initialStatus?: Tr
             title="重置所有搜索和筛选条件"
           >
             <RotateCcw size={14} />
-            重置筛选
           </button>
         </div>
         <button
@@ -285,11 +341,6 @@ export default function TransactionsPage({ initialStatus }: { initialStatus?: Tr
           <SlidersHorizontal size={18} />
         </button>
         <div className="toolbar-spacer" />
-        <ColumnVisibilityPanel
-          visibleFields={visibleTransactionFields}
-          onFieldVisible={setTransactionFieldVisible}
-          onReset={resetTransactionFields}
-        />
         <button
           className="icon-button"
           title="导出 Excel"
@@ -333,19 +384,63 @@ export default function TransactionsPage({ initialStatus }: { initialStatus?: Tr
             </select>
           </label>
           <label>
-            开始日期
-            <input
-              aria-label="开始日期"
-              type="date"
-              value={query.from ?? ''}
+            日期类型
+            <select
+              aria-label="日期类型"
+              value={query.dateField ?? 'purchaseDate'}
               onChange={(event) =>
                 setQuery((current) => ({
                   ...current,
                   page: 1,
-                  from: event.target.value || undefined,
+                  dateField: event.target.value as TransactionDateField,
                 }))
               }
-            />
+            >
+              <option value="purchaseDate">购入日期</option>
+              <option value="soldDate">售出日期</option>
+            </select>
+          </label>
+          <label>
+            {dateLabel}开始
+            <div className={`date-input-shell${query.from ? ' has-value' : ''}`}>
+              <input
+                aria-label={`${dateLabel}开始`}
+                title="可直接输入日期，也可点击日历选择"
+                inputMode="numeric"
+                className="date-filter-input"
+                type="date"
+                value={query.from ?? ''}
+                onChange={(event) =>
+                  setQuery((current) => ({
+                    ...current,
+                    page: 1,
+                    from: event.target.value || undefined,
+                  }))
+                }
+              />
+              {!query.from && <span aria-hidden="true">年-月-日</span>}
+            </div>
+          </label>
+          <label>
+            {dateLabel}结束
+            <div className={`date-input-shell${query.to ? ' has-value' : ''}`}>
+              <input
+                aria-label={`${dateLabel}结束`}
+                title="可直接输入日期，也可点击日历选择"
+                inputMode="numeric"
+                className="date-filter-input"
+                type="date"
+                value={query.to ?? ''}
+                onChange={(event) =>
+                  setQuery((current) => ({
+                    ...current,
+                    page: 1,
+                    to: event.target.value || undefined,
+                  }))
+                }
+              />
+              {!query.to && <span aria-hidden="true">年-月-日</span>}
+            </div>
           </label>
           <footer>
             <button

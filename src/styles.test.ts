@@ -6,20 +6,22 @@ describe('overview monthly chart styles', () => {
 
   it('keeps the scroll wrapper and stacked month metadata in the computed styles', () => {
     document.body.innerHTML = `
-      <div class="simple-chart-wrapper">
-        <div class="simple-chart">
-          <div class="simple-chart__item">
-            <div class="simple-chart__plot">
-              <i class="bar-positive"></i>
-              <i class="bar-negative"></i>
-            </div>
-            <div class="simple-chart__info">
-              <span class="simple-chart__month">2026.08</span>
-              <strong class="simple-chart__amount">¥100.00</strong>
+      <section class="overview-monthly-chart">
+        <div class="simple-chart-wrapper">
+          <div class="simple-chart">
+            <div class="simple-chart__item">
+              <div class="simple-chart__plot">
+                <i class="bar-positive"></i>
+                <i class="bar-negative"></i>
+              </div>
+              <div class="simple-chart__info">
+                <span class="simple-chart__month">2026.08</span>
+                <strong class="simple-chart__amount">¥100.00</strong>
+              </div>
             </div>
           </div>
         </div>
-      </div>
+      </section>
     `;
 
     const wrapper = document.querySelector<HTMLElement>('.simple-chart-wrapper')!;
@@ -34,19 +36,48 @@ describe('overview monthly chart styles', () => {
     expect(
       styleRules.some(
         (rule) =>
-          rule.selectorText === '.bar-positive' &&
+          rule.selectorText === '.overview-monthly-chart .bar-positive' &&
           rule.style.getPropertyValue('background-color') === 'var(--profit)' &&
-          rule.style.getPropertyPriority('background-color') === 'important',
+          rule.style.getPropertyPriority('background-color') === '',
       ),
     ).toBe(true);
     expect(
       styleRules.some(
         (rule) =>
-          rule.selectorText === '.bar-negative' &&
+          rule.selectorText === '.overview-monthly-chart .bar-negative' &&
           rule.style.getPropertyValue('background-color') === 'var(--loss)' &&
-          rule.style.getPropertyPriority('background-color') === 'important',
+          rule.style.getPropertyPriority('background-color') === '',
       ),
     ).toBe(true);
+  });
+
+  it('keeps the overview chart on its dedicated two-row grid layout', () => {
+    document.body.innerHTML = `
+      <section class="overview-monthly-chart">
+        <div class="simple-chart-wrapper">
+          <div class="simple-chart">
+            <div class="simple-chart__item">
+              <div class="simple-chart__plot" data-direction="positive">
+                <i class="bar-positive"></i>
+              </div>
+              <div class="simple-chart__info">
+                <span class="simple-chart__month">2026.08</span>
+                <strong class="simple-chart__amount">¥100.00</strong>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    `;
+
+    const chart = document.querySelector<HTMLElement>('.overview-monthly-chart .simple-chart')!;
+    const item = document.querySelector<HTMLElement>('.overview-monthly-chart .simple-chart__item')!;
+    const plot = document.querySelector<HTMLElement>('.overview-monthly-chart .simple-chart__plot')!;
+
+    expect(getComputedStyle(chart).height).toBe('254px');
+    expect(getComputedStyle(item).display).toBe('grid');
+    expect(getComputedStyle(plot).display).toBe('grid');
+    expect(getComputedStyle(plot).height).toBe('184px');
   });
 });
 

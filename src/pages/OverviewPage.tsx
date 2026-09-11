@@ -94,24 +94,26 @@ export default function OverviewPage() {
                       className="simple-chart__plot"
                       data-direction={profitVal >= 0 ? 'positive' : 'negative'}
                     >
-                      <i
-                        className={
-                          item.profit === null
-                            ? 'bar-empty'
-                            : profitVal >= 0
-                              ? 'bar-positive'
-                              : 'bar-negative'
-                        }
-                        style={{
-                          height: `${item.profit === null ? 4 : Math.max(4, (Math.abs(profitVal) / max) * 100)}%`,
-                        }}
-                      />
+                      <div className="simple-chart__bar-stack">
+                        <strong className="simple-chart__bar-label">
+                          {formatMoney(item.profit)}
+                        </strong>
+                        <i
+                          className={
+                            item.profit === null
+                              ? 'bar-empty'
+                              : profitVal >= 0
+                                ? 'bar-positive'
+                                : 'bar-negative'
+                          }
+                          style={{
+                            height: `${item.profit === null ? 4 : Math.max(4, (Math.abs(profitVal) / max) * 100)}%`,
+                          }}
+                        />
+                      </div>
                     </div>
                     <div className="simple-chart__info">
-                      <span className="simple-chart__month">
-                        {formatMonthAxisLabel(item.month)}
-                      </span>
-                      <strong className="simple-chart__amount">{formatMoney(item.profit)}</strong>
+                      <span className="simple-chart__month">{formatMonthAxisLabel(item.month)}</span>
                     </div>
                   </div>
                 );

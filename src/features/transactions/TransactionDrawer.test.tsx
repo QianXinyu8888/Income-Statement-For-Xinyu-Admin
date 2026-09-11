@@ -77,13 +77,15 @@ describe('TransactionDrawer', () => {
     expect(screen.getByRole('dialog').closest('.drawer-layer')?.parentElement).toBe(document.body);
   });
 
-  it('shows only Feishu formula values for an existing record', () => {
+  it('shows the formula values without implementation details for an existing record', () => {
     render(
       <TransactionDrawer record={record} open saving={false} onClose={vi.fn()} onSave={vi.fn()} />,
     );
 
     expect(screen.getByText('利润（飞书） ¥40.00')).toBeInTheDocument();
-    expect(screen.getByText('总成本（飞书）').parentElement).toHaveTextContent('—');
+    expect(screen.getByText('总成本').parentElement).toHaveTextContent('—');
+    expect(screen.queryByText('总成本（飞书）')).not.toBeInTheDocument();
+    expect(screen.queryByText('只读公式字段')).not.toBeInTheDocument();
     expect(screen.queryByText('¥120.00')).not.toBeInTheDocument();
     expect(screen.queryByLabelText('排序')).not.toBeInTheDocument();
   });

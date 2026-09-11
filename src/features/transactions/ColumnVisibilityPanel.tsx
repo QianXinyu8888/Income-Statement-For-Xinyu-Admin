@@ -68,13 +68,13 @@ export function ColumnVisibilityPanel({ visibleFields, onFieldVisible, onReset }
         ref={triggerRef}
         type="button"
         className="button button--secondary column-visibility__trigger"
-        aria-label="选择显示字段"
+        aria-label="自定义显示字段"
         aria-expanded={open}
         aria-controls={panelId}
         onClick={() => setOpen((value) => !value)}
       >
         <Columns3 size={16} aria-hidden="true" />
-        自定义字段显示
+        自定义显示字段
       </button>
       {open && (
         <div
