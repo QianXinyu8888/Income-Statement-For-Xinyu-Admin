@@ -92,6 +92,7 @@ describe('TransactionDrawer', () => {
     render(<TransactionDrawer record={null} open saving={false} onClose={vi.fn()} onSave={vi.fn()} />);
 
     expect(screen.queryByText('待收货')).not.toBeInTheDocument();
+    expect(screen.getByText('购入成本 + 购入运费 + 售出运费')).toBeInTheDocument();
     expect(screen.queryByRole('combobox', { name: '状态' })).not.toBeInTheDocument();
     expect(screen.getByRole('spinbutton', { name: '购入成本' })).toBeInTheDocument();
     expect(screen.getByRole('spinbutton', { name: '购入运费' })).toBeInTheDocument();

@@ -338,7 +338,7 @@ export function TransactionDrawer({
           <div className="calculated-field">
             <span>{record ? '总成本（飞书）' : '预计总成本'}</span>
             <strong>{displayedTotalCost === null ? '—' : money.format(displayedTotalCost)}</strong>
-            <small>{record ? '只读公式字段' : '保存后以飞书公式结果为准'}</small>
+            <small>{record ? '只读公式字段' : '购入成本 + 购入运费 + 售出运费'}</small>
           </div>
           <label htmlFor="tx-note">
             备注
